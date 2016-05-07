@@ -4,17 +4,22 @@
 module Main where
 
 import           Criterion.Main
+import           Control.Monad.Trans.Resource                        (MonadThrow)
 import qualified Data.ByteString                                     as BS
 import qualified Data.ByteString.Internal                            as BSI
+import           Data.Conduit
 import qualified Data.Vector.Storable                                as DVS
 import           Data.Word
 import           Foreign
 import           HaskellWorks.Data.Bits.BitShown
+import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.FromByteString
+import           HaskellWorks.Data.Xml.Conduit
+import           HaskellWorks.Data.Xml.Conduit.Blank
+import           HaskellWorks.Data.Xml.Succinct.Cursor
 import           HaskellWorks.Data.Positioning
 import           HaskellWorks.Data.Succinct.BalancedParens.Simple
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic
-import           HaskellWorks.Data.Xml.Succinct.Cursor
 import           System.IO.MMap
 
 setupEnvBs :: Int -> IO BS.ByteString
@@ -47,31 +52,50 @@ benchRankSelect =
     ]
   ]
 
+runCon :: Conduit i [] BS.ByteString -> i -> BS.ByteString
+runCon con bs = BS.concat $ runListConduit con [bs]
+
+runCon2 :: Conduit i [] o -> [i] -> [o]
+runCon2 con is = let os = runListConduit con is in seq (length os) os
+
+runCon3 :: Conduit i [] BS.ByteString -> [i] -> [BS.ByteString]
+runCon3 con is = let os = runListConduit con is in seq (BS.length (last os)) os
+
+xmlToInterestBits3 :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
+xmlToInterestBits3 = blankXml =$= blankedXmlToInterestBits
+
 benchRankXml40Conduits :: [Benchmark]
 benchRankXml40Conduits =
   [ env (setupEnvXml "/Users/jky/Downloads/part40.xml") $ \bs -> bgroup "Xml40"
-    [ bench "loadXml                         "  (whnf  loadXml                            bs)
+    [ bench "Run blankXml                    "  (whnf (runCon blankXml                  ) bs)
+    , bench "Run xmlToInterestBits3          "  (whnf (runCon xmlToInterestBits3        ) bs)
+    , bench "loadXml                         "  (whnf  loadXml                            bs)
     ]
   ]
 
 benchRankXml80Conduits :: [Benchmark]
 benchRankXml80Conduits =
   [ env (setupEnvXml "/Users/jky/Downloads/part80.xml") $ \bs -> bgroup "Xml40"
-    [ bench "loadXml" (whnf loadXml bs)
+    [ bench "Run blankXml                    "  (whnf (runCon blankXml                  ) bs)
+    , bench "Run xmlToInterestBits3          "  (whnf (runCon xmlToInterestBits3        ) bs)
+    , bench "loadXml" (whnf loadXml bs)
     ]
   ]
 
 benchRankXmlBigConduits :: [Benchmark]
 benchRankXmlBigConduits =
   [ env (setupEnvXml "/Users/jky/Downloads/78mb.xml") $ \bs -> bgroup "XmlBig"
-    [ bench "loadXml" (whnf loadXml bs)
+    [ bench "Run blankXml                    "  (whnf (runCon blankXml                  ) bs)
+    , bench "Run xmlToInterestBits3          "  (whnf (runCon xmlToInterestBits3        ) bs)
+    , bench "loadXml" (whnf loadXml bs)
     ]
   ]
 
 benchBlankedXmlToBalancedParens :: [Benchmark]
 benchBlankedXmlToBalancedParens =
   [ env (setupEnvXml "/Users/jky/Downloads/part40.xml") $ \bs -> bgroup "XmlBig"
-    [ bench "loadXml" (whnf loadXml bs)
+    [ bench "blankedXmlToBalancedParens2" (whnf (runCon2 blankedXmlToBalancedParens) [bs])
+    , bench "blankedXmlToBalancedParens2" (whnf (runCon3 blankedXmlToBalancedParens2) [bs])
     ]
   ]
 

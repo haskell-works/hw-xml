@@ -36,6 +36,9 @@ executable hw-xml-example
 library
   hs-source-dirs:       src
   exposed-modules:      HaskellWorks.Data.Xml
+                      , HaskellWorks.Data.Xml.Conduit
+                      , HaskellWorks.Data.Xml.Conduit.Blank
+                      , HaskellWorks.Data.Xml.Conduit.Words
                       , HaskellWorks.Data.Xml.Extract
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
@@ -52,6 +55,7 @@ library
                       , HaskellWorks.Data.Xml.Type
                       , HaskellWorks.Data.Xml.Value
   build-depends:        base                            >= 4.7  && < 5
+                      , array
                       , attoparsec
                       , bytestring
                       , conduit
@@ -62,6 +66,7 @@ library
                       , hw-prim
                       , hw-rankselect
                       , mono-traversable
+                      , resourcet
                       , text
                       , vector
                       , word8
@@ -110,6 +115,7 @@ benchmark bench
                       , conduit
                       , criterion
                       , hw-bits
+                      , hw-conduit
                       , hw-xml
                       , hw-prim
                       , hw-rankselect

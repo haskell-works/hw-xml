@@ -11,7 +11,9 @@
 
 module HaskellWorks.Data.Xml.Succinct.CursorSpec(spec) where
 
+import           Control.Monad
 import qualified Data.ByteString                                            as BS
+import qualified Data.Map                                                   as M
 import           Data.String
 import qualified Data.Vector.Storable                                       as DVS
 import           Data.Word
@@ -21,6 +23,7 @@ import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.FromForeignRegion
 import           HaskellWorks.Data.Xml.Succinct.Cursor                     as C
 import           HaskellWorks.Data.Xml.Token
+import           HaskellWorks.Data.Xml.Value
 import           HaskellWorks.Data.Succinct.BalancedParens.Internal
 import           HaskellWorks.Data.Succinct.BalancedParens.Simple
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
@@ -46,55 +49,55 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.CursorSpec" $ do
   describe "Cursor for [Bool]" $ do
     it "initialises to beginning of empty object" $ do
       let cursor = "{}" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorObject
+      xmlCursorType cursor `shouldBe` Just XmlCursorObject
     it "initialises to beginning of empty object preceded by spaces" $ do
       let cursor = " {}" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorObject
+      xmlCursorType cursor `shouldBe` Just XmlCursorObject
     it "initialises to beginning of number" $ do
       let cursor = "1234" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorNumber
+      xmlCursorType cursor `shouldBe` Just XmlCursorNumber
     it "initialises to beginning of string" $ do
       let cursor = "\"Hello\"" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorString
+      xmlCursorType cursor `shouldBe` Just XmlCursorString
     it "initialises to beginning of array" $ do
       let cursor = "[]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorArray
+      xmlCursorType cursor `shouldBe` Just XmlCursorArray
     it "initialises to beginning of boolean true" $ do
       let cursor = "true" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorBool
+      xmlCursorType cursor `shouldBe` Just XmlCursorBool
     it "initialises to beginning of boolean false" $ do
       let cursor = "false" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorBool
+      xmlCursorType cursor `shouldBe` Just XmlCursorBool
     it "initialises to beginning of null" $ do
       let cursor = "null" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType cursor `shouldBe` XmlCursorNull
+      xmlCursorType cursor `shouldBe` Just XmlCursorNull
     it "cursor can navigate to first child of array" $ do
       let cursor = "[null]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType (fc cursor) `shouldBe` XmlCursorNull
+      (fc >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNull
     it "cursor can navigate to second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType ((ns . fc) cursor) `shouldBe` XmlCursorObject
+      (fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorObject
     it "cursor can navigate to first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType ((fc . ns . fc) cursor) `shouldBe` XmlCursorString
+      (fc >=> ns >=> fc >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
     it "cursor can navigate to first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlCursorType ((ns . fc . ns . fc) cursor)  `shouldBe` XmlCursorNumber
+      (fc >=> ns >=> fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNumber
     it "depth at top" $ do
       let cursor = "[null]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
       cd cursor `shouldBe` 1
     it "depth at first child of array" $ do
       let cursor = "[null]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd (fc cursor) `shouldBe` 2
+      cd <$> fc cursor `shouldBe` Just 2
     it "depth at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd ((ns . fc) cursor) `shouldBe` 2
+      cd <$> (fc >=> ns) cursor `shouldBe` Just 2
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd ((fc . ns . fc) cursor) `shouldBe` 3
+      cd <$> (fc >=> ns >=> fc) cursor `shouldBe` Just 3
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd ((ns . fc . ns . fc) cursor)  `shouldBe` 3
+      cd <$> (fc >=> ns >=> fc >=> ns) cursor `shouldBe` Just 3
   genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
   genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
   genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
@@ -131,121 +134,124 @@ genSpec :: forall t u.
   , TestBit           u
   , FromForeignRegion (XmlCursor BS.ByteString t u)
   , IsString          (XmlCursor BS.ByteString t u)
-  , HasXmlCursorType (XmlCursor BS.ByteString t u))
+  , HasXmlCursorType (XmlCursor BS.ByteString t u)
+  , XmlValueAt BS.ByteString BS.ByteString (XmlCursor BS.ByteString t u))
   => String -> (XmlCursor BS.ByteString t u) -> SpecWith ()
 genSpec t _ = do
   describe ("Cursor for (" ++ t ++ ")") $ do
     it "initialises to beginning of empty object" $ do
       let cursor = "{}" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorObject
+      xmlCursorType cursor `shouldBe` Just XmlCursorObject
     it "initialises to beginning of empty object preceded by spaces" $ do
       let cursor = " {}" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorObject
+      xmlCursorType cursor `shouldBe` Just XmlCursorObject
+      xmlValueAt cursor `shouldBe` Just (XmlObject M.empty :: XmlValue BS.ByteString BS.ByteString)
     it "initialises to beginning of number" $ do
       let cursor = "1234" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorNumber
+      xmlCursorType cursor `shouldBe` Just XmlCursorNumber
     it "initialises to beginning of string" $ do
       let cursor = "\"Hello\"" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorString
+      xmlCursorType cursor `shouldBe` Just XmlCursorString
     it "initialises to beginning of array" $ do
       let cursor = "[]" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorArray
+      xmlCursorType cursor `shouldBe` Just XmlCursorArray
+      xmlValueAt cursor `shouldBe` Just (XmlArray [] :: XmlValue BS.ByteString BS.ByteString)
     it "initialises to beginning of boolean true" $ do
       let cursor = "true" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorBool
+      xmlCursorType cursor `shouldBe` Just XmlCursorBool
     it "initialises to beginning of boolean false" $ do
       let cursor = "false" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorBool
+      xmlCursorType cursor `shouldBe` Just XmlCursorBool
     it "initialises to beginning of null" $ do
       let cursor = "null" :: XmlCursor BS.ByteString t u
-      xmlCursorType cursor `shouldBe` XmlCursorNull
+      xmlCursorType cursor `shouldBe` Just XmlCursorNull
     it "cursor can navigate to first child of array" $ do
       let cursor = "[null]" :: XmlCursor BS.ByteString t u
-      xmlCursorType (fc cursor) `shouldBe` XmlCursorNull
+      (fc >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNull
     it "cursor can navigate to second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      xmlCursorType ((ns . fc) cursor) `shouldBe` XmlCursorObject
+      (fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorObject
     it "cursor can navigate to first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      xmlCursorType ((fc . ns . fc) cursor) `shouldBe` XmlCursorString
+      (fc >=> ns >=> fc >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
     it "cursor can navigate to first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      xmlCursorType ((ns . fc . ns . fc) cursor)  `shouldBe` XmlCursorNumber
+      (fc >=> ns >=> fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNumber
     it "depth at top" $ do
       let cursor = "[null]" :: XmlCursor BS.ByteString t u
       cd cursor `shouldBe` 1
     it "depth at first child of array" $ do
       let cursor = "[null]" :: XmlCursor BS.ByteString t u
-      cd (fc cursor) `shouldBe` 2
+      cd <$> (fc) cursor `shouldBe` Just 2
     it "depth at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd ((ns . fc) cursor) `shouldBe` 2
+      cd <$> (fc >=> ns) cursor `shouldBe` Just 2
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd ((fc . ns . fc) cursor) `shouldBe` 3
+      cd <$> (fc >=> ns >=> fc) cursor `shouldBe` Just 3
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd ((ns . fc . ns . fc) cursor)  `shouldBe` 3
+      cd <$> (fc >=> ns >=> fc >=> ns) cursor `shouldBe` Just 3
     it "can navigate down and forwards" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
-      xmlCursorType                                                              cursor  `shouldBe` XmlCursorObject
-      xmlCursorType ((                                                       fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((                                                  ns . fc) cursor) `shouldBe` XmlCursorObject
-      xmlCursorType ((                                             fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((                                        ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((                                   ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((                              ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorObject
-      xmlCursorType ((                         fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((                    ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((               ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((          ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((     ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorString
-      xmlCursorType ((ns . ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` XmlCursorNumber
+      (xmlCursorType                                                                                    ) cursor `shouldBe` Just XmlCursorObject
+      (fc                                                                              >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns                                                                       >=> xmlCursorType) cursor `shouldBe` Just XmlCursorObject
+      (fc >=> ns >=> fc                                                                >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns                                                         >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns                                                  >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns                                           >=> xmlCursorType) cursor `shouldBe` Just XmlCursorObject
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                    >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                             >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                      >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns               >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns        >=> xmlCursorType) cursor `shouldBe` Just XmlCursorString
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNumber
     it "can navigate up" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
-      (                                                        pn . fc) cursor `shouldBe`                               cursor
-      (                                                   pn . ns . fc) cursor `shouldBe`                               cursor
-      (                                              pn . fc . ns . fc) cursor `shouldBe` (                    ns . fc) cursor
-      (                                         pn . ns . fc . ns . fc) cursor `shouldBe` (                    ns . fc) cursor
-      (                                    pn . ns . ns . fc . ns . fc) cursor `shouldBe` (                    ns . fc) cursor
-      (                               pn . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (                    ns . fc) cursor
-      (                          pn . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
-      (                     pn . ns . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
-      (                pn . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
-      (           pn . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
-      (      pn . ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
-      ( pn . ns . ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor `shouldBe` (ns . ns . ns . fc . ns . fc) cursor
+      (fc >=> pn                                                                             ) cursor `shouldBe`                                    Just cursor
+      (fc >=> ns >=> pn                                                                      ) cursor `shouldBe`                                    Just cursor
+      (fc >=> ns >=> fc >=> pn                                                               ) cursor `shouldBe` (fc >=> ns                            ) cursor
+      (fc >=> ns >=> fc >=> ns >=> pn                                                        ) cursor `shouldBe` (fc >=> ns                            ) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> pn                                                 ) cursor `shouldBe` (fc >=> ns                            ) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> pn                                          ) cursor `shouldBe` (fc >=> ns                            ) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> pn                                   ) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> pn                            ) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> pn                     ) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> pn              ) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> pn       ) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns >=> pn) cursor `shouldBe` (fc >=> ns >=> fc >=> ns >=> ns >=> ns) cursor
     it "can get subtree size" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
-      ss                                                              cursor  `shouldBe` 45
-      ss ((                                                       fc) cursor) `shouldBe` 1
-      ss ((                                                  ns . fc) cursor) `shouldBe` 43
-      ss ((                                             fc . ns . fc) cursor) `shouldBe` 1
-      ss ((                                        ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((                                   ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((                              ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 9
-      ss ((                         fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((                    ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((               ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((          ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((     ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
-      ss ((ns . ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` 1
+      ss                                                                                        cursor  `shouldBe` 45
+      ss <$> (fc                                                                              ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns                                                                       ) cursor `shouldBe` Just 43
+      ss <$> (fc >=> ns >=> fc                                                                ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns                                                         ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns                                                  ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns                                           ) cursor `shouldBe` Just 9
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                    ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                             ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                      ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns               ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns        ) cursor `shouldBe` Just 1
+      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns ) cursor `shouldBe` Just 1
     it "can get token at cursor" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
-      xmlTokenAt                                                              cursor  `shouldBe` Just (XmlTokenBraceL                             )
-      xmlTokenAt ((                                                       fc) cursor) `shouldBe` Just (XmlTokenString "widget"                    )
-      xmlTokenAt ((                                                  ns . fc) cursor) `shouldBe` Just (XmlTokenBraceL                             )
-      xmlTokenAt ((                                             fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "debug"                     )
-      xmlTokenAt ((                                        ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "on"                        )
-      xmlTokenAt ((                                   ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "window"                    )
-      xmlTokenAt ((                              ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenBraceL                             )
-      xmlTokenAt ((                         fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "title"                     )
-      xmlTokenAt ((                    ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "Sample Konfabulator Widget")
-      xmlTokenAt ((               ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "name"                      )
-      xmlTokenAt ((          ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "main_window"               )
-      xmlTokenAt ((     ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenString "width"                     )
-      xmlTokenAt ((ns . ns . ns . ns . ns . fc . ns . ns . ns . fc . ns . fc) cursor) `shouldBe` Just (XmlTokenNumber 500.0                       )
+      (xmlTokenAt                                                                                    ) cursor `shouldBe` Just (XmlTokenBraceL                             )
+      (fc                                                                              >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "widget"                    )
+      (fc >=> ns                                                                       >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenBraceL                             )
+      (fc >=> ns >=> fc                                                                >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "debug"                     )
+      (fc >=> ns >=> fc >=> ns                                                         >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "on"                        )
+      (fc >=> ns >=> fc >=> ns >=> ns                                                  >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "window"                    )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns                                           >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenBraceL                             )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                    >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "title"                     )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                             >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "Sample Konfabulator Widget")
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                      >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "name"                      )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns               >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "main_window"               )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns        >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenString "width"                     )
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns >=> xmlTokenAt) cursor `shouldBe` Just (XmlTokenNumber 500.0                       )

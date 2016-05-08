@@ -27,29 +27,29 @@ data XmlCursorType
   deriving (Eq, Show)
 
 class HasXmlCursorType k where
-  xmlCursorType :: k -> XmlCursorType
+  xmlCursorType :: k -> Maybe XmlCursorType
 
-xmlCursorType' :: Char -> XmlCursorType
+xmlCursorType' :: Char -> Maybe XmlCursorType
 xmlCursorType' c = case c of
-  '[' -> XmlCursorArray
-  't' -> XmlCursorBool
-  'f' -> XmlCursorBool
-  '0' -> XmlCursorNumber
-  '1' -> XmlCursorNumber
-  '2' -> XmlCursorNumber
-  '3' -> XmlCursorNumber
-  '4' -> XmlCursorNumber
-  '5' -> XmlCursorNumber
-  '6' -> XmlCursorNumber
-  '7' -> XmlCursorNumber
-  '8' -> XmlCursorNumber
-  '9' -> XmlCursorNumber
-  '+' -> XmlCursorNumber
-  '-' -> XmlCursorNumber
-  'n' -> XmlCursorNull
-  '{' -> XmlCursorObject
-  '"' -> XmlCursorString
-  _   -> error "Invalid XmlCursor cursorRank"
+  '[' -> Just XmlCursorArray
+  't' -> Just XmlCursorBool
+  'f' -> Just XmlCursorBool
+  '0' -> Just XmlCursorNumber
+  '1' -> Just XmlCursorNumber
+  '2' -> Just XmlCursorNumber
+  '3' -> Just XmlCursorNumber
+  '4' -> Just XmlCursorNumber
+  '5' -> Just XmlCursorNumber
+  '6' -> Just XmlCursorNumber
+  '7' -> Just XmlCursorNumber
+  '8' -> Just XmlCursorNumber
+  '9' -> Just XmlCursorNumber
+  '+' -> Just XmlCursorNumber
+  '-' -> Just XmlCursorNumber
+  'n' -> Just XmlCursorNull
+  '{' -> Just XmlCursorObject
+  '"' -> Just XmlCursorString
+  _   -> Nothing
 
 xmlCursorPos :: (Rank1 w, Select1 v, VectorLike s) => XmlCursor s v w -> Position
 xmlCursorPos k = toPosition (select1 ik (rank1 bpk (cursorRank k)) - 1)

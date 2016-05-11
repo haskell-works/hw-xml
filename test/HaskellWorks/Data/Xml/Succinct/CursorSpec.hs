@@ -85,19 +85,19 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.CursorSpec" $ do
       (fc >=> ns >=> fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNumber
     it "depth at top" $ do
       let cursor = "[null]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd cursor `shouldBe` 1
+      cd cursor `shouldBe` Just 1
     it "depth at first child of array" $ do
       let cursor = "[null]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd <$> fc cursor `shouldBe` Just 2
+      (fc >=> cd) cursor `shouldBe` Just 2
     it "depth at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd <$> (fc >=> ns) cursor `shouldBe` Just 2
+      (fc >=> ns >=> cd) cursor `shouldBe` Just 2
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd <$> (fc >=> ns >=> fc) cursor `shouldBe` Just 3
+      (fc >=> ns >=> fc >=> cd) cursor `shouldBe` Just 3
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      cd <$> (fc >=> ns >=> fc >=> ns) cursor `shouldBe` Just 3
+      (fc >=> ns >=> fc >=> ns >=> cd) cursor `shouldBe` Just 3
   genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
   genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
   genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
@@ -179,19 +179,19 @@ genSpec t _ = do
       (fc >=> ns >=> fc >=> ns >=> xmlCursorType) cursor `shouldBe` Just XmlCursorNumber
     it "depth at top" $ do
       let cursor = "[null]" :: XmlCursor BS.ByteString t u
-      cd cursor `shouldBe` 1
+      cd cursor `shouldBe` Just 1
     it "depth at first child of array" $ do
       let cursor = "[null]" :: XmlCursor BS.ByteString t u
-      cd <$> (fc) cursor `shouldBe` Just 2
+      (fc >=> cd) cursor `shouldBe` Just 2
     it "depth at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd <$> (fc >=> ns) cursor `shouldBe` Just 2
+      (fc >=> ns >=> cd) cursor `shouldBe` Just 2
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd <$> (fc >=> ns >=> fc) cursor `shouldBe` Just 3
+      (fc >=> ns >=> fc >=> cd) cursor `shouldBe` Just 3
     it "depth at first child of object at second child of array" $ do
       let cursor = "[null, {\"field\": 1}]" :: XmlCursor BS.ByteString t u
-      cd <$> (fc >=> ns >=> fc >=> ns) cursor `shouldBe` Just 3
+      (fc >=> ns >=> fc >=> ns >=> cd) cursor `shouldBe` Just 3
     it "can navigate down and forwards" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
@@ -226,19 +226,19 @@ genSpec t _ = do
     it "can get subtree size" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u
-      ss                                                                                        cursor  `shouldBe` 45
-      ss <$> (fc                                                                              ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns                                                                       ) cursor `shouldBe` Just 43
-      ss <$> (fc >=> ns >=> fc                                                                ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns                                                         ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns                                                  ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns                                           ) cursor `shouldBe` Just 9
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                    ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                             ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                      ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns               ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns        ) cursor `shouldBe` Just 1
-      ss <$> (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns ) cursor `shouldBe` Just 1
+      ss                                                                                       cursor `shouldBe` Just 45
+      (fc                                                                              >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns                                                                       >=> ss) cursor `shouldBe` Just 43
+      (fc >=> ns >=> fc                                                                >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns                                                         >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns                                                  >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns                                           >=> ss) cursor `shouldBe` Just 9
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                    >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                             >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                      >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns               >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns        >=> ss) cursor `shouldBe` Just 1
+      (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns >=> ns >=> ss) cursor `shouldBe` Just 1
     it "can get token at cursor" $ do
       (fptr, offset, size) <- mmapFileForeignPtr "test/data/sample.xml" ReadOnly Nothing
       let cursor = fromForeignRegion (fptr, offset, size) :: XmlCursor BS.ByteString t u

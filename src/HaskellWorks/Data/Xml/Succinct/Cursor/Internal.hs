@@ -107,10 +107,10 @@ instance (BP.BalancedParens u, Rank1 u, Rank0 u) => TreeCursor (XmlCursor t v u)
   parent :: XmlCursor t v u -> Maybe (XmlCursor t v u)
   parent k = let mq = BP.parent (balancedParens k) (cursorRank k) in (\q -> k { cursorRank = q }) <$> mq
 
-  depth :: XmlCursor t v u -> Count
+  depth :: XmlCursor t v u -> Maybe Count
   depth k = BP.depth (balancedParens k) (cursorRank k)
 
-  subtreeSize :: XmlCursor t v u -> Count
+  subtreeSize :: XmlCursor t v u -> Maybe Count
   subtreeSize k = BP.subtreeSize (balancedParens k) (cursorRank k)
 
 wIsXmlNumberDigit :: Word8 -> Bool

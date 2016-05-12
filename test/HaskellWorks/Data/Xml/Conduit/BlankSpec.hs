@@ -17,7 +17,16 @@ whenBlankedXmlShouldBe original expected = do
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
   describe "Can blank XML" $ do
-    "<person fstName=\"alexey\">"         `whenBlankedXmlShouldBe` ""
+    "<b/>"                                  `whenBlankedXmlShouldBe` "<  >"
+    "<b></b>"                               `whenBlankedXmlShouldBe` "<  >   "
+    "<b />"                                 `whenBlankedXmlShouldBe` "< ()>"
+    "<foo bar='buzz' />"                    `whenBlankedXmlShouldBe` "<   ((  )(    ) )>"
+    "<foo bar=\"buzz\" />"                  `whenBlankedXmlShouldBe` "<   ((  )(    ) )>"
+    "<e a='x' b='y'/>"                      `whenBlankedXmlShouldBe` "< (()( ) ()( ))>"
+    "<e a='x' b='y'/>"                      `whenBlankedXmlShouldBe` "< (()( ) ()( ))>"
+    "<e a = 'x' b = 'y' />"                 `whenBlankedXmlShouldBe` "< (()  ( ) ()  ( ) )>"
+    "<a x='y'><b/></a>"                     `whenBlankedXmlShouldBe` "< (()( ))<  >>   "
+    "<person fstName=\"alexey\" />"         `whenBlankedXmlShouldBe` "<      ((      )(      ) )>"
   -- describe "Can blank json" $ do
   --   "\"\""                                `whenBlankedXmlShouldBe` "()"
   --   "\"\\\\\""                            `whenBlankedXmlShouldBe` "(  )"

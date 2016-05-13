@@ -23,6 +23,7 @@ data BlankState
   | InString Word8
   | InSpace
   | InText
+  | InComment
   | InIdent
   | Test
 
@@ -45,9 +46,10 @@ blankXml' lastChar lastState = do
     blankByteString :: (BlankState, ByteStringP) -> Maybe (Word8, (BlankState, ByteStringP))
     blankByteString (_, EmptyBSP) = Nothing
     blankByteString (InXml, bs) = case bs of
+      BSP !c !cs | isCommentStart c cs   -> Just (_less       , (InComment , toBSP cs))
       BSP !c !cs | isStartTag c cs       -> Just (_less       , (InTag     , toBSP cs))
       BSP !c !cs | isEndTag c cs         -> Just (_space      , (InCloseTag, toBSP cs))
-      BSP !c !cs | isSpace c             -> Just (_space      , (InSpace   , toBSP cs))
+      BSP !c !cs | isSpace c             -> Just (_space      , (InXml   , toBSP cs))
       BSP !c !cs                         -> Just (_parenleft  , (InText    , toBSP cs))
     blankByteString (InTag, bs) = case bs of
       BSP !c !cs | isSpace c             -> Just (_parenleft  , (InAttrList, toBSP cs))
@@ -74,6 +76,7 @@ blankXml' lastChar lastState = do
       BSP !c !cs | c == q                -> Just (_parenright , (InAttrList, toBSP cs))
       BSP !c !cs                         -> Just (_space      , (InString q, toBSP cs))
     blankByteString (InSpace, bs) = case bs of
+      BSP !c !cs | isCommentStart c cs   -> Just (_less       , (InComment , toBSP cs))
       BSP !c !cs | isSpace c             -> Just (_space      , (InSpace   , toBSP cs))
       BSP !c !cs | isStartTag c cs       -> Just (_less       , (InTag     , toBSP cs))
       BSP !c !cs | isEndTag c cs         -> Just (_space      , (InCloseTag, toBSP cs))
@@ -81,6 +84,9 @@ blankXml' lastChar lastState = do
     blankByteString (InText, bs) = case bs of
       BSP !c !cs | headIs (== _less) cs  -> Just (_parenright , (InXml     , toBSP cs))
       BSP !c !cs                         -> Just (_space      , (InText    , toBSP cs))
+    blankByteString (InComment, bs) = case bs of
+      BSP !c !cs | isCommentClose c cs   -> Just (_space      , (InClose   , toBSP cs))
+      BSP _  !cs                         -> Just (_space      , (InComment , toBSP cs))
     blankByteString (Test, bs) = case bs of
       BSP !c !cs                         -> Just (c           , (Test      , toBSP cs))
 
@@ -114,8 +120,14 @@ isStartTag c cs = c == _less && headIs isNameStartChar cs
 isTagClose :: Word8 -> ByteString -> Bool
 isTagClose c cs = c == _slash && headIs (== _greater) cs
 
+isCommentStart :: Word8 -> ByteString -> Bool
+isCommentStart c cs = c == _less && headIs (== _exclam) cs
+
+isCommentClose :: Word8 -> ByteString -> Bool
+isCommentClose c cs = c == _hyphen && headIs (== _greater) cs
+
 unsnocUndecided :: ByteStringP -> (ByteStringP, Maybe Word8)
-unsnocUndecided = unscnocIf (\w -> w ==_less || w == _slash)
+unsnocUndecided = unscnocIf (\w -> w ==_less || w == _slash || w == _hyphen)
 {-# INLINE unsnocUndecided #-}
 
 unscnocIf :: (Word8 -> Bool) -> ByteStringP -> (ByteStringP, Maybe Word8)

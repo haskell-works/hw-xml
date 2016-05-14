@@ -11,15 +11,15 @@ module HaskellWorks.Data.Xml.Conduit
   ) where
 
 import           Control.Monad
-import           Data.Array.Unboxed                   as A
-import qualified Data.Bits                            as BITS
-import           Data.ByteString                      as BS
+import           Data.Array.Unboxed             as A
+import qualified Data.Bits                      as BITS
+import           Data.ByteString                as BS
 import           Data.Conduit
 import           Data.Int
 import           Data.Word
 import           Data.Word8
 import           HaskellWorks.Data.Bits.BitWise
-import           Prelude                              as P
+import           Prelude                        as P
 
 interestingWord8s :: A.UArray Word8 Word8
 interestingWord8s = A.array (0, 255) [
@@ -69,8 +69,8 @@ blankedXmlToBalancedParens' :: Monad m => BS.ByteString -> Conduit BS.ByteString
 blankedXmlToBalancedParens' bs = case BS.uncons bs of
   Just (c, cs) -> do
     case c of
-      d | d == _braceleft     -> yield True
-      d | d == _braceright    -> yield False
+      d | d == _less          -> yield True
+      d | d == _greater       -> yield False
       d | d == _bracketleft   -> yield True
       d | d == _bracketright  -> yield False
       d | d == _parenleft     -> yield True

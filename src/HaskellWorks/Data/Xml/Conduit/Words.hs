@@ -19,8 +19,7 @@ isNameStartChar :: Word8 -> Bool
 isNameStartChar w = w == _underscore || w == _colon || isAlphabetic w
                  || w `isIn` (0xc0, 0xd6)
                  || w `isIn` (0xd8, 0xf6)
-                 || w `isIn` (0xf8, 0x2ff)
-                 || w `isIn` (0x370,0x37d)
+                 || w `isIn` (0xf8, 0xff)
 
 isNameChar :: Word8 -> Bool
 isNameChar w = isNameStartChar w || w == _hyphen || w == _period

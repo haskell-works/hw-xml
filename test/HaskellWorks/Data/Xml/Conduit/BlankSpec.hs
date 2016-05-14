@@ -23,6 +23,7 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     "<b>  text  </b>"                         `whenBlankedXmlShouldBe` "<    (    )   >"
     "<b />"                                   `whenBlankedXmlShouldBe` "< ()>"
     "<foo bar='buzz' />"                      `whenBlankedXmlShouldBe` "<   ((  )(    ) )>"
+    "<foo xsd:bar='buzz' />"                  `whenBlankedXmlShouldBe` "<   ((      )(    ) )>"
     "<foo bar=\"buzz\" />"                    `whenBlankedXmlShouldBe` "<   ((  )(    ) )>"
     "<e a='x' b='y'/>"                        `whenBlankedXmlShouldBe` "< (()( ) ()( ))>"
     "<e a='x' b='y'/>"                        `whenBlankedXmlShouldBe` "< (()( ) ()( ))>"

@@ -62,7 +62,7 @@ blankXml' lastChar lastState = do
     blankByteString (InAttrList, bs) = case bs of
       BSP !c !cs | c == _greater        -> Just (_parenright  , (InXml     , toBSP cs))
       BSP !c !cs | isTagClose c cs      -> Just (_parenright  , (InClose   , toBSP cs))
-      BSP !c !cs | isNameChar c         -> Just (_parenleft   , (InIdent   , toBSP cs))
+      BSP !c !cs | isNameStartChar c    -> Just (_parenleft   , (InIdent   , toBSP cs))
       BSP !c !cs | isQuote c            -> Just (_parenleft   , (InString c, toBSP cs))
       BSP !c !cs                        -> Just (_space       , (InAttrList, toBSP cs))
     blankByteString (InClose, bs) = case bs of

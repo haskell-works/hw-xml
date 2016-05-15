@@ -25,6 +25,11 @@ isNameChar :: Word8 -> Bool
 isNameChar w = isNameStartChar w || w == _hyphen || w == _period
             || w == 0xb7 || w `isIn` (0, 9)
 
+isXml :: Word8 -> Bool
+isXml w = w == _less || w == _greater
+
+isTextStart :: Word8 -> Bool
+isTextStart w = not (isSpace w) && w /= _less && w /= _greater
 
 isIn :: Word8 -> (Word8, Word8) -> Bool
 isIn w (s, e) = w >= s && w <= e

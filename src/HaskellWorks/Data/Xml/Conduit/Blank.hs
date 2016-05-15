@@ -48,9 +48,9 @@ blankXml' lastChar lastState = do
     blankByteString (InXml, bs) = case bs of
       BSP !c !cs | isMetaStart c cs     -> Just (_bracketleft , (InMeta    , toBSP cs))
       BSP !c !cs | isEndTag c cs        -> Just (_space       , (InCloseTag, toBSP cs))
+      BSP !c !cs | isTextStart c        -> Just (_parenleft   , (InText    , toBSP cs))
       BSP !c !cs | c == _less           -> Just (_less        , (InTag     , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (_space       , (InXml     , toBSP cs))
-      BSP !c !cs                        -> Just (_parenleft   , (InText    , toBSP cs))
+      BSP _  !cs                        -> Just (_space       , (InXml     , toBSP cs))
     blankByteString (InTag, bs) = case bs of
       BSP !c !cs | isSpace c            -> Just (_parenleft   , (InAttrList, toBSP cs))
       BSP !c !cs | isTagClose c cs      -> Just (_space       , (InClose   , toBSP cs))
@@ -105,9 +105,9 @@ blankXml' lastChar lastState = do
       BSP !c !cs | c == _greater           -> Just (_bracketright, (InBang (n-1) , toBSP cs))
       BSP _  !cs                           -> Just (_space       , (InBang n     , toBSP cs))
 
-prefix :: Maybe Word8 -> Maybe ByteString -> Maybe (ByteStringP)
+prefix :: Maybe Word8 -> Maybe ByteString -> Maybe ByteStringP
 prefix (Just s) (Just bs) = Just $ BSP s bs
-prefix (Just s) (Nothing) = Just $ BSP s BS.empty
+prefix (Just s) Nothing   = Just $ BSP s BS.empty
 prefix Nothing  (Just bs) = (\(!c, !cs) -> BSP c cs) <$> BS.uncons bs
 prefix Nothing  Nothing   = Nothing
 

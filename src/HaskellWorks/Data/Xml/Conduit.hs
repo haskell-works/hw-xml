@@ -23,7 +23,7 @@ import           Prelude                        as P
 
 interestingWord8s :: A.UArray Word8 Word8
 interestingWord8s = A.array (0, 255) [
-  (w, if w == _bracketleft || w == _braceleft || w == _parenleft || w == _t || w == _f || w == _n || w == _1
+  (w, if w == _bracketleft || w == _braceleft || w == _parenleft || w == _bracketleft || w == _less
     then 1
     else 0)
   | w <- [0 .. 255]]
@@ -75,10 +75,6 @@ blankedXmlToBalancedParens' bs = case BS.uncons bs of
       d | d == _bracketright  -> yield False
       d | d == _parenleft     -> yield True
       d | d == _parenright    -> yield False
-      d | d == _t             -> yield True >> yield False
-      d | d == _f             -> yield True >> yield False
-      d | d == _1             -> yield True >> yield False
-      d | d == _n             -> yield True >> yield False
       _                       -> return ()
     blankedXmlToBalancedParens' cs
   Nothing -> return ()
@@ -121,8 +117,8 @@ data MiniBP = MiniN | MiniT | MiniF | MiniTF
 
 balancedParensOf :: Word8 -> MiniBP
 balancedParensOf c = case c of
-    d | d == _braceleft     -> MiniT
-    d | d == _braceright    -> MiniF
+    d | d == _less          -> MiniT
+    d | d == _greater       -> MiniF
     d | d == _bracketleft   -> MiniT
     d | d == _bracketright  -> MiniF
     d | d == _parenleft     -> MiniT

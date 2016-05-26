@@ -26,7 +26,7 @@ executable hw-xml-example
                       , hw-conduit
                       , hw-diagnostics
                       , hw-xml
-                      , hw-prim                       >= 0.0.1
+                      , hw-prim                       >= 0.0.2
                       , hw-rankselect
                       , mmap
                       , resourcet
@@ -63,7 +63,7 @@ library
                       , hw-bits
                       , hw-conduit
                       , hw-parser
-                      , hw-prim                       >= 0.0.1
+                      , hw-prim                       >= 0.0.2
                       , hw-rankselect
                       , mono-traversable
                       , resourcet
@@ -90,7 +90,7 @@ test-suite hw-xml-test
                       , hw-bits
                       , hw-conduit
                       , hw-xml
-                      , hw-prim                       >= 0.0.1
+                      , hw-prim                       >= 0.0.2
                       , hw-rankselect
                       , mmap
                       , parsec
@@ -118,7 +118,7 @@ benchmark bench
                       , hw-bits
                       , hw-conduit
                       , hw-xml
-                      , hw-prim                       >= 0.0.1
+                      , hw-prim                       >= 0.0.2
                       , hw-rankselect
                       , mmap
                       , resourcet

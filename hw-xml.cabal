@@ -11,7 +11,7 @@ copyright:              2016 John Ky
 category:               Data, XML
 build-type:             Simple
 extra-source-files:     README.md
-cabal-version:          >= 1.10
+cabal-version:          >= 1.22
 data-files:             test/data/sample.xml
 
 executable hw-xml-example

@@ -27,7 +27,7 @@ executable hw-xml-example
                       , hw-diagnostics
                       , hw-xml
                       , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect
+                      , hw-rankselect                 >= 0.0.0.5
                       , mmap
                       , resourcet
                       , vector
@@ -64,7 +64,7 @@ library
                       , hw-conduit
                       , hw-parser
                       , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect
+                      , hw-rankselect                 >= 0.0.0.5
                       , mono-traversable
                       , resourcet
                       , text
@@ -72,7 +72,7 @@ library
                       , word8
 
   default-language:     Haskell2010
-  ghc-options:          -rtsopts -with-rtsopts=-N -Wall -O2 -Wall -msse4.2
+  ghc-options:          -Wall -O2 -msse4.2
 
 test-suite hw-xml-test
   type:                 exitcode-stdio-1.0
@@ -91,7 +91,7 @@ test-suite hw-xml-test
                       , hw-conduit
                       , hw-xml
                       , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect
+                      , hw-rankselect                 >= 0.0.0.5
                       , mmap
                       , parsec
                       , QuickCheck
@@ -119,7 +119,7 @@ benchmark bench
                       , hw-conduit
                       , hw-xml
                       , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect
+                      , hw-rankselect                 >= 0.0.0.5
                       , mmap
                       , resourcet
                       , vector

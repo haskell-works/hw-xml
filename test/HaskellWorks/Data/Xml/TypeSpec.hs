@@ -57,12 +57,17 @@ spec = describe "HaskellWorks.Data.Json.Succinct.CursorSpec" $ do
       (fc >=> fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --boo
       (fc >=> fc >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --buzz
       (fc >=> fc >=> ns >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing --back off!
---     it "cursor can navigate to first child of object at second child of array" $ do
---       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
---       (fc >=> ns >=> fc >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---     it "cursor can navigate to first child of object at second child of array" $ do
---       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
---       (fc >=> ns >=> fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeNumber
+    it "cursor can navigate to children" $ do
+      let cursor = "<a><b /><c /></a>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
+      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement --b
+      (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement --c
+      (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing --back off!
+    it "cursor recognises child element as an element child next to attr list" $ do
+      let cursor = "<a foo='bar'><inner /></a>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
+      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList
+      (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement
+      (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing -- no more!
+
 --   genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
 --   genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
 --   genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))

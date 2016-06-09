@@ -68,81 +68,63 @@ spec = describe "HaskellWorks.Data.Json.Succinct.CursorSpec" $ do
       (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement
       (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing -- no more!
 
---   genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
---   genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
---   genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
---   genSpec "DVS.Vector Word64" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
---   genSpec "Poppy512"          (undefined :: XmlCursor BS.ByteString Poppy512 (SimpleBalancedParens (DVS.Vector Word64)))
+  genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
+  genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
+  genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
+  genSpec "DVS.Vector Word64" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
+  genSpec "Poppy512"          (undefined :: XmlCursor BS.ByteString Poppy512 (SimpleBalancedParens (DVS.Vector Word64)))
 
--- genSpec :: forall t u.
---   ( Eq                t
---   , Show              t
---   , Select1           t
---   , Eq                u
---   , Show              u
---   , Rank0             u
---   , Rank1             u
---   , BalancedParens    u
---   , TestBit           u
---   , FromForeignRegion (XmlCursor BS.ByteString t u)
---   , IsString          (XmlCursor BS.ByteString t u)
---   , JsonIndexAt       (XmlCursor BS.ByteString t u)
---   )
---   => String -> (XmlCursor BS.ByteString t u) -> SpecWith ()
--- genSpec t _ = do
---   describe ("Json cursor of type " ++ t) $ do
---     let forJson (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " ++ show cursor) (f cursor)
---     forJson "{}" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeObject
---     forJson " {}" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeObject
---     forJson "1234" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeNumber
---     forJson "\"Hello\"" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeString
---     forJson "[]" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeArray
---     forJson "true" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeBool
---     forJson "false" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeBool
---     forJson "null" $ \cursor -> do
---       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just JsonTypeNull
---     forJson "[null]" $ \cursor -> do
---       it "should have correct type"       $ (fc >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeNull
---     forJson "[null, {\"field\": 1}]" $ \cursor -> do
---       it "cursor can navigate to second child of array" $ do
---         (fc >=> ns >=> xmlTypeAt)  cursor  `shouldBe` Just JsonTypeObject
---       it "cursor can navigate to first child of object at second child of array" $ do
---         (fc >=> ns >=> fc >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---       it "cursor can navigate to first child of object at second child of array" $ do
---         (fc >=> ns >=> fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeNumber
---     describe "For empty json array" $ do
---       let cursor =  "[null]" :: XmlCursor BS.ByteString t u
---       it "can navigate down and forwards" $ do
---         (                     xmlTypeAt) cursor `shouldBe` Just JsonTypeArray
---         (fc               >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeNull
---         (fc >=> ns        >=> xmlTypeAt) cursor `shouldBe` Nothing
---         (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing
---     describe "For sample Json" $ do
---       let cursor =  "{ \
---                     \    \"widget\": { \
---                     \        \"debug\": \"on\", \
---                     \        \"window\": { \
---                     \            \"name\": \"main_window\", \
---                     \            \"dimensions\": [500, 600.01e-02, true, false, null] \
---                     \        } \
---                     \    } \
---                     \}" :: XmlCursor BS.ByteString t u
---       it "can navigate down and forwards" $ do
---         (                                                                      xmlTypeAt) cursor `shouldBe` Just JsonTypeObject
---         (fc                                                                >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns                                                         >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeObject
---         (fc >=> ns >=> fc                                                  >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns                                           >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns >=> ns                                    >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns >=> ns >=> ns                             >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeObject
---         (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                      >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns               >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns        >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString
---         (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeArray
+genSpec :: forall t u.
+  ( Eq                t
+  , Show              t
+  , Select1           t
+  , Eq                u
+  , Show              u
+  , Rank0             u
+  , Rank1             u
+  , BalancedParens    u
+  , TestBit           u
+  , FromForeignRegion (XmlCursor BS.ByteString t u)
+  , IsString          (XmlCursor BS.ByteString t u)
+  , XmlIndexAt        (XmlCursor BS.ByteString t u)
+  )
+  => String -> (XmlCursor BS.ByteString t u) -> SpecWith ()
+genSpec t _ = do
+  describe ("Json cursor of type " ++ t) $ do
+    let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " ++ show cursor) (f cursor)
+    forXml "<elem/>" $ \cursor -> do
+      it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just XmlTypeElement
+    forXml " <elem />" $ \cursor -> do
+      it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just XmlTypeElement
+    forXml "<a foo='bar' boo='buzz'><inner data='none' /></a>" $ \cursor -> do
+      it "cursor can navigate to second attribute" $ do
+        (fc >=> fc >=> ns >=> ns >=> xmlTypeAt)  cursor  `shouldBe` Just XmlTypeToken
+      it "cursor can navigate to first attribute of an inner element" $ do
+        (fc >=> ns >=> fc >=> fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken
+      it "cursor can navigate to first atrribute value of an inner element" $ do
+        (fc >=> ns >=> fc >=> fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken
+    describe "For a single element" $ do
+      let cursor =  "<a>text</a>" :: XmlCursor BS.ByteString t u
+      it "can navigate down and forwards" $ do
+        (                     xmlTypeAt) cursor `shouldBe` Just XmlTypeElement
+        (fc               >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken
+        (fc >=> ns        >=> xmlTypeAt) cursor `shouldBe` Nothing
+        (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing
+    describe "For sample Xml" $ do
+      let cursor = "<widget debug=\"on\"> \
+                    \  <window name=\"main_window\"> \
+                    \    <dimension>500</dimension> \
+                    \    <dimension>600.01e-02</dimension> \
+                    \    <dimension>    false   </dimension> \
+                    \  </window> \
+                    \</widget>" :: XmlCursor BS.ByteString t u
+      it "can navigate down and forwards" $ do
+        (                                                                      xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --widget
+        (fc                                                                >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList    --widget attrs
+        (fc >=> ns                                                         >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --window
+        (fc >=> ns >=> fc                                                  >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList    --window attrs
+        (fc >=> ns >=> fc >=> ns                                           >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --dimension 500
+        (fc >=> ns >=> fc >=> ns >=> ns                                    >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --dimension 600
+        (fc >=> ns >=> fc >=> ns >=> ns >=> ns                             >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --dimension false
+        (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                      >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken       --false
+

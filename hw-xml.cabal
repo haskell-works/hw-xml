@@ -40,12 +40,10 @@ library
                       , HaskellWorks.Data.Xml.Conduit
                       , HaskellWorks.Data.Xml.Conduit.Blank
                       , HaskellWorks.Data.Xml.Conduit.Words
-                      , HaskellWorks.Data.Xml.Extract
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
                       , HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
                       , HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
-                      , HaskellWorks.Data.Xml.Succinct.Cursor.FromXmlCursor
                       , HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Internal
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Token
@@ -81,6 +79,7 @@ test-suite hw-xml-test
   main-is:              Spec.hs
   other-modules:        HaskellWorks.Data.Xml.Token.TokenizeSpec
                       , HaskellWorks.Data.Xml.Succinct.CursorSpec
+                      , HaskellWorks.Data.Xml.TypeSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec
   build-depends:        base                          >= 4          && < 5
                       , attoparsec

@@ -47,9 +47,16 @@ spec = describe "HaskellWorks.Data.Json.Succinct.CursorSpec" $ do
     it "initialises to beginning of empty object preceded by spaces" $ do
       let cursor = " <elem />" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
       xmlTypeAt cursor `shouldBe` Just XmlTypeElement
---     it "cursor can navigate to second child of array" $ do
---       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
---       (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeObject
+    it "cursor can navigate to attr list" $ do
+      let cursor = "<a foo='bar' boo='buzz'/>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
+      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList
+    it "cursor can navigate through attrs" $ do
+      let cursor = "<a foo='bar' boo='buzz'/>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
+      (fc >=> fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --foo
+      (fc >=> fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --bar
+      (fc >=> fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --boo
+      (fc >=> fc >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --buzz
+      (fc >=> fc >=> ns >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing --back off!
 --     it "cursor can navigate to first child of object at second child of array" $ do
 --       let cursor = "[null, {\"field\": 1}]" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
 --       (fc >=> ns >=> fc >=> xmlTypeAt) cursor `shouldBe` Just JsonTypeString

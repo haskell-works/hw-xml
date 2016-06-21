@@ -24,12 +24,9 @@ import           HaskellWorks.Data.Xml.Succinct
 
 data XmlIndex
   = XmlIndexElement [XmlIndex]
-  | XmlIndexComment BS.ByteString
-  | XmlIndexCDataStart
-  | XmlIndexMeta
   | XmlIndexAttrList [(BS.ByteString, BS.ByteString)]
   | XmlIndexString BS.ByteString
-  | XmlIndexToken BS.ByteString
+  | XmlIndexValue BS.ByteString
 
   deriving (Eq, Show)
 
@@ -41,7 +38,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
     Just (!c, _) | isElementStart c   -> XmlIndexElement <$> mapValuesFrom (firstChild k)
     Just (!c, _) | isQuote c          -> Right (XmlIndexString remainder)
     Just (!c, _) | isSpace c          -> XmlIndexAttrList  <$> mapAttrsFrom (firstChild k)
-    Just _                            -> Right (XmlIndexToken remainder)
+    Just _                            -> Right (XmlIndexValue remainder)
     Nothing                           -> Left (DecodeError "End of data"      )
     where ik                = interests k
           bpk               = balancedParens k
@@ -51,7 +48,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
           mapAttrsFrom j    = (pairwise >=> asField) <$> mapValuesFrom j
           pairwise (a:b:rs) = (a, b) : pairwise rs
           pairwise _        = []
-          asField (XmlIndexToken a, XmlIndexString b) = [(a, b)]
+          asField (XmlIndexValue a, XmlIndexString b) = [(a, b)]
           asField _  = []
 
         --   parseElem v = case vUncons v of

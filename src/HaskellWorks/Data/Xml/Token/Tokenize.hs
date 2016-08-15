@@ -96,13 +96,14 @@ instance ParseXml BS.ByteString String Double where
           ( char '\\' >> return '\\' ) <|>
           ( char '\'' >> return '\'' ) <|>
           ( char '/'  >> return '/'  )
+      escapedCode :: T.Parser BS.ByteString Char
       escapedCode   = do
         _ <- string "\\u"
         a <- hexDigit
         b <- hexDigit
         c <- hexDigit
         d <- hexDigit
-        return $ chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
+        return . chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
 
   parseXmlTokenWhitespace = do
     _ <- AC.many1' $ BC.choice [string " ", string "\t", string "\n", string "\r"]
@@ -127,7 +128,7 @@ instance ParseXml BS.ByteString BS.ByteString Double where
     _ <- string "\""
     value <- many (verbatimChar <|> escapedChar <|> escapedCode)
     _ <- string "\""
-    return $ XmlTokenString $ BS.pack value
+    return . XmlTokenString $ BS.pack value
     where
       word :: Word8 -> T.Parser BS.ByteString Word8
       word w = satisfy (== w)
@@ -152,7 +153,7 @@ instance ParseXml BS.ByteString BS.ByteString Double where
         b <- hexDigit
         c <- hexDigit
         d <- hexDigit
-        return $ fromIntegral $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
+        return . fromIntegral $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
 
   parseXmlTokenWhitespace = do
     _ <- AC.many1' $ BC.choice [string " ", string "\t", string "\n", string "\r"]

@@ -5,15 +5,21 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TupleSections         #-}
 
-module HaskellWorks.Data.Xml.Value.Internal where
+module HaskellWorks.Data.Xml.Grammar where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.ByteString.Char8 as ABC
-import qualified Data.Attoparsec.Types            as T
+--import qualified Data.Attoparsec.ByteString.Char8 as ABC
+import qualified Data.Attoparsec.Types    as T
 import           Data.Bits
 import           Data.Char
 import           Data.String
-import           HaskellWorks.Data.Parser         as P
+import           HaskellWorks.Data.Parser as P
+
+data XmlElementType
+  = XmlElementTypeElement String
+  | XmlElementTypeComment
+  | XmlElementTypeCData
+  | XmlElementTypeMeta String
 
 parseHexDigitNumeric :: P.Parser t => T.Parser t Int
 parseHexDigitNumeric = do
@@ -39,15 +45,35 @@ parseXmlString = do
   value <- many (verbatimChar <|> escapedChar <|> escapedCode)
   _ <- string q
   return value
- 
+
+parseXmlElement :: (P.Parser t, IsString t) => T.Parser t XmlElementType
+parseXmlElement = comment <|> cdata <|> meta <|> element
+  where
+  comment = const XmlElementTypeComment <$> string "!--"
+  cdata   = const XmlElementTypeCData   <$> string "![CDATA["
+  meta    = XmlElementTypeMeta          <$> (string "!" >> parseXmlToken)
+  element = XmlElementTypeElement       <$> parseXmlToken
+
 parseXmlToken :: (P.Parser t, IsString t) => T.Parser t String
 parseXmlToken = do
-  value <- many string
-  _     <- ABC.space <|> char '='
+  value <- many verbatimChar
+  _ <- satisfyChar (\c -> isSpace c || c == '=')
   return value
 
 verbatimChar :: P.Parser t => T.Parser t Char
-verbatimChar  = satisfyChar (ABC.notInClass "\"\\") <?> "invalid string character"
+verbatimChar  = satisfyChar isNameChar <?> "invalid string character"
+
+isNameStartChar :: Char -> Bool
+isNameStartChar w =
+  let iw = ord w
+  in w == '_' || w == ':' || isAlpha w
+     || (iw >= 0xc0 && iw <= 0xd6)
+     || (iw >= 0xd8 && iw <= 0xf6)
+     || (iw >= 0xf8 && iw <= 0xff)
+
+isNameChar :: Char -> Bool
+isNameChar w = isNameStartChar w || w == '-' || w == '.'
+             || ord w == 0xb7 || isNumber w
 
 escapedChar :: (P.Parser t, IsString t) => T.Parser t Char
 escapedChar = do
@@ -69,4 +95,4 @@ escapedCode = do
   b <- parseHexDigit
   c <- parseHexDigit
   d <- parseHexDigit
-  return $ chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
+  return . chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d

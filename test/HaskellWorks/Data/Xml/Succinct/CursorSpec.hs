@@ -29,10 +29,10 @@ import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
 import qualified HaskellWorks.Data.TreeCursor                               as TC
 import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
-import           HaskellWorks.Data.Xml.Succinct.Index
-import           HaskellWorks.Data.Xml.Token
-import           HaskellWorks.Data.Xml.Value
-import           System.IO.MMap
+--import           HaskellWorks.Data.Xml.Succinct.Index
+--import           HaskellWorks.Data.Xml.Token
+--import           HaskellWorks.Data.Xml.Value
+--import           System.IO.MMap
 import           Test.Hspec
 
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}

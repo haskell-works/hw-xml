@@ -41,9 +41,9 @@ parseHexDigit = parseHexDigitNumeric <|> parseHexDigitAlphaLower <|> parseHexDig
 
 parseXmlString :: (P.Parser t, IsString t) => T.Parser t String
 parseXmlString = do
-  q <- string "\"" <|> string "'"
-  value <- many (verbatimChar <|> escapedChar <|> escapedCode)
-  _ <- string q
+  q <- satisfyChar (=='"') <|> satisfyChar (=='\'')
+  value <- many (escapedChar <|> escapedCode <|> satisfyChar (const True))
+  _ <- satisfyChar (==q)
   return value
 
 parseXmlElement :: (P.Parser t, IsString t) => T.Parser t XmlElementType
@@ -51,17 +51,11 @@ parseXmlElement = comment <|> cdata <|> meta <|> element
   where
   comment = const XmlElementTypeComment <$> string "!--"
   cdata   = const XmlElementTypeCData   <$> string "![CDATA["
-  meta    = XmlElementTypeMeta          <$> (string "!" >> parseXmlToken)
+  meta    = XmlElementTypeMeta          <$> ((string "!" <|> string "?") >> parseXmlToken)
   element = XmlElementTypeElement       <$> parseXmlToken
 
 parseXmlToken :: (P.Parser t, IsString t) => T.Parser t String
-parseXmlToken = do
-  value <- many verbatimChar
-  _ <- satisfyChar (\c -> isSpace c || c == '=')
-  return value
-
-verbatimChar :: P.Parser t => T.Parser t Char
-verbatimChar  = satisfyChar isNameChar <?> "invalid string character"
+parseXmlToken = many $ satisfyChar isNameChar <?> "invalid string character"
 
 isNameStartChar :: Char -> Bool
 isNameStartChar w =

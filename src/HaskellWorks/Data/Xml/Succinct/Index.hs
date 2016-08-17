@@ -4,7 +4,11 @@
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module HaskellWorks.Data.Xml.Succinct.Index where
+module HaskellWorks.Data.Xml.Succinct.Index
+( XmlIndex(..)
+, XmlIndexAt(..)
+)
+where
 
 import           Control.Arrow
 import           Control.Monad
@@ -33,7 +37,6 @@ data XmlIndex
   | XmlIndexAttrList [(BS.ByteString, BS.ByteString)]
   | XmlIndexString BS.ByteString
   | XmlIndexValue BS.ByteString
-
   deriving (Eq, Show)
 
 class XmlIndexAt a where
@@ -42,11 +45,11 @@ class XmlIndexAt a where
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexAt (XmlCursor BS.ByteString v w) where
   xmlIndexAt :: XmlCursor BS.ByteString v w -> Either DecodeError XmlIndex
   xmlIndexAt k = case vUncons remainder of
-    Just (!c, cs) | isElementStart c   -> parseElem cs
-    Just (!c, _)  | isQuote c          -> Right (XmlIndexString remainder)
-    Just (!c, _)  | isSpace c          -> XmlIndexAttrList  <$> mapAttrsFrom (firstChild k)
-    Just _                             -> Right (XmlIndexValue remainder)
-    Nothing                            -> Left (DecodeError "End of data"      )
+    Just (!c, cs) | isElementStart c -> parseElem cs
+    Just (!c, _ ) | isQuote c        -> Right (XmlIndexString remainder)
+    Just (!c, _ ) | isSpace c        -> XmlIndexAttrList  <$> mapAttrsFrom (firstChild k)
+    Just _                           -> Right (XmlIndexValue remainder)
+    Nothing                          -> Left (DecodeError "End of data")
     where ik                = interests k
           bpk               = balancedParens k
           p                 = lastPositionOf (select1 ik (rank1 bpk (cursorRank k)))

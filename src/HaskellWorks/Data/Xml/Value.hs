@@ -5,7 +5,12 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TupleSections         #-}
 
-module HaskellWorks.Data.Xml.Value where
+module HaskellWorks.Data.Xml.Value
+( XmlValue(..)
+, XmlValueAt(..)
+, FromXmlValue(..)
+)
+where
 
 --import           Control.Arrow
 import qualified Data.Attoparsec.ByteString.Char8     as ABC
@@ -13,11 +18,13 @@ import qualified Data.ByteString                      as BS
 import           Data.Monoid
 import           HaskellWorks.Data.Decode
 import           HaskellWorks.Data.Xml.Succinct.Index
-import           HaskellWorks.Data.Xml.Grammar
 
 data XmlValue
-  = XmlString String
-  | XmlElement [XmlValue]
+  = XmlText String
+  | XmlElement String [XmlValue]
+  | XmlCData String
+  | XmlComment String
+  | XmlMeta String
   | XmlAttrList [(String, String)]
   deriving (Eq, Show)
 
@@ -29,17 +36,27 @@ class FromXmlValue a where
 
 instance XmlValueAt XmlIndex where
   xmlValueAt i = case i of
-    XmlIndexString s -> case ABC.parse parseXmlString s of
-      ABC.Fail    {}     -> Left (DecodeError ("Invalid string: '" <> show (BS.take 20 s) <> "...'"))
-      ABC.Partial _      -> Left (DecodeError "Unexpected end of string")
-      ABC.Done    _ r    -> Right (XmlString r)
-    XmlIndexAttrList as  -> XmlAttrList <$> mapM (\(k, v) -> (,) <$> parseString k <*> parseString v) as
-    XmlIndexElement _ es -> XmlElement <$> mapM xmlValueAt es
+    XmlIndexCData s        -> XmlCData   <$> parseTextUntil "]]>" s
+    XmlIndexComment s      -> XmlComment <$> parseTextUntil "-->" s
+    XmlIndexMeta s _       -> Right $ XmlMeta s
+    XmlIndexElement s _    -> Right $ XmlElement s []
+    _                      -> decodeErr "Not yet supported" ""
+    -- XmlIndexString s -> case ABC.parse parseXmlString s of
+    --   ABC.Fail    {}     -> Left (DecodeError ("Invalid string: '" <> show (BS.take 20 s) <> "...'"))
+    --   ABC.Partial _      -> Left (DecodeError "Unexpected end of string")
+    --   ABC.Done    _ r    -> Right (XmlText r)
+    -- XmlIndexAttrList as  -> XmlAttrList <$> mapM (\(k, v) -> (,) <$> parseString k <*> parseString v) as
+    -- XmlIndexElement _ es -> XmlElement <$> mapM xmlValueAt es
     where
-      parseString bs = case ABC.parse parseXmlString bs of
-        ABC.Fail    {}  -> Left (DecodeError ("Invalid field: '" <> show (BS.take 20 bs) <> "...'"))
-        ABC.Partial _   -> Left (DecodeError "Unexpected end of field")
-        ABC.Done    _ s -> Right s
+      parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
+      parseTextUntil s bs = case ABC.parse (parseUntil s) bs of
+        ABC.Fail    {}  -> decodeErr ("Unable to find " <> show s) bs
+        ABC.Partial _   -> decodeErr ("Unexpected end, expected " <> show s) bs
+        ABC.Done    _ r -> Right r
 
 instance FromXmlValue XmlValue where
   fromXmlValue = Right
+
+decodeErr :: String -> BS.ByteString -> Either DecodeError x
+decodeErr reason bs =
+  Left $ DecodeError (reason <>": " <> show (BS.take 20 bs) <> "...'")

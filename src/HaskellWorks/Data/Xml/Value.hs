@@ -17,6 +17,7 @@ import qualified Data.Attoparsec.ByteString.Char8     as ABC
 import qualified Data.ByteString                      as BS
 import           Data.Monoid
 import           HaskellWorks.Data.Decode
+import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
 
 data XmlValue
@@ -39,7 +40,8 @@ instance XmlValueAt XmlIndex where
     XmlIndexCData s        -> XmlCData   <$> parseTextUntil "]]>" s
     XmlIndexComment s      -> XmlComment <$> parseTextUntil "-->" s
     XmlIndexMeta s _       -> Right $ XmlMeta s
-    XmlIndexElement s _    -> Right $ XmlElement s []
+    XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs  --Right $ XmlElement s []
+    XmlIndexAttrList as    -> XmlAttrList <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
     _                      -> decodeErr "Not yet supported" ""
     -- XmlIndexString s -> case ABC.parse parseXmlString s of
     --   ABC.Fail    {}     -> Left (DecodeError ("Invalid string: '" <> show (BS.take 20 s) <> "...'"))
@@ -50,8 +52,16 @@ instance XmlValueAt XmlIndex where
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
       parseTextUntil s bs = case ABC.parse (parseUntil s) bs of
-        ABC.Fail    {}  -> decodeErr ("Unable to find " <> show s) bs
-        ABC.Partial _   -> decodeErr ("Unexpected end, expected " <> show s) bs
+        ABC.Fail    {}  -> decodeErr ("Unable to find " <> show s <> ".") bs
+        ABC.Partial _   -> decodeErr ("Unexpected end, expected " <> show s <> ".") bs
+        ABC.Done    _ r -> Right r
+      parseString bs = case ABC.parse parseXmlString bs of
+        ABC.Fail    {}  -> decodeErr "Unable to parse string" bs
+        ABC.Partial _   -> decodeErr "Unexpected end of string, expected" bs
+        ABC.Done    _ r -> Right r
+      parseAttrName bs = case ABC.parse parseXmlAttributeName bs of
+        ABC.Fail    {}  -> decodeErr "Unable to parse attribute name" bs
+        ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
 
 instance FromXmlValue XmlValue where
@@ -59,4 +69,4 @@ instance FromXmlValue XmlValue where
 
 decodeErr :: String -> BS.ByteString -> Either DecodeError x
 decodeErr reason bs =
-  Left $ DecodeError (reason <>": " <> show (BS.take 20 bs) <> "...'")
+  Left $ DecodeError (reason <>" (" <> show (BS.take 20 bs) <> "...)")

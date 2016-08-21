@@ -37,12 +37,13 @@ class FromXmlValue a where
 
 instance XmlValueAt XmlIndex where
   xmlValueAt i = case i of
-    XmlIndexCData s        -> XmlCData   <$> parseTextUntil "]]>" s
-    XmlIndexComment s      -> XmlComment <$> parseTextUntil "-->" s
+    XmlIndexCData s        -> XmlCData    <$> parseTextUntil "]]>" s
+    XmlIndexComment s      -> XmlComment  <$> parseTextUntil "-->" s
     XmlIndexMeta s _       -> Right $ XmlMeta s
-    XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs  --Right $ XmlElement s []
-    XmlIndexAttrList as    -> XmlAttrList <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
-    _                      -> decodeErr "Not yet supported" ""
+    XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs
+    XmlIndexAttrList as    -> XmlAttrList  <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
+    XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s
+    unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
     -- XmlIndexString s -> case ABC.parse parseXmlString s of
     --   ABC.Fail    {}     -> Left (DecodeError ("Invalid string: '" <> show (BS.take 20 s) <> "...'"))
     --   ABC.Partial _      -> Left (DecodeError "Unexpected end of string")

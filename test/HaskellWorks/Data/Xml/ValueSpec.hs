@@ -69,11 +69,11 @@ genSpec :: forall t u.
   , IsString          (XmlCursor BS.ByteString t u)
   , XmlIndexAt        (XmlCursor BS.ByteString t u)
   )
-  => String -> (XmlCursor BS.ByteString t u) -> SpecWith ()
+  => String -> XmlCursor BS.ByteString t u -> SpecWith ()
 genSpec t _ = do
   describe ("Json cursor of type " <> t) $ do
     let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " <> show cursor) (f cursor)
-    
+
     forXml "<a/>" $ \cursor -> do
       it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (XmlElement "a" [])
 
@@ -84,6 +84,11 @@ genSpec t _ = do
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
       it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
         Right (XmlElement "a" [XmlAttrList [("attr", "value")], XmlElement "b" [XmlAttrList [("attr", "value")]]])
+
+    forXml "<a>value text</a>" $ \cursor -> do
+      it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlElement "a" [XmlText "value text"])
+
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])
     -- forXml "1234" $ \cursor -> do

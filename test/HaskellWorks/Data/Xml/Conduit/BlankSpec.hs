@@ -44,6 +44,6 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
       \<!ELEMENT greeting (#PCDATA)>]>"       `whenBlankedXmlShouldBe` "[                   [                           ] ]"
 
     "<a><![CDATA[<hi>Hello,\
-    \ world!</hi>]]></b>"                     `whenBlankedXmlShouldBe` "<  [       (                       )]   >"
+    \ world!</hi>]]></b>"                     `whenBlankedXmlShouldBe` "<  [                                ]   >"
 
-    "<a><![CDATA[ [ ]]]]></b>"                `whenBlankedXmlShouldBe` "<  [       (      )]   >"
+    "<a><![CDATA[ [ ]]]]></b>"                `whenBlankedXmlShouldBe` "<  [               ]   >"

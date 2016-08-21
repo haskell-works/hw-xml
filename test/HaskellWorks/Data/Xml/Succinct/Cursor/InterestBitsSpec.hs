@@ -30,4 +30,4 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec" $ do
     (interestBitsOf "<e><c></e>"     :: BitShown (DVS.Vector Word8)) `shouldBe` fromString "10010000 00000000"
     (interestBitsOf " <e p='a'/> "   :: BitShown (DVS.Vector Word8)) `shouldBe` fromString "01011010 00000000"
     (interestBitsOf " <!-- u -->"    :: BitShown (DVS.Vector Word8)) `shouldBe` fromString "01000000 00000000"
-    (interestBitsOf "<![CDATA[ x"    :: BitShown (DVS.Vector Word8)) `shouldBe` fromString "10000000 10000000"
+    (interestBitsOf "<![CDATA[ x"    :: BitShown (DVS.Vector Word8)) `shouldBe` fromString "10000000 00000000"

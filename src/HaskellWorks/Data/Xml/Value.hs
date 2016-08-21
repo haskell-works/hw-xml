@@ -44,12 +44,6 @@ instance XmlValueAt XmlIndex where
     XmlIndexAttrList as    -> XmlAttrList  <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
     XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s
     unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
-    -- XmlIndexString s -> case ABC.parse parseXmlString s of
-    --   ABC.Fail    {}     -> Left (DecodeError ("Invalid string: '" <> show (BS.take 20 s) <> "...'"))
-    --   ABC.Partial _      -> Left (DecodeError "Unexpected end of string")
-    --   ABC.Done    _ r    -> Right (XmlText r)
-    -- XmlIndexAttrList as  -> XmlAttrList <$> mapM (\(k, v) -> (,) <$> parseString k <*> parseString v) as
-    -- XmlIndexElement _ es -> XmlElement <$> mapM xmlValueAt es
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
       parseTextUntil s bs = case ABC.parse (parseUntil s) bs of

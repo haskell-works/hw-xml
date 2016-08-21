@@ -89,6 +89,17 @@ genSpec t _ = do
       it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe`
         Right (XmlElement "a" [XmlText "value text"])
 
+    forXml "<!-- some comment -->" $ \cursor -> do
+      it "should parse space separared comment" $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlComment " some comment ")
+
+    forXml "<!--some comment ->-->" $ \cursor -> do
+      it "should parse space separared comment" $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlComment "some comment ->")
+
+    forXml "<![CDATA[a <br/> tag]]>" $ \cursor -> do
+      it "should parse cdata data" $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlCData "a <br/> tag")
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])
     -- forXml "1234" $ \cursor -> do

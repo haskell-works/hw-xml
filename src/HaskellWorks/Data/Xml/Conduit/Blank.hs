@@ -91,12 +91,12 @@ blankXml' lastChar lastState = do
       BSP _  !cs                        -> Just (_space       , (InBang 1     , toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InCdataTag, bs) = case bs of
-      BSP !c !cs | c == _bracketleft    -> Just (_parenleft   , (InCdata 0    , toBSP cs))
+      BSP !c !cs | c == _bracketleft    -> Just (_space       , (InCdata 0    , toBSP cs))
       BSP _  !cs                        -> Just (_space       , (InCdataTag   , toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InCdata n, bs) = case bs of
       BSP !c !cs | c == _greater && n >= 2 -> Just (_bracketright, (InXml        , toBSP cs))
-      BSP !c !cs | isCdataEnd c cs && n>0  -> Just (_parenright  , (InCdata (n+1), toBSP cs))
+      BSP !c !cs | isCdataEnd c cs && n>0  -> Just (_space       , (InCdata (n+1), toBSP cs))
       BSP !c !cs | c == _bracketright      -> Just (_space       , (InCdata (n+1), toBSP cs))
       BSP _  !cs                           -> Just (_space       , (InCdata 0    , toBSP cs))
       EmptyBSP                             -> Nothing

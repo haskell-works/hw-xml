@@ -68,7 +68,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
               ABC.Done i r   -> case r of
                 XmlElementTypeCData     -> Right $ XmlIndexCData i
                 XmlElementTypeComment   -> Right $ XmlIndexComment i
-                XmlElementTypeMeta s    -> Right $ XmlIndexMeta s []
+                XmlElementTypeMeta s    -> XmlIndexMeta s    <$> mapValuesFrom (firstChild k)
                 XmlElementTypeElement s -> XmlIndexElement s <$> mapValuesFrom (firstChild k)
 
 

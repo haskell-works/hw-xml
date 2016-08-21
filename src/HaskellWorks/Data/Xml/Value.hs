@@ -25,7 +25,7 @@ data XmlValue
   | XmlElement String [XmlValue]
   | XmlCData String
   | XmlComment String
-  | XmlMeta String
+  | XmlMeta String [XmlValue]
   | XmlAttrList [(String, String)]
   deriving (Eq, Show)
 
@@ -37,9 +37,9 @@ class FromXmlValue a where
 
 instance XmlValueAt XmlIndex where
   xmlValueAt i = case i of
-    XmlIndexCData s        -> XmlCData    <$> parseTextUntil "]]>" s
-    XmlIndexComment s      -> XmlComment  <$> parseTextUntil "-->" s
-    XmlIndexMeta s _       -> Right $ XmlMeta s
+    XmlIndexCData s        -> XmlCData     <$> parseTextUntil "]]>" s
+    XmlIndexComment s      -> XmlComment   <$> parseTextUntil "-->" s
+    XmlIndexMeta s cs      -> XmlMeta s    <$> mapM xmlValueAt cs
     XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs
     XmlIndexAttrList as    -> XmlAttrList  <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
     XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s

@@ -100,6 +100,10 @@ genSpec t _ = do
     forXml "<![CDATA[a <br/> tag]]>" $ \cursor -> do
       it "should parse cdata data" $ xmlValueVia (Just cursor) `shouldBe`
         Right (XmlCData "a <br/> tag")
+
+    forXml "<!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]>" $ \cursor -> do
+      it "should parse metas" $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlMeta "DOCTYPE" [XmlMeta "ELEMENT" []])
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])
     -- forXml "1234" $ \cursor -> do

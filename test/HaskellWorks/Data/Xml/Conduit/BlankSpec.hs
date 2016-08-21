@@ -3,6 +3,7 @@
 module HaskellWorks.Data.Xml.Conduit.BlankSpec (spec) where
 
 import qualified Data.ByteString                     as BS
+import           Data.Monoid
 import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.Xml.Conduit.Blank
 import           Test.Hspec
@@ -11,7 +12,7 @@ import           Test.Hspec
 
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do
-  it (show original ++ " when blanked json should be " ++ show expected) $ do
+  it (show original <> " when blanked json should be " <> show expected) $ do
     BS.concat (runListConduit blankXml [original]) `shouldBe` expected
 
 spec :: Spec

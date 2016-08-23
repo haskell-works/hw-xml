@@ -1,8 +1,8 @@
-{-# LANGUAGE FlexibleContexts       #-}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
-{-# LANGUAGE OverloadedStrings      #-}
-{-# LANGUAGE TypeSynonymInstances   #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
 
 module HaskellWorks.Data.Xml.Token.Tokenize
     ( IsChar(..)
@@ -11,17 +11,17 @@ module HaskellWorks.Data.Xml.Token.Tokenize
     ) where
 
 import           Control.Applicative
-import qualified Data.Attoparsec.ByteString.Char8   as BC
-import qualified Data.Attoparsec.Combinator         as AC
-import qualified Data.Attoparsec.Types              as T
-import qualified Data.ByteString                    as BS
+import qualified Data.Attoparsec.ByteString.Char8  as BC
+import qualified Data.Attoparsec.Combinator        as AC
+import qualified Data.Attoparsec.Types             as T
 import           Data.Bits
+import qualified Data.ByteString                   as BS
 import           Data.Char
 import           Data.Word
 import           Data.Word8
 import           HaskellWorks.Data.Char.IsChar
+import           HaskellWorks.Data.Parser          as P
 import           HaskellWorks.Data.Xml.Token.Types
-import           HaskellWorks.Data.Parser           as P
 
 hexDigitNumeric :: P.Parser t => T.Parser t Int
 hexDigitNumeric = do
@@ -42,18 +42,18 @@ hexDigit :: P.Parser t => T.Parser t Int
 hexDigit = hexDigitNumeric <|> hexDigitAlphaLower <|> hexDigitAlphaUpper
 
 class ParseXml t s d where
-  parseXmlTokenString :: T.Parser t (XmlToken s d)
-  parseXmlToken :: T.Parser t (XmlToken s d)
-  parseXmlTokenBraceL :: T.Parser t (XmlToken s d)
-  parseXmlTokenBraceR :: T.Parser t (XmlToken s d)
-  parseXmlTokenBracketL :: T.Parser t (XmlToken s d)
-  parseXmlTokenBracketR :: T.Parser t (XmlToken s d)
-  parseXmlTokenComma :: T.Parser t (XmlToken s d)
-  parseXmlTokenColon :: T.Parser t (XmlToken s d)
+  parseXmlTokenString     :: T.Parser t (XmlToken s d)
+  parseXmlToken           :: T.Parser t (XmlToken s d)
+  parseXmlTokenBraceL     :: T.Parser t (XmlToken s d)
+  parseXmlTokenBraceR     :: T.Parser t (XmlToken s d)
+  parseXmlTokenBracketL   :: T.Parser t (XmlToken s d)
+  parseXmlTokenBracketR   :: T.Parser t (XmlToken s d)
+  parseXmlTokenComma      :: T.Parser t (XmlToken s d)
+  parseXmlTokenColon      :: T.Parser t (XmlToken s d)
   parseXmlTokenWhitespace :: T.Parser t (XmlToken s d)
-  parseXmlTokenNull :: T.Parser t (XmlToken s d)
-  parseXmlTokenBoolean :: T.Parser t (XmlToken s d)
-  parseXmlTokenDouble :: T.Parser t (XmlToken s d)
+  parseXmlTokenNull       :: T.Parser t (XmlToken s d)
+  parseXmlTokenBoolean    :: T.Parser t (XmlToken s d)
+  parseXmlTokenDouble     :: T.Parser t (XmlToken s d)
 
   parseXmlToken =
     parseXmlTokenString     <|>
@@ -69,14 +69,14 @@ class ParseXml t s d where
     parseXmlTokenDouble
 
 instance ParseXml BS.ByteString String Double where
-  parseXmlTokenBraceL = string "{" >> return XmlTokenBraceL
-  parseXmlTokenBraceR = string "}" >> return XmlTokenBraceR
-  parseXmlTokenBracketL = string "[" >> return XmlTokenBracketL
-  parseXmlTokenBracketR = string "]" >> return XmlTokenBracketR
-  parseXmlTokenComma = string "," >> return XmlTokenComma
-  parseXmlTokenColon = string ":" >> return XmlTokenColon
-  parseXmlTokenNull = string "null" >> return XmlTokenNull
-  parseXmlTokenDouble = XmlTokenNumber <$> rational
+  parseXmlTokenBraceL   = string "{"      >> return XmlTokenBraceL
+  parseXmlTokenBraceR   = string "}"      >> return XmlTokenBraceR
+  parseXmlTokenBracketL = string "["      >> return XmlTokenBracketL
+  parseXmlTokenBracketR = string "]"      >> return XmlTokenBracketR
+  parseXmlTokenComma    = string ","      >> return XmlTokenComma
+  parseXmlTokenColon    = string ":"      >> return XmlTokenColon
+  parseXmlTokenNull     = string "null"   >> return XmlTokenNull
+  parseXmlTokenDouble   = XmlTokenNumber <$> rational
 
   parseXmlTokenString = do
     _ <- string "\""
@@ -96,13 +96,14 @@ instance ParseXml BS.ByteString String Double where
           ( char '\\' >> return '\\' ) <|>
           ( char '\'' >> return '\'' ) <|>
           ( char '/'  >> return '/'  )
+      escapedCode :: T.Parser BS.ByteString Char
       escapedCode   = do
         _ <- string "\\u"
         a <- hexDigit
         b <- hexDigit
         c <- hexDigit
         d <- hexDigit
-        return $ chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
+        return . chr $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
 
   parseXmlTokenWhitespace = do
     _ <- AC.many1' $ BC.choice [string " ", string "\t", string "\n", string "\r"]
@@ -114,20 +115,20 @@ instance ParseXml BS.ByteString String Double where
       false = string "false"  >> return (XmlTokenBoolean False)
 
 instance ParseXml BS.ByteString BS.ByteString Double where
-  parseXmlTokenBraceL = string "{" >> return XmlTokenBraceL
-  parseXmlTokenBraceR = string "}" >> return XmlTokenBraceR
-  parseXmlTokenBracketL = string "[" >> return XmlTokenBracketL
-  parseXmlTokenBracketR = string "]" >> return XmlTokenBracketR
-  parseXmlTokenComma = string "," >> return XmlTokenComma
-  parseXmlTokenColon = string ":" >> return XmlTokenColon
-  parseXmlTokenNull = string "null" >> return XmlTokenNull
-  parseXmlTokenDouble = XmlTokenNumber <$> rational
+  parseXmlTokenBraceL   = string "{"      >> return XmlTokenBraceL
+  parseXmlTokenBraceR   = string "}"      >> return XmlTokenBraceR
+  parseXmlTokenBracketL = string "["      >> return XmlTokenBracketL
+  parseXmlTokenBracketR = string "]"      >> return XmlTokenBracketR
+  parseXmlTokenComma    = string ","      >> return XmlTokenComma
+  parseXmlTokenColon    = string ":"      >> return XmlTokenColon
+  parseXmlTokenNull     = string "null"   >> return XmlTokenNull
+  parseXmlTokenDouble   = XmlTokenNumber <$> rational
 
   parseXmlTokenString = do
     _ <- string "\""
     value <- many (verbatimChar <|> escapedChar <|> escapedCode)
     _ <- string "\""
-    return $ XmlTokenString $ BS.pack value
+    return . XmlTokenString $ BS.pack value
     where
       word :: Word8 -> T.Parser BS.ByteString Word8
       word w = satisfy (== w)
@@ -152,7 +153,7 @@ instance ParseXml BS.ByteString BS.ByteString Double where
         b <- hexDigit
         c <- hexDigit
         d <- hexDigit
-        return $ fromIntegral $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
+        return . fromIntegral $ a `shift` 24 .|. b `shift` 16 .|. c `shift` 8 .|. d
 
   parseXmlTokenWhitespace = do
     _ <- AC.many1' $ BC.choice [string " ", string "\t", string "\n", string "\r"]

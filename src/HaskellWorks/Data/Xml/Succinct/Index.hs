@@ -30,36 +30,46 @@ import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct
 
 data XmlIndex
-  = XmlIndexElement String [XmlIndex]
+  = XmlIndexDocument [XmlIndex]
+  | XmlIndexElement String [XmlIndex]
   | XmlIndexCData BS.ByteString
   | XmlIndexComment BS.ByteString
   | XmlIndexMeta String [XmlIndex]
-  | XmlIndexAttrList [(BS.ByteString, BS.ByteString)]
-  | XmlIndexString BS.ByteString
+  | XmlIndexAttrList [(XmlIndex, XmlIndex)]
   | XmlIndexValue BS.ByteString
+  | XmlIndexAttrName BS.ByteString
+  | XmlIndexAttrValue BS.ByteString
   deriving (Eq, Show)
 
 class XmlIndexAt a where
   xmlIndexAt :: a -> Either DecodeError XmlIndex
 
+pos :: (Select1 v, Rank1 w) => XmlCursor t v w -> Position
+pos c = lastPositionOf (select1 (interests c) (rank1 (balancedParens c) (cursorRank c)))
+
+remText :: (VectorLike v, Select1 v1, Rank1 w) => XmlCursor v v1 w -> v
+remText c = vDrop (toCount (pos c)) (cursorText c)
+
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexAt (XmlCursor BS.ByteString v w) where
   xmlIndexAt :: XmlCursor BS.ByteString v w -> Either DecodeError XmlIndex
   xmlIndexAt k = case vUncons remainder of
-    Just (!c, cs) | isElementStart c -> parseElem cs
-    Just (!c, _ ) | isQuote c        -> Right (XmlIndexString remainder)
-    Just (!c, _ ) | isSpace c        -> XmlIndexAttrList  <$> mapAttrsFrom (firstChild k)
-    Just _                           -> Right (XmlIndexValue remainder)
-    Nothing                          -> Left (DecodeError "End of data")
-    where ik                = interests k
-          bpk               = balancedParens k
-          p                 = lastPositionOf (select1 ik (rank1 bpk (cursorRank k)))
-          remainder         = vDrop (toCount p) (cursorText k)
+    Just (!c, cs) | isElementStart c          -> parseElem cs
+    Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList <$> mapAttrsFrom (firstChild k)
+    Just (!c, _ ) | isAttribute && isQuote c  -> Right (XmlIndexAttrValue remainder)
+    Just _        | isAttribute               -> Right (XmlIndexAttrName remainder)
+    Just _                                    -> Right (XmlIndexValue remainder)
+    Nothing                                   -> Left (DecodeError "End of data")
+    where remainder         = remText k
           mapValuesFrom j   = sequence (L.unfoldr (fmap (xmlIndexAt &&& nextSibling)) j)
-          mapAttrsFrom j    = (pairwise >=> asField) <$> mapValuesFrom j
+          mapAttrsFrom j    = (pairwise >=> asAttribute) <$> mapValuesFrom j
           pairwise (a:b:rs) = (a, b) : pairwise rs
           pairwise _        = []
-          asField (XmlIndexValue a, XmlIndexString b) = [(a, b)]
-          asField _  = []
+          asAttribute (XmlIndexAttrName a, XmlIndexAttrValue b) = [(XmlIndexAttrName a, XmlIndexAttrValue b)]
+          asAttribute _  = []
+
+          isAttribute = case remText <$> parent k >>= vUncons of
+            Just (!c, _) | isSpace c -> True
+            _                        -> False
 
           parseElem bs =
             case ABC.parse parseXmlElement bs of
@@ -70,6 +80,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
                 XmlElementTypeComment   -> Right $ XmlIndexComment i
                 XmlElementTypeMeta s    -> XmlIndexMeta s    <$> mapValuesFrom (firstChild k)
                 XmlElementTypeElement s -> XmlIndexElement s <$> mapValuesFrom (firstChild k)
+                XmlElementTypeDocument  -> XmlIndexDocument <$> ((++) <$> mapValuesFrom (firstChild k) <*> mapValuesFrom (nextSibling k))
 
 
 decodeErr :: String -> BS.ByteString -> Either DecodeError x

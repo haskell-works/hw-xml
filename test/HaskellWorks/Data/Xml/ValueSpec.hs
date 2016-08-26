@@ -55,6 +55,12 @@ xmlValueVia mk = case mk of
   Just k    -> (xmlIndexAt >=> xmlValueAt) k
   Nothing   -> Left (DecodeError "No such element")
 
+xmlIndexVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
+              => Maybe (XmlCursor BS.ByteString t u) -> Either DecodeError XmlIndex
+xmlIndexVia mk = case mk of
+  Just k    -> xmlIndexAt k
+  Nothing   -> Left (DecodeError "No such element")
+
 genSpec :: forall t u.
   ( Eq                t
   , Show              t
@@ -83,7 +89,8 @@ genSpec t _ = do
 
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
       it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
-        Right (XmlElement "a" [XmlAttrList [("attr", "value")], XmlElement "b" [XmlAttrList [("attr", "value")]]])
+        Right (XmlElement "a" [XmlAttrList [("attr", "value")],
+               XmlElement "b" [XmlAttrList [("attr", "value")]]])
 
     forXml "<a>value text</a>" $ \cursor -> do
       it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe`
@@ -104,6 +111,22 @@ genSpec t _ = do
     forXml "<!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]>" $ \cursor -> do
       it "should parse metas" $ xmlValueVia (Just cursor) `shouldBe`
         Right (XmlMeta "DOCTYPE" [XmlMeta "ELEMENT" []])
+
+    forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
+      it "should parse xml header" $ xmlValueVia (Just cursor) `shouldBe`
+        Right (XmlDocument [
+          XmlAttrList [],
+          XmlElement "a" [XmlAttrList [("version", "1.0"), ("encoding", "UTF-8")],
+          XmlText "free"]]
+        )
+      it "navigate around" $ do
+        xmlValueVia (ns cursor) `shouldBe` Right (XmlElement "a" [XmlAttrList [("text", "value")], XmlText "free"])
+      --   xmlValueVia ((ns >=> fc) cursor) `shouldBe` Right (XmlAttrList [])
+        xmlValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` Right (XmlAttrName "text")
+        xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` Right (XmlAttrName "value")
+        xmlValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` Right (XmlText "free")
+      --   xmlIndexVia ((ns >=> fc) cursor) `shouldBe` Right (XmlIndexComment "")
+
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])
     -- forXml "1234" $ \cursor -> do

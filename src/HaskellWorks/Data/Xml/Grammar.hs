@@ -16,7 +16,8 @@ import           Data.String
 import           HaskellWorks.Data.Parser as P
 
 data XmlElementType
-  = XmlElementTypeElement String
+  = XmlElementTypeDocument
+  | XmlElementTypeElement String
   | XmlElementTypeComment
   | XmlElementTypeCData
   | XmlElementTypeMeta String
@@ -45,12 +46,13 @@ parseXmlString = do
   many (satisfyChar (/= q))
 
 parseXmlElement :: (P.Parser t, IsString t) => T.Parser t XmlElementType
-parseXmlElement = comment <|> cdata <|> meta <|> element
+parseXmlElement = comment <|> cdata <|> doc <|> meta <|> element
   where
-  comment = const XmlElementTypeComment <$> string "!--"
-  cdata   = const XmlElementTypeCData   <$> string "![CDATA["
-  meta    = XmlElementTypeMeta          <$> ((string "!" <|> string "?") >> parseXmlToken)
-  element = XmlElementTypeElement       <$> parseXmlToken
+  comment = const XmlElementTypeComment  <$> string "!--"
+  cdata   = const XmlElementTypeCData    <$> string "![CDATA["
+  meta    = XmlElementTypeMeta           <$> (string "!" >> parseXmlToken)
+  doc     = const XmlElementTypeDocument <$> string "?xml"
+  element = XmlElementTypeElement        <$> parseXmlToken
 
 parseXmlToken :: (P.Parser t, IsString t) => T.Parser t String
 parseXmlToken = many $ satisfyChar isNameChar <?> "invalid string character"

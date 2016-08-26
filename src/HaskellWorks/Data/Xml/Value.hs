@@ -21,11 +21,14 @@ import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
 
 data XmlValue
-  = XmlText String
+  = XmlDocument [XmlValue]
+  | XmlText String
   | XmlElement String [XmlValue]
   | XmlCData String
   | XmlComment String
   | XmlMeta String [XmlValue]
+  | XmlAttrName String
+  | XmlAttrValue String
   | XmlAttrList [(String, String)]
   deriving (Eq, Show)
 
@@ -41,7 +44,11 @@ instance XmlValueAt XmlIndex where
     XmlIndexComment s      -> XmlComment   <$> parseTextUntil "-->" s
     XmlIndexMeta s cs      -> XmlMeta s    <$> mapM xmlValueAt cs
     XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs
-    XmlIndexAttrList as    -> XmlAttrList  <$> mapM (\(k, v) -> (,) <$> parseAttrName k <*> parseString v) as
+    XmlIndexDocument cs    -> XmlDocument  <$> mapM xmlValueAt cs
+    XmlIndexAttrName cs    -> XmlAttrName  <$> parseAttrName cs
+    XmlIndexAttrValue cs   -> XmlAttrValue <$> parseString cs
+    XmlIndexAttrList as    ->
+      XmlAttrList  <$> mapM (\(XmlIndexAttrName k, XmlIndexAttrValue v) -> (,) <$> parseAttrName k <*> parseString v) as
     XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s
     unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
     where

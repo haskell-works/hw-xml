@@ -64,7 +64,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
           mapAttrsFrom j    = (pairwise >=> asAttribute) <$> mapValuesFrom j
           pairwise (a:b:rs) = (a, b) : pairwise rs
           pairwise _        = []
-          asAttribute (XmlIndexAttrName a, XmlIndexAttrValue b) = [(XmlIndexAttrName a, XmlIndexAttrValue b)]
+          asAttribute v@(XmlIndexAttrName _, XmlIndexAttrValue _) = [v]
           asAttribute _  = []
 
           isAttribute = case remText <$> parent k >>= vUncons of

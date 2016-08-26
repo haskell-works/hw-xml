@@ -125,7 +125,6 @@ genSpec t _ = do
         xmlValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` Right (XmlAttrName "text")
         xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` Right (XmlAttrValue "value")
         xmlValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` Right (XmlText "free")
-      --   xmlIndexVia ((ns >=> fc) cursor) `shouldBe` Right (XmlIndexComment "")
 
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])

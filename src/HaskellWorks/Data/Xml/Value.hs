@@ -50,7 +50,7 @@ instance XmlValueAt XmlIndex where
     XmlIndexAttrList as    ->
       XmlAttrList  <$> mapM (\(XmlIndexAttrName k, XmlIndexAttrValue v) -> (,) <$> parseAttrName k <*> parseString v) as
     XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s
-    unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
+    --unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
       parseTextUntil s bs = case ABC.parse (parseUntil s) bs of

@@ -115,15 +115,15 @@ genSpec t _ = do
     forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
       it "should parse xml header" $ xmlValueVia (Just cursor) `shouldBe`
         Right (XmlDocument [
-          XmlAttrList [],
-          XmlElement "a" [XmlAttrList [("version", "1.0"), ("encoding", "UTF-8")],
+          XmlAttrList [("version", "1.0"), ("encoding", "UTF-8")],
+          XmlElement "a" [XmlAttrList [("text", "value")],
           XmlText "free"]]
         )
       it "navigate around" $ do
         xmlValueVia (ns cursor) `shouldBe` Right (XmlElement "a" [XmlAttrList [("text", "value")], XmlText "free"])
-      --   xmlValueVia ((ns >=> fc) cursor) `shouldBe` Right (XmlAttrList [])
+        xmlValueVia ((ns >=> fc) cursor) `shouldBe` Right (XmlAttrList [("text", "value")])
         xmlValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` Right (XmlAttrName "text")
-        xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` Right (XmlAttrName "value")
+        xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` Right (XmlAttrValue "value")
         xmlValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` Right (XmlText "free")
       --   xmlIndexVia ((ns >=> fc) cursor) `shouldBe` Right (XmlIndexComment "")
 

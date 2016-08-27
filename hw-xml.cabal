@@ -5,9 +5,9 @@ description:            Please see README.md
 homepage:               http://github.com/haskell-works/hw-xml#readme
 license:                BSD3
 license-file:           LICENSE
-author:                 John Ky
-maintainer:             newhoggy@gmail.com
-copyright:              2016 John Ky
+author:                 John Ky, Alexey Raga
+maintainer:             alexey.raga@gmail.com
+copyright:              2016 John Ky, Alexey Raga
 category:               Data, XML
 build-type:             Simple
 extra-source-files:     README.md

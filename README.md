@@ -1,6 +1,12 @@
 # hw-xml
 [![CircleCI](https://circleci.com/gh/haskell-works/hw-xml.svg?style=svg)](https://circleci.com/gh/haskell-works/hw-xml)
 
+`hw-xml` is a succinct XML parsing library. It uses succinct data-structures to allow traversal of large XML strings with minimal memory overhead.
+
+It is currently considered experimental and is not as optimised as it could be.
+
+For an example, see app/Main.hs
+
 ```
 benchmarking XmlBig/Run blankXml
 time                 2.212 s    (1.971 s .. 2.652 s)

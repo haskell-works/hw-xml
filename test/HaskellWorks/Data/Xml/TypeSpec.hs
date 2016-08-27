@@ -19,7 +19,7 @@ import           Data.Word
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.FromForeignRegion
-import           HaskellWorks.Data.Succinct.BalancedParens.Internal
+import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
 import           HaskellWorks.Data.Succinct.BalancedParens.Simple
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
@@ -127,4 +127,3 @@ genSpec t _ = do
         (fc >=> ns >=> fc >=> ns >=> ns                                    >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --dimension 600
         (fc >=> ns >=> fc >=> ns >=> ns >=> ns                             >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement     --dimension false
         (fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                      >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken       --false
-

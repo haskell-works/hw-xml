@@ -25,16 +25,16 @@ readXml path = do
 main :: IO ()
 main = do
   performGC
-  !c0 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c1 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c2 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c3 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c4 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c5 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c6 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c7 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c8 <- readXml "/Users/jky/Downloads/78mbs.xml"
-  !c9 <- readXml "/Users/jky/Downloads/78mbs.xml"
+  !c0 <- readXml "сorpus/105mb.xml"
+  !c1 <- readXml "сorpus/105mb.xml"
+  !c2 <- readXml "сorpus/105mb.xml"
+  !c3 <- readXml "сorpus/105mb.xml"
+  !c4 <- readXml "сorpus/105mb.xml"
+  !c5 <- readXml "сorpus/105mb.xml"
+  !c6 <- readXml "сorpus/105mb.xml"
+  !c7 <- readXml "сorpus/105mb.xml"
+  !c8 <- readXml "сorpus/105mb.xml"
+  !c9 <- readXml "сorpus/105mb.xml"
   print "Returned from readXml"
   performGC
   threadDelay 100000000

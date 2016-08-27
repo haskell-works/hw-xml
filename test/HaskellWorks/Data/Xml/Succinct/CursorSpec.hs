@@ -21,7 +21,7 @@ import           HaskellWorks.Data.Bits.BitShow
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.FromForeignRegion
-import           HaskellWorks.Data.Succinct.BalancedParens.Internal
+import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
 import           HaskellWorks.Data.Succinct.BalancedParens.Simple
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1

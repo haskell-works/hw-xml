@@ -24,7 +24,7 @@ import           HaskellWorks.Data.FromForeignRegion
 import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
 import           HaskellWorks.Data.Xml.Succinct.Index
 import           HaskellWorks.Data.Xml.Value
-import           HaskellWorks.Data.Succinct.BalancedParens.Internal
+import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
 import           HaskellWorks.Data.Succinct.BalancedParens.Simple
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
 import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
@@ -53,12 +53,6 @@ xmlValueVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
               => Maybe (XmlCursor BS.ByteString t u) -> Either DecodeError XmlValue
 xmlValueVia mk = case mk of
   Just k    -> (xmlIndexAt >=> xmlValueAt) k
-  Nothing   -> Left (DecodeError "No such element")
-
-xmlIndexVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
-              => Maybe (XmlCursor BS.ByteString t u) -> Either DecodeError XmlIndex
-xmlIndexVia mk = case mk of
-  Just k    -> xmlIndexAt k
   Nothing   -> Left (DecodeError "No such element")
 
 genSpec :: forall t u.

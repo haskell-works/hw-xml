@@ -8,17 +8,15 @@
 module HaskellWorks.Data.Xml.Value
 ( XmlValue(..)
 , XmlValueAt(..)
-, FromXmlValue(..)
 )
 where
 
---import           Control.Arrow
 import qualified Data.Attoparsec.ByteString.Char8     as ABC
 import qualified Data.ByteString                      as BS
 import           Data.Monoid
-import           HaskellWorks.Data.Decode
 import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
+--import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
 data XmlValue
   = XmlDocument [XmlValue]
@@ -30,29 +28,27 @@ data XmlValue
   | XmlAttrName String
   | XmlAttrValue String
   | XmlAttrList [(String, String)]
+  | XmlValueError String
   deriving (Eq, Show)
 
 class XmlValueAt a where
-  xmlValueAt :: a -> Either DecodeError XmlValue
-
-class FromXmlValue a where
-  fromXmlValue :: XmlValue -> Either DecodeError a
+  xmlValueAt :: a -> XmlValue
 
 instance XmlValueAt XmlIndex where
   xmlValueAt i = case i of
-    XmlIndexCData s        -> XmlCData     <$> parseTextUntil "]]>" s
-    XmlIndexComment s      -> XmlComment   <$> parseTextUntil "-->" s
-    XmlIndexMeta s cs      -> XmlMeta s    <$> mapM xmlValueAt cs
-    XmlIndexElement s cs   -> XmlElement s <$> mapM xmlValueAt cs
-    XmlIndexDocument cs    -> XmlDocument  <$> mapM xmlValueAt cs
-    XmlIndexAttrName cs    -> XmlAttrName  <$> parseAttrName cs
-    XmlIndexAttrValue cs   -> XmlAttrValue <$> parseString cs
-    XmlIndexAttrList as    ->
-      XmlAttrList  <$> mapM (\(XmlIndexAttrName k, XmlIndexAttrValue v) -> (,) <$> parseAttrName k <*> parseString v) as
-    XmlIndexValue s        -> XmlText      <$> parseTextUntil "<" s
-    --unknown                -> decodeErr ("Not yet supported: " <> show unknown) ""
+    XmlIndexCData s        -> parseTextUntil "]]>" s `as` XmlCData
+    XmlIndexComment s      -> parseTextUntil "-->" s `as` XmlComment
+    XmlIndexMeta s cs      -> XmlMeta s       (xmlValueAt <$> cs)
+    XmlIndexElement s cs   -> XmlElement s    (xmlValueAt <$> cs)
+    XmlIndexDocument cs    -> XmlDocument     (xmlValueAt <$> cs)
+    XmlIndexAttrName cs    -> parseAttrName cs       `as` XmlAttrName
+    XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
+    XmlIndexAttrList cs    -> mapM parseAttrKV cs    `as` XmlAttrList
+    XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
+    --unknown                -> XmlValueError ("Not yet supported: " <> show unknown)
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
+
       parseTextUntil s bs = case ABC.parse (parseUntil s) bs of
         ABC.Fail    {}  -> decodeErr ("Unable to find " <> show s <> ".") bs
         ABC.Partial _   -> decodeErr ("Unexpected end, expected " <> show s <> ".") bs
@@ -66,9 +62,12 @@ instance XmlValueAt XmlIndex where
         ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
 
-instance FromXmlValue XmlValue where
-  fromXmlValue = Right
+      parseAttrKV (XmlIndexAttrName k, XmlIndexAttrValue v) = (,) <$> parseAttrName k <*> parseString v
+      parseAttrKV _ = Left "Unable to parse attribute list"
 
-decodeErr :: String -> BS.ByteString -> Either DecodeError x
+as :: Either String a -> (a -> XmlValue) -> XmlValue
+as = flip $ either XmlValueError
+
+decodeErr :: String -> BS.ByteString -> Either String a
 decodeErr reason bs =
-  Left $ DecodeError (reason <>" (" <> show (BS.take 20 bs) <> "...)")
+  Left $ reason <>" (" <> show (BS.take 20 bs) <> "...)"

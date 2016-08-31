@@ -28,7 +28,7 @@ data XmlValue
   | XmlAttrName String
   | XmlAttrValue String
   | XmlAttrList [(String, String)]
-  | XmlValueError String
+  | XmlError String
   deriving (Eq, Show)
 
 class XmlValueAt a where
@@ -45,7 +45,8 @@ instance XmlValueAt XmlIndex where
     XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
     XmlIndexAttrList cs    -> mapM parseAttrKV cs    `as` XmlAttrList
     XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
-    --unknown                -> XmlValueError ("Not yet supported: " <> show unknown)
+    XmlIndexError s        -> XmlError s
+    --unknown                -> XmlError ("Not yet supported: " <> show unknown)
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
 
@@ -66,7 +67,7 @@ instance XmlValueAt XmlIndex where
       parseAttrKV _ = Left "Unable to parse attribute list"
 
 as :: Either String a -> (a -> XmlValue) -> XmlValue
-as = flip $ either XmlValueError
+as = flip $ either XmlError
 
 decodeErr :: String -> BS.ByteString -> Either String a
 decodeErr reason bs =

@@ -19,7 +19,6 @@ import qualified Data.Vector.Storable                                       as D
 import           Data.Word
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Bits.BitWise
-import           HaskellWorks.Data.Decode
 import           HaskellWorks.Data.FromForeignRegion
 import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
 import           HaskellWorks.Data.Xml.Succinct.Index
@@ -52,8 +51,8 @@ spec = describe "HaskellWorks.Data.Xml.ValueSpec" $ do
 xmlValueVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
               => Maybe (XmlCursor BS.ByteString t u) -> XmlValue
 xmlValueVia mk = case mk of
-  Just k    -> either (\(DecodeError e) -> XmlValueError e) id (xmlValueAt <$> xmlIndexAt k)
-  Nothing   -> XmlValueError "No such element"
+  Just k    -> xmlValueAt (xmlIndexAt k) --either (\(DecodeError e) -> XmlError e) id (xmlValueAt <$> xmlIndexAt k)
+  Nothing   -> XmlError "No such element"
 
 genSpec :: forall t u.
   ( Eq                t

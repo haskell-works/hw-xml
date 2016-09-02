@@ -40,6 +40,9 @@ fc = TC.firstChild
 ns = TC.nextSibling
 cd = TC.depth
 
+attrs :: [(String, String)] -> XmlValue
+attrs as = XmlAttrList $ as >>= (\(k, v) -> [XmlAttrName k, XmlAttrValue v])
+
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.ValueSpec" $ do
   genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
@@ -78,12 +81,12 @@ genSpec t _ = do
 
     forXml "<a attr='value'/>" $ \cursor -> do
       it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
-        XmlElement "a" [XmlAttrList [("attr", "value")]]
+        XmlElement "a" [attrs [("attr", "value")]]
 
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
       it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
-        XmlElement "a" [XmlAttrList [("attr", "value")],
-          XmlElement "b" [XmlAttrList [("attr", "value")]]]
+        XmlElement "a" [attrs [("attr", "value")],
+          XmlElement "b" [attrs [("attr", "value")]]]
 
     forXml "<a>value text</a>" $ \cursor -> do
       it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe`
@@ -108,13 +111,13 @@ genSpec t _ = do
     forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
       it "should parse xml header" $ xmlValueVia (Just cursor) `shouldBe`
         XmlDocument [
-          XmlAttrList [("version", "1.0"), ("encoding", "UTF-8")],
-          XmlElement "a" [XmlAttrList [("text", "value")],
+          attrs [("version", "1.0"), ("encoding", "UTF-8")],
+          XmlElement "a" [attrs [("text", "value")],
           XmlText "free"]]
 
       it "navigate around" $ do
-        xmlValueVia (ns cursor) `shouldBe` XmlElement "a" [XmlAttrList [("text", "value")], XmlText "free"]
-        xmlValueVia ((ns >=> fc) cursor) `shouldBe` XmlAttrList [("text", "value")]
+        xmlValueVia (ns cursor) `shouldBe` XmlElement "a" [attrs [("text", "value")], XmlText "free"]
+        xmlValueVia ((ns >=> fc) cursor) `shouldBe` attrs [("text", "value")]
         xmlValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` XmlAttrName "text"
         xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` XmlAttrValue "value"
         xmlValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` XmlText "free"

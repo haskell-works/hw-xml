@@ -33,7 +33,7 @@ data XmlIndex
   | XmlIndexCData BS.ByteString
   | XmlIndexComment BS.ByteString
   | XmlIndexMeta String [XmlIndex]
-  | XmlIndexAttrList [(XmlIndex, XmlIndex)]
+  | XmlIndexAttrList [XmlIndex]
   | XmlIndexValue BS.ByteString
   | XmlIndexAttrName BS.ByteString
   | XmlIndexAttrValue BS.ByteString
@@ -53,19 +53,13 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
   xmlIndexAt :: XmlCursor BS.ByteString v w -> XmlIndex
   xmlIndexAt k = case vUncons remainder of
     Just (!c, cs) | isElementStart c          -> parseElem cs
-    Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapAttrsFrom (firstChild k)
+    Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom (firstChild k)
     Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
     Just _        | isAttribute               -> XmlIndexAttrName remainder
     Just _                                    -> XmlIndexValue remainder
     Nothing                                   -> XmlIndexError "End of data"
     where remainder         = remText k
           mapValuesFrom     = L.unfoldr (fmap (xmlIndexAt &&& nextSibling))
-          mapAttrsFrom j    = pairwise (mapValuesFrom j) >>= asAttribute -- (pairwise >=> asAttribute) <$> mapValuesFrom j
-          pairwise (a:b:rs) = (a, b) : pairwise rs
-          pairwise _        = []
-          asAttribute v@(XmlIndexAttrName _, XmlIndexAttrValue _) = [v]
-          asAttribute _  = []
-
           isAttribute = case remText <$> parent k >>= vUncons of
             Just (!c, _) | isSpace c -> True
             _                        -> False
@@ -79,7 +73,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
                 XmlElementTypeComment   -> XmlIndexComment i
                 XmlElementTypeMeta s    -> XmlIndexMeta s    (mapValuesFrom $ firstChild k)
                 XmlElementTypeElement s -> XmlIndexElement s (mapValuesFrom $ firstChild k)
-                XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom (firstChild k) ++ mapValuesFrom (nextSibling k))
+                XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom (firstChild k) <> mapValuesFrom (nextSibling k))
 
 
 decodeErr :: String -> BS.ByteString -> XmlIndex

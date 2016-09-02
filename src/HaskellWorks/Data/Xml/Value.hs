@@ -14,6 +14,7 @@ where
 import qualified Data.Attoparsec.ByteString.Char8     as ABC
 import qualified Data.ByteString                      as BS
 import           Data.Monoid
+--import           Data.List
 import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
 --import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
@@ -27,9 +28,35 @@ data XmlValue
   | XmlMeta String [XmlValue]
   | XmlAttrName String
   | XmlAttrValue String
-  | XmlAttrList [(String, String)]
+  | XmlAttrList [XmlValue]
   | XmlError String
   deriving (Eq, Show)
+
+-- instance Pretty XmlValue where
+--   pretty mjpv = case mjpv of
+--     XmlText s       -> dullgreen   (text (show s))
+--     XmlAttrName s   -> cyan        (text (show s))
+--     XmlAttrValue s  -> red.dquotes (text (show s))
+--     XmlAttrList as  -> hsep        (attrPair <$> as)
+--     XmlComment s    -> dullblack   (text $ "<!-- " <> show s <> "-->")
+--     XmlElement s xs -> encloseSep (cyan $ langle <> text s)
+--
+--     -- JsonPartialObject kvs -> hEncloseSep (text "{") (text "}") (text ",") ((pretty . toJsonPartialField) `map` kvs)
+--     -- JsonPartialArray vs   -> hEncloseSep (text "[") (text "]") (text ",") (pretty `map` vs)
+--     -- JsonPartialBool w     -> red (text (show w))
+--     -- JsonPartialNull       -> text "null"
+--     XmlError s    -> text "[error " <> text s <> text "]"
+--     where
+--       attrPair (k, v) = (cyan.text $ show k) <> equals <> (red.dquotes.text $ show v)
+--       elem1 s xs =
+--         let (as, es) = partition isAttr xs
+--             attrs = (\(k, v) -> (XmlIndexAttrName k, )
+--         in  cyan (langle <> text s) <> (hsep (attrPair <$> as))
+--       isAttr v = case v of
+--         XmlAttrName  _ -> True
+--         XmlAttrValue _ -> True
+--         XmlAttrList  _ -> True
+--         _              -> False
 
 class XmlValueAt a where
   xmlValueAt :: a -> XmlValue
@@ -43,7 +70,7 @@ instance XmlValueAt XmlIndex where
     XmlIndexDocument cs    -> XmlDocument     (xmlValueAt <$> cs)
     XmlIndexAttrName cs    -> parseAttrName cs       `as` XmlAttrName
     XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
-    XmlIndexAttrList cs    -> mapM parseAttrKV cs    `as` XmlAttrList
+    XmlIndexAttrList cs    -> XmlAttrList     (xmlValueAt <$> cs)
     XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
     XmlIndexError s        -> XmlError s
     --unknown                -> XmlError ("Not yet supported: " <> show unknown)
@@ -62,9 +89,6 @@ instance XmlValueAt XmlIndex where
         ABC.Fail    {}  -> decodeErr "Unable to parse attribute name" bs
         ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
-
-      parseAttrKV (XmlIndexAttrName k, XmlIndexAttrValue v) = (,) <$> parseAttrName k <*> parseString v
-      parseAttrKV _ = Left "Unable to parse attribute list"
 
 as :: Either String a -> (a -> XmlValue) -> XmlValue
 as = flip $ either XmlError

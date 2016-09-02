@@ -14,10 +14,10 @@ where
 import qualified Data.Attoparsec.ByteString.Char8     as ABC
 import qualified Data.ByteString                      as BS
 import           Data.Monoid
---import           Data.List
+import           Data.List
 import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
---import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
 data XmlValue
   = XmlDocument [XmlValue]
@@ -32,31 +32,37 @@ data XmlValue
   | XmlError String
   deriving (Eq, Show)
 
--- instance Pretty XmlValue where
---   pretty mjpv = case mjpv of
---     XmlText s       -> dullgreen   (text (show s))
---     XmlAttrName s   -> cyan        (text (show s))
---     XmlAttrValue s  -> red.dquotes (text (show s))
---     XmlAttrList as  -> hsep        (attrPair <$> as)
---     XmlComment s    -> dullblack   (text $ "<!-- " <> show s <> "-->")
---     XmlElement s xs -> encloseSep (cyan $ langle <> text s)
---
---     -- JsonPartialObject kvs -> hEncloseSep (text "{") (text "}") (text ",") ((pretty . toJsonPartialField) `map` kvs)
---     -- JsonPartialArray vs   -> hEncloseSep (text "[") (text "]") (text ",") (pretty `map` vs)
---     -- JsonPartialBool w     -> red (text (show w))
---     -- JsonPartialNull       -> text "null"
---     XmlError s    -> text "[error " <> text s <> text "]"
---     where
---       attrPair (k, v) = (cyan.text $ show k) <> equals <> (red.dquotes.text $ show v)
---       elem1 s xs =
---         let (as, es) = partition isAttr xs
---             attrs = (\(k, v) -> (XmlIndexAttrName k, )
---         in  cyan (langle <> text s) <> (hsep (attrPair <$> as))
---       isAttr v = case v of
---         XmlAttrName  _ -> True
---         XmlAttrValue _ -> True
---         XmlAttrList  _ -> True
---         _              -> False
+instance Pretty XmlValue where
+  pretty mjpv = case mjpv of
+    XmlText s       -> ctext $ text s
+    XmlAttrName s   -> text s
+    XmlAttrValue s  -> (ctext . dquotes . text) s
+    XmlAttrList ats -> formatAttrs ats
+    XmlComment s    -> (text $ "<!-- " <> show s <> "-->")
+    XmlElement s xs -> formatElem s xs
+    XmlDocument xs  -> formatMeta "?" "xml" xs
+    XmlError s      -> red $ text "[error " <> text s <> text "]"
+    XmlCData s      -> cangle "<!" <> ctag (text "[CDATA[") <> text s <> cangle (text "]]>")
+    XmlMeta s xs    -> formatMeta "!" s xs
+    where
+      formatAttr at = case at of
+        XmlAttrName a  -> text " " <> pretty (XmlAttrName a)
+        XmlAttrValue a -> text "=" <> pretty (XmlAttrValue a)
+        _              -> undefined
+      formatAttrs ats = hcat (formatAttr <$> ats)
+      formatElem s xs =
+        let (ats, es) = partition isAttr xs
+        in  cangle langle <> ctag (text s)
+              <> hcat (formatAttr <$> ats)
+              <> cangle rangle
+              <> hcat (pretty <$> es)
+              <> cangle (text "</") <> ctag (text s) <> cangle rangle
+      formatMeta b s xs =
+        let (ats, es) = partition isAttr xs
+        in  cangle (langle <> text b) <> ctag (text s)
+              <> hcat (formatAttr <$> ats)
+              <> cangle rangle
+              <> hcat (pretty <$> es)
 
 class XmlValueAt a where
   xmlValueAt :: a -> XmlValue
@@ -89,6 +95,16 @@ instance XmlValueAt XmlIndex where
         ABC.Fail    {}  -> decodeErr "Unable to parse attribute name" bs
         ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
+
+cangle = dullwhite
+ctag = bold
+ctext = dullgreen
+
+isAttr v = case v of
+  XmlAttrName  _ -> True
+  XmlAttrValue _ -> True
+  XmlAttrList  _ -> True
+  _              -> False
 
 as :: Either String a -> (a -> XmlValue) -> XmlValue
 as = flip $ either XmlError

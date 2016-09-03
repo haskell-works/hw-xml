@@ -38,7 +38,7 @@ instance Pretty XmlValue where
     XmlAttrName s   -> text s
     XmlAttrValue s  -> (ctext . dquotes . text) s
     XmlAttrList ats -> formatAttrs ats
-    XmlComment s    -> (text $ "<!-- " <> show s <> "-->")
+    XmlComment s    -> text $ "<!-- " <> show s <> "-->"
     XmlElement s xs -> formatElem s xs
     XmlDocument xs  -> formatMeta "?" "xml" xs
     XmlError s      -> red $ text "[error " <> text s <> text "]"
@@ -96,10 +96,16 @@ instance XmlValueAt XmlIndex where
         ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
 
+cangle :: Doc -> Doc
 cangle = dullwhite
+
+ctag :: Doc -> Doc
 ctag = bold
+
+ctext :: Doc -> Doc
 ctext = dullgreen
 
+isAttr :: XmlValue -> Bool
 isAttr v = case v of
   XmlAttrName  _ -> True
   XmlAttrValue _ -> True

@@ -48,19 +48,20 @@ instance Pretty XmlValue where
       formatAttr at = case at of
         XmlAttrName a  -> text " " <> pretty (XmlAttrName a)
         XmlAttrValue a -> text "=" <> pretty (XmlAttrValue a)
-        _              -> undefined
+        XmlAttrList _ -> red $ text "ATTRS"
+        _              -> red $ text "booo"
       formatAttrs ats = hcat (formatAttr <$> ats)
       formatElem s xs =
-        let (ats, es) = partition isAttr xs
+        let (ats, es) = partition isAttrL xs
         in  cangle langle <> ctag (text s)
-              <> hcat (formatAttr <$> ats)
+              <> hcat (pretty <$> ats)
               <> cangle rangle
               <> hcat (pretty <$> es)
               <> cangle (text "</") <> ctag (text s) <> cangle rangle
       formatMeta b s xs =
         let (ats, es) = partition isAttr xs
         in  cangle (langle <> text b) <> ctag (text s)
-              <> hcat (formatAttr <$> ats)
+              <> hcat (pretty <$> ats)
               <> cangle rangle
               <> hcat (pretty <$> es)
 
@@ -104,6 +105,10 @@ ctag = bold
 
 ctext :: Doc -> Doc
 ctext = dullgreen
+
+isAttrL :: XmlValue -> Bool
+isAttrL (XmlAttrList _) = True
+isAttrL _               = False
 
 isAttr :: XmlValue -> Bool
 isAttr v = case v of

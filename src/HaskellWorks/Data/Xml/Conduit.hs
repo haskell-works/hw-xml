@@ -23,7 +23,12 @@ import           Prelude                        as P
 
 interestingWord8s :: A.UArray Word8 Word8
 interestingWord8s = A.array (0, 255) [
-  (w, if w == _bracketleft || w == _braceleft || w == _parenleft || w == _bracketleft || w == _less
+  (w, if w == _bracketleft
+         || w == _braceleft
+         || w == _parenleft
+         || w == _bracketleft
+         || w == _less
+         || w == _a || w == _v || w == _t
     then 1
     else 0)
   | w <- [0 .. 255]]
@@ -75,6 +80,9 @@ blankedXmlToBalancedParens' bs = case BS.uncons bs of
       d | d == _bracketright  -> yield False
       d | d == _parenleft     -> yield True
       d | d == _parenright    -> yield False
+      d | d == _a             -> yield True >> yield False
+      d | d == _v             -> yield True >> yield False
+      d | d == _t             -> yield True >> yield False
       _                       -> return ()
     blankedXmlToBalancedParens' cs
   Nothing -> return ()
@@ -124,9 +132,8 @@ balancedParensOf c = case c of
     d | d == _parenleft     -> MiniT
     d | d == _parenright    -> MiniF
     d | d == _t             -> MiniTF
-    d | d == _f             -> MiniTF
-    d | d == _1             -> MiniTF
-    d | d == _n             -> MiniTF
+    d | d == _a             -> MiniTF
+    d | d == _v             -> MiniTF
     _                       -> MiniN
 
 yieldBitsOfWord8 :: Monad m => Word8 -> Conduit BS.ByteString m Bool

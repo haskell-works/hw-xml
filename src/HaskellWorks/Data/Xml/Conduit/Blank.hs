@@ -45,7 +45,7 @@ blankXml' lastChar lastState = do
     blankByteString (InXml, bs) = case bs of
       BSP !c !cs | isMetaStart c cs     -> Just (_bracketleft , (InMeta    , toBSP cs))
       BSP !c !cs | isEndTag c cs        -> Just (_space       , (InCloseTag, toBSP cs))
-      BSP !c !cs | isTextStart c        -> Just (_parenleft   , (InText    , toBSP cs))
+      BSP !c !cs | isTextStart c        -> Just (_t           , (InText    , toBSP cs))
       BSP !c !cs | c == _less           -> Just (_less        , (InTag     , toBSP cs))
       BSP _  !cs                        -> Just (_space       , (InXml     , toBSP cs))
       EmptyBSP                          -> Nothing
@@ -62,8 +62,8 @@ blankXml' lastChar lastState = do
     blankByteString (InAttrList, bs) = case bs of
       BSP !c !cs | c == _greater        -> Just (_parenright  , (InXml     , toBSP cs))
       BSP !c !cs | isTagClose c cs      -> Just (_parenright  , (InClose   , toBSP cs))
-      BSP !c !cs | isNameStartChar c    -> Just (_parenleft   , (InIdent   , toBSP cs))
-      BSP !c !cs | isQuote c            -> Just (_parenleft   , (InString c, toBSP cs))
+      BSP !c !cs | isNameStartChar c    -> Just (_a           , (InIdent   , toBSP cs))
+      BSP !c !cs | isQuote c            -> Just (_v           , (InString c, toBSP cs))
       BSP _  !cs                        -> Just (_space       , (InAttrList, toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InClose, bs) = case bs of
@@ -71,16 +71,17 @@ blankXml' lastChar lastState = do
       EmptyBSP                          -> Nothing
     blankByteString (InIdent, bs) = case bs of
       BSP !c !cs | isNameChar c         -> Just (_space       , (InIdent   , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (_parenright  , (InAttrList, toBSP cs))
-      BSP !c !cs | c == _equal          -> Just (_parenright  , (InAttrList, toBSP cs))
-      BSP _  !cs                        -> Just (_parenright  , (InAttrList, toBSP cs))
+      BSP !c !cs | isSpace c            -> Just (_space       , (InAttrList, toBSP cs))
+      BSP !c !cs | c == _equal          -> Just (_space       , (InAttrList, toBSP cs))
+      BSP _  !cs                        -> Just (_space       , (InAttrList, toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InString q, bs) = case bs of
-      BSP !c !cs | c == q               -> Just (_parenright  , (InAttrList, toBSP cs))
+      BSP !c !cs | c == q               -> Just (_space       , (InAttrList, toBSP cs))
       BSP _  !cs                        -> Just (_space       , (InString q, toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InText, bs) = case bs of
-      BSP _  !cs | headIs (== _less) cs -> Just (_parenright  , (InXml     , toBSP cs))
+      BSP !c !cs | isEndTag c cs        -> Just (_space       , (InCloseTag, toBSP cs))
+      BSP _  !cs | headIs (== _less) cs -> Just (_space       , (InXml     , toBSP cs))
       BSP _  !cs                        -> Just (_space       , (InText    , toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InMeta, bs) = case bs of

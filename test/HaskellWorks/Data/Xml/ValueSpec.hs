@@ -13,23 +13,23 @@ module HaskellWorks.Data.Xml.ValueSpec (spec) where
 
 import           Control.Monad
 import           Data.Monoid
-import qualified Data.ByteString                                            as BS
+import qualified Data.ByteString                                  as BS
 import           Data.String
-import qualified Data.Vector.Storable                                       as DVS
+import qualified Data.Vector.Storable                             as DVS
 import           Data.Word
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.FromForeignRegion
-import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
+import           HaskellWorks.Data.Xml.Succinct.Cursor            as C
 import           HaskellWorks.Data.Xml.Succinct.Index
 import           HaskellWorks.Data.Xml.Value
-import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
-import           HaskellWorks.Data.Succinct.BalancedParens.Simple
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
-import qualified HaskellWorks.Data.TreeCursor                               as TC
+import           HaskellWorks.Data.BalancedParens.BalancedParens
+import           HaskellWorks.Data.BalancedParens.Simple
+import           HaskellWorks.Data.RankSelect.Base.Rank0
+import           HaskellWorks.Data.RankSelect.Base.Rank1
+import           HaskellWorks.Data.RankSelect.Base.Select1
+import           HaskellWorks.Data.RankSelect.Poppy512
+import qualified HaskellWorks.Data.TreeCursor                     as TC
 import           Test.Hspec
 
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
@@ -38,7 +38,7 @@ import           Test.Hspec
 
 fc = TC.firstChild
 ns = TC.nextSibling
-cd = TC.depth
+-- cd = TC.depth
 
 attrs :: [(String, String)] -> XmlValue
 attrs as = XmlAttrList $ as >>= (\(k, v) -> [XmlAttrName k, XmlAttrValue v])

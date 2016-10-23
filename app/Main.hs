@@ -9,7 +9,7 @@ import           Data.Word
 import           GHC.Conc
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.FromByteString
-import           HaskellWorks.Data.Succinct.BalancedParens.Simple
+import           HaskellWorks.Data.BalancedParens.Simple
 import           HaskellWorks.Data.Xml.Succinct.Cursor
 import           HaskellWorks.Diagnostics.Time
 import           System.Mem

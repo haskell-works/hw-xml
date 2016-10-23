@@ -12,21 +12,21 @@
 module HaskellWorks.Data.Xml.Succinct.CursorSpec(spec) where
 
 import           Control.Monad
-import qualified Data.ByteString                                            as BS
-import qualified Data.Map                                                   as M
-import           Data.String
-import qualified Data.Vector.Storable                                       as DVS
-import           Data.Word
-import           HaskellWorks.Data.Bits.BitShow
+-- import qualified Data.ByteString                                            as BS
+-- import qualified Data.Map                                                   as M
+-- import           Data.String
+-- import qualified Data.Vector.Storable                                       as DVS
+-- import           Data.Word
+-- import           HaskellWorks.Data.Bits.BitShow
 import           HaskellWorks.Data.Bits.BitShown
-import           HaskellWorks.Data.Bits.BitWise
-import           HaskellWorks.Data.FromForeignRegion
-import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
-import           HaskellWorks.Data.Succinct.BalancedParens.Simple
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
+-- import           HaskellWorks.Data.Bits.BitWise
+-- import           HaskellWorks.Data.FromForeignRegion
+-- import           HaskellWorks.Data.BalancedParens.BalancedParens
+import           HaskellWorks.Data.BalancedParens.Simple
+-- import           HaskellWorks.Data.RankSelect.Base.Rank0
+-- import           HaskellWorks.Data.RankSelect.Base.Rank1
+-- import           HaskellWorks.Data.RankSelect.Base.Select1
+-- import           HaskellWorks.Data.RankSelect.Poppy512
 import qualified HaskellWorks.Data.TreeCursor                               as TC
 import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
 --import           HaskellWorks.Data.Xml.Succinct.Index
@@ -40,9 +40,9 @@ import           Test.Hspec
 
 fc = TC.firstChild
 ns = TC.nextSibling
-pn = TC.parent
+-- pn = TC.parent
 cd = TC.depth
-ss = TC.subtreeSize
+-- ss = TC.subtreeSize
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Succinct.CursorSpec" $ do

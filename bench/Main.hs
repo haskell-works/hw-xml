@@ -17,7 +17,7 @@ import           HaskellWorks.Data.FromByteString
 import           HaskellWorks.Data.Xml.Conduit
 import           HaskellWorks.Data.Xml.Conduit.Blank
 import           HaskellWorks.Data.Xml.Succinct.Cursor
-import           HaskellWorks.Data.Succinct.BalancedParens.Simple
+import           HaskellWorks.Data.BalancedParens.Simple
 import           System.IO.MMap
 
 setupEnvXml :: FilePath -> IO BS.ByteString

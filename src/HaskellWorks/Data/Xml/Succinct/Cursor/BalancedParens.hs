@@ -13,10 +13,10 @@ import qualified Data.ByteString                                    as BS
 import           Data.Conduit
 import qualified Data.Vector.Storable                               as DVS
 import           Data.Word
+import           HaskellWorks.Data.BalancedParens                   as BP
 import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.Xml.Conduit
 import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
-import           HaskellWorks.Data.Succinct.BalancedParens          as BP
 
 newtype XmlBalancedParens a = XmlBalancedParens a
 

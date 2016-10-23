@@ -11,21 +11,23 @@ module HaskellWorks.Data.Xml.Succinct.Index
 where
 
 import           Control.Arrow
-import qualified Data.Attoparsec.ByteString.Char8                           as ABC
-import qualified Data.ByteString                                            as BS
-import qualified Data.List                                                  as L
+import qualified Data.Attoparsec.ByteString.Char8           as ABC
+import qualified Data.ByteString                            as BS
+import qualified Data.List                                  as L
 import           Data.Monoid
 import           HaskellWorks.Data.Bits.BitWise
+import           HaskellWorks.Data.Drop
 import           HaskellWorks.Data.Positioning
-import qualified HaskellWorks.Data.Succinct.BalancedParens                  as BP
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
+import qualified HaskellWorks.Data.BalancedParens           as BP
+import           HaskellWorks.Data.RankSelect.Base.Rank0
+import           HaskellWorks.Data.RankSelect.Base.Rank1
+import           HaskellWorks.Data.RankSelect.Base.Select1
 import           HaskellWorks.Data.TreeCursor
-import           HaskellWorks.Data.Vector.VectorLike
+import           HaskellWorks.Data.Uncons
 import           HaskellWorks.Data.Xml.CharLike
 import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct
+import           Prelude hiding (drop)
 
 data XmlIndex
   = XmlIndexDocument [XmlIndex]
@@ -46,12 +48,12 @@ class XmlIndexAt a where
 pos :: (Select1 v, Rank1 w) => XmlCursor t v w -> Position
 pos c = lastPositionOf (select1 (interests c) (rank1 (balancedParens c) (cursorRank c)))
 
-remText :: (VectorLike v, Select1 v1, Rank1 w) => XmlCursor v v1 w -> v
-remText c = vDrop (toCount (pos c)) (cursorText c)
+remText :: (Drop v, Select1 v1, Rank1 w) => XmlCursor v v1 w -> v
+remText c = drop (toCount (pos c)) (cursorText c)
 
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexAt (XmlCursor BS.ByteString v w) where
   xmlIndexAt :: XmlCursor BS.ByteString v w -> XmlIndex
-  xmlIndexAt k = case vUncons remainder of
+  xmlIndexAt k = case uncons remainder of
     Just (!c, cs) | isElementStart c          -> parseElem cs
     Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom (firstChild k)
     Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
@@ -60,7 +62,7 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
     Nothing                                   -> XmlIndexError "End of data"
     where remainder         = remText k
           mapValuesFrom     = L.unfoldr (fmap (xmlIndexAt &&& nextSibling))
-          isAttribute = case remText <$> parent k >>= vUncons of
+          isAttribute = case remText <$> parent k >>= uncons of
             Just (!c, _) | isSpace c -> True
             _                        -> False
 

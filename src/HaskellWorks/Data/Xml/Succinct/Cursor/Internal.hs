@@ -9,25 +9,24 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.Internal
   , xmlCursorPos
   ) where
 
-import qualified Data.ByteString                                            as BS
-import qualified Data.ByteString.Char8                                      as BSC
-import           Data.ByteString.Internal                                   as BSI
+import qualified Data.ByteString                                      as BS
+import qualified Data.ByteString.Char8                                as BSC
+import           Data.ByteString.Internal                             as BSI
 import           Data.String
-import qualified Data.Vector.Storable                                       as DVS
+import qualified Data.Vector.Storable                                 as DVS
 import           Data.Word
 import           Foreign.ForeignPtr
+import qualified HaskellWorks.Data.BalancedParens                     as BP
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.FromByteString
 import           HaskellWorks.Data.FromForeignRegion
 import           HaskellWorks.Data.Positioning
-import qualified HaskellWorks.Data.Succinct.BalancedParens                  as BP
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
+import           HaskellWorks.Data.RankSelect.Base.Rank0
+import           HaskellWorks.Data.RankSelect.Base.Rank1
+import           HaskellWorks.Data.RankSelect.Base.Select1
+import           HaskellWorks.Data.RankSelect.Poppy512
 import           HaskellWorks.Data.TreeCursor
-import           HaskellWorks.Data.Vector.VectorLike
-import qualified HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens       as CBP
+import qualified HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens as CBP
 import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import           HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
 
@@ -107,7 +106,7 @@ instance (BP.BalancedParens u, Rank1 u, Rank0 u) => TreeCursor (XmlCursor t v u)
   subtreeSize :: XmlCursor t v u -> Maybe Count
   subtreeSize k = BP.subtreeSize (balancedParens k) (cursorRank k)
 
-xmlCursorPos :: (Rank1 w, Select1 v, VectorLike s) => XmlCursor s v w -> Position
+xmlCursorPos :: (Rank1 w, Select1 v) => XmlCursor s v w -> Position
 xmlCursorPos k = toPosition (select1 ik (rank1 bpk (cursorRank k)) - 1)
   where ik  = interests k
         bpk = balancedParens k

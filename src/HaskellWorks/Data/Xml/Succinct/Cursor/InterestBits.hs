@@ -16,9 +16,9 @@ import           Data.Word
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.FromByteString
+import           HaskellWorks.Data.RankSelect.Poppy512
 import           HaskellWorks.Data.Xml.Conduit
 import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
 
 newtype XmlInterestBits a = XmlInterestBits a
 

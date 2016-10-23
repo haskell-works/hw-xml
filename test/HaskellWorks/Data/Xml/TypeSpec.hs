@@ -19,12 +19,12 @@ import           Data.Word
 import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.FromForeignRegion
-import           HaskellWorks.Data.Succinct.BalancedParens.BalancedParens
-import           HaskellWorks.Data.Succinct.BalancedParens.Simple
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank0
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Rank1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Basic.Select1
-import           HaskellWorks.Data.Succinct.RankSelect.Binary.Poppy512
+import           HaskellWorks.Data.BalancedParens.BalancedParens
+import           HaskellWorks.Data.BalancedParens.Simple
+import           HaskellWorks.Data.RankSelect.Base.Rank0
+import           HaskellWorks.Data.RankSelect.Base.Rank1
+import           HaskellWorks.Data.RankSelect.Base.Select1
+import           HaskellWorks.Data.RankSelect.Poppy512
 import qualified HaskellWorks.Data.TreeCursor                               as TC
 import           HaskellWorks.Data.Xml.Succinct.Cursor                      as C
 import           HaskellWorks.Data.Xml.Succinct.Index

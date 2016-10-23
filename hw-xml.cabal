@@ -22,12 +22,13 @@ executable hw-xml-example
                       , bytestring
                       , conduit
                       , criterion
-                      , hw-bits
-                      , hw-conduit
-                      , hw-diagnostics
+                      , hw-balancedparens             >= 0.1.0.0
+                      , hw-bits                       >= 0.4.0.0
+                      , hw-conduit                    >= 0.1.0.0
+                      , hw-diagnostics                >= 0.0.0.6
                       , hw-xml
-                      , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect                 >= 0.0.0.5
+                      , hw-prim                       >= 0.4.0.0
+                      , hw-rankselect                 >= 0.7.0.0
                       , mmap
                       , resourcet
                       , vector
@@ -61,11 +62,13 @@ library
                       , bytestring
                       , conduit
                       , containers
-                      , hw-bits
-                      , hw-conduit
+                      , hw-balancedparens             >= 0.1.0.0
+                      , hw-bits                       >= 0.4.0.0
+                      , hw-conduit                    >= 0.1.0.0
                       , hw-parser
-                      , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect                 >= 0.0.0.5
+                      , hw-prim                       >= 0.4.0.0
+                      , hw-rankselect                 >= 0.7.0.0
+                      , hw-rankselect-base            >= 0.2.0.0
                       , mono-traversable
                       , resourcet
                       , text
@@ -90,11 +93,13 @@ test-suite hw-xml-test
                       , conduit
                       , containers
                       , hspec
-                      , hw-bits
-                      , hw-conduit
+                      , hw-balancedparens             >= 0.1.0.0
+                      , hw-bits                       >= 0.4.0.0
+                      , hw-conduit                    >= 0.1.0.0
                       , hw-xml
-                      , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect                 >= 0.0.0.5
+                      , hw-prim                       >= 0.4.0.0
+                      , hw-rankselect                 >= 0.7.0.0
+                      , hw-rankselect-base            >= 0.2.0.0
                       , mmap
                       , parsec
                       , QuickCheck
@@ -119,11 +124,12 @@ benchmark bench
                       , bytestring
                       , conduit
                       , criterion
-                      , hw-bits
-                      , hw-conduit
+                      , hw-balancedparens             >= 0.1.0.0
+                      , hw-bits                       >= 0.4.0.0
+                      , hw-conduit                    >= 0.1.0.0
                       , hw-xml
-                      , hw-prim                       >= 0.0.3.1
-                      , hw-rankselect                 >= 0.0.0.5
+                      , hw-prim                       >= 0.4.0.0
+                      , hw-rankselect                 >= 0.7.0.0
                       , mmap
                       , resourcet
                       , vector

@@ -82,8 +82,9 @@ test-suite hw-xml-test
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       test
   main-is:              Spec.hs
-  other-modules:        HaskellWorks.Data.Xml.Token.TokenizeSpec
+  other-modules:        HaskellWorks.Data.Xml.Conduit.BlankSpec
                       , HaskellWorks.Data.Xml.Succinct.CursorSpec
+                      , HaskellWorks.Data.Xml.Token.TokenizeSpec
                       , HaskellWorks.Data.Xml.TypeSpec
                       , HaskellWorks.Data.Xml.ValueSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec

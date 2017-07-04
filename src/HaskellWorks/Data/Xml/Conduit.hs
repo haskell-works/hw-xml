@@ -122,6 +122,7 @@ blankedXmlToBalancedParens2 = do
     Just bs -> do
       let (cs, _) = BS.unfoldrN (BS.length bs * 2) gen (Nothing, bs)
       yield cs
+      blankedXmlToBalancedParens2
     Nothing -> return ()
   where gen :: (Maybe Bool, ByteString) -> Maybe (Word8, (Maybe Bool, ByteString))
         gen (Just True  , bs) = Just (0xFF, (Nothing, bs))

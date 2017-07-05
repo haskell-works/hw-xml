@@ -75,7 +75,7 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
       let inputShiftedChunked = chunkedBy 16 inputShifted
       let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
 
-      noSpaces (BS.concat inputOriginalBlanked) `shouldBe` noSpaces (BS.concat inputShiftedBlanked)
+      noSpaces (BS.concat inputShiftedBlanked) `shouldBe` noSpaces (BS.concat inputOriginalBlanked)
   it "Can blank across chunk boundaries with auto-close tags" $ do
     let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><statistics><attack>"
     let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
@@ -88,4 +88,4 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
       let inputShiftedChunked = chunkedBy 16 inputShifted
       let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
 
-      noSpaces (BS.concat inputOriginalBlanked) `shouldBe` noSpaces (BS.concat inputShiftedBlanked)
+      noSpaces (BS.concat inputShiftedBlanked) `shouldBe` noSpaces (BS.concat inputOriginalBlanked)

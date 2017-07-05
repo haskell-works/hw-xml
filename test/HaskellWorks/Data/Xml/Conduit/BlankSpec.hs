@@ -1,24 +1,20 @@
-{-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module HaskellWorks.Data.Xml.Conduit.BlankSpec (spec) where
 
-import qualified Data.ByteString                     as BS
-import           Data.Monoid
-import           Data.Conduit
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.Xml.Conduit.Blank
-import           HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.Xml.Conduit.Blank
-import           Data.String
-import           Test.Hspec
-import           HaskellWorks.Data.ByteString
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.Xml.Conduit
-import           Test.QuickCheck
 import Data.Char
+import Data.Monoid
+import HaskellWorks.Data.ByteString
+import HaskellWorks.Data.Conduit.List
+import HaskellWorks.Data.Xml.Conduit.Blank
+import Test.Hspec
+import Test.QuickCheck
+
+import qualified Data.ByteString as BS
 
 {-# ANN module ("HLint: ignore Redundant do" :: String) #-}
+{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
 
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do
@@ -27,7 +23,7 @@ whenBlankedXmlShouldBe original expected = do
 
 repeatBS :: Int -> BS.ByteString -> BS.ByteString
 repeatBS n bs | n > 0   = bs <> repeatBS (n - 1) bs
-repeatBS  _ _            = BS.empty
+repeatBS  _ _ = BS.empty
 
 noSpaces :: BS.ByteString -> BS.ByteString
 noSpaces = BS.filter (/= fromIntegral (ord ' '))

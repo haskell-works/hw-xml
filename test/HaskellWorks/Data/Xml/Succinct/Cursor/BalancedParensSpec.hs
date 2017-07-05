@@ -13,6 +13,7 @@ import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.Xml.Conduit
 import           HaskellWorks.Data.Xml.Conduit.Blank
 import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+import HaskellWorks.Data.Xml.Conduit.Blank
 import           Test.Hspec
 
 {-# ANN module ("HLint: Ignore Redundant do"        :: String) #-}
@@ -71,4 +72,3 @@ mkBlank csize bs = runListConduit blankXml (chunkedBy csize bs)
 
 mkBits :: [BS.ByteString] -> [BS.ByteString]
 mkBits = runListConduit (blankedXmlToBalancedParens2 =$= compressWordAsBit)
-

@@ -135,8 +135,7 @@ isEndTag c cs = c == _less && headIs (== _slash) cs
 -- isStartTag c cs = c == _less && headIs isNameStartChar cs
 
 isTagClose :: Word8 -> ByteString -> Bool
-isTagClose c cs =
-  (c == _slash || c == _question) && headIs (== _greater) cs
+isTagClose c cs = (c == _slash) || ((c == _slash || c == _question) && headIs (== _greater) cs)
 
 isMetaStart :: Word8 -> ByteString -> Bool
 isMetaStart c cs = c == _less && headIs (== _exclam) cs

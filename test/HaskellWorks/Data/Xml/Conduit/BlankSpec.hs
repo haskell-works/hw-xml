@@ -28,6 +28,11 @@ repeatBS  _ _ = BS.empty
 noSpaces :: BS.ByteString -> BS.ByteString
 noSpaces = BS.filter (/= fromIntegral (ord ' '))
 
+data Annotated a b = Annotated a b deriving Show
+
+instance Eq a => Eq (Annotated a b) where
+  (Annotated a _) == (Annotated b _) = a == b
+
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
   describe "Can blank XML" $ do
@@ -88,4 +93,25 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
       let inputShiftedChunked = chunkedBy 16 inputShifted
       let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
 
-      noSpaces (BS.concat inputShiftedBlanked) `shouldBe` noSpaces (BS.concat inputOriginalBlanked)
+      -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
+      let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
+      let expected  = Annotated (noSpaces (BS.concat inputOriginalBlanked)) (inputOriginalBlanked, n)
+
+      actual `shouldBe` expected
+  it "Can blank across chunk boundaries with auto-close tags" $ do
+    let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><statistics><attack>"
+    let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
+    let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
+    let inputOriginalChunked = chunkedBy 16 inputOriginal
+    let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
+
+    let n = 15
+    let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
+    let inputShiftedChunked = chunkedBy 16 inputShifted
+    let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
+
+    -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
+    let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
+    let expected  = Annotated (noSpaces (BS.concat inputOriginalBlanked)) (inputOriginalBlanked, n)
+
+    actual `shouldBe` expected

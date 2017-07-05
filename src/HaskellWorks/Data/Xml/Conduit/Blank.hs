@@ -25,7 +25,7 @@ data BlankState
   | InRem Int
   | InIdent
 
-data ByteStringP = BSP Word8 ByteString | EmptyBSP
+data ByteStringP = BSP Word8 ByteString | EmptyBSP deriving Show
 
 blankXml :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
 blankXml = blankXml' Nothing InXml
@@ -67,8 +67,8 @@ blankXml' lastChar lastState = do
       BSP _  !cs                        -> Just (_space       , (InAttrList, toBSP cs))
       EmptyBSP                          -> Nothing
     blankByteString (InClose, bs) = case bs of
-      BSP _ !cs                         -> Just (_greater     , (InXml     , toBSP cs))
-      EmptyBSP                          -> Nothing
+      (BSP _ !cs) -> Just (_greater     , (InXml     , toBSP cs))
+      EmptyBSP    -> Nothing
     blankByteString (InIdent, bs) = case bs of
       BSP !c !cs | isNameChar c         -> Just (_space       , (InIdent   , toBSP cs))
       BSP !c !cs | isSpace c            -> Just (_space       , (InAttrList, toBSP cs))
@@ -126,7 +126,7 @@ toBSP bs = case BS.uncons bs of
 
 lenBSP :: ByteStringP -> Int
 lenBSP (BSP _ bs) = BS.length bs + 1
-lenBSP EmptyBSP = 0
+lenBSP EmptyBSP   = 0
 
 isEndTag :: Word8 -> ByteString -> Bool
 isEndTag c cs = c == _less && headIs (== _slash) cs
@@ -146,7 +146,7 @@ isCdataEnd c cs = c == _bracketright && headIs (== _greater) cs
 
 unsnocUndecided :: ByteStringP -> (ByteStringP, Maybe Word8)
 unsnocUndecided = unscnocIf (\w -> w ==_less           -- <elem> or </elem>?
-                                || w == _slash         -- <elem /> or not?
+                                -- || w == _slash         -- <elem /> or not?
                                 || w == _hyphen        -- closing comment or just - ?
                                 || w == _bracketright) -- closing CDATA or just data?
 {-# INLINE unsnocUndecided #-}
@@ -162,5 +162,5 @@ unscnocIf _ EmptyBSP = (EmptyBSP, Nothing)
 unscnocIf p (BSP !c !bs) =
   case BS.unsnoc bs of
     Just (bs', w) | p w -> (BSP c bs', Just w)
-    _                   -> (BSP c bs , Nothing)
+    _             -> (BSP c bs , Nothing)
 {-# INLINE unscnocIf #-}

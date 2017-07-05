@@ -5,7 +5,7 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   , getBlankedXml
   ) where
 
-import qualified Data.ByteString                      as BS
+import qualified Data.ByteString                     as BS
 import           HaskellWorks.Data.ByteString
 import           HaskellWorks.Data.Conduit.List
 import           HaskellWorks.Data.FromByteString

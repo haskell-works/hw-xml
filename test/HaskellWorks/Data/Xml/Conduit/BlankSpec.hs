@@ -67,16 +67,29 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     "<a><c>00</c><s/></a>"                    `whenBlankedXmlShouldBe` "<  <  t    ><  >   >"
     "<a><c>0</c><s/></a>"                     `whenBlankedXmlShouldBe` "<  <  t   ><  >   >"
 
-  it "Can blank across chunk boundaries" $ do
+  it "Can blank across chunk boundaries with basic tags" $ do
     let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<statistics>\n  <attack>"
     let inputOriginalSuffix = "\n  </attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n</statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
-    let inputOriginalChunked = chunkedBy 15 inputOriginal
+    let inputOriginalChunked = chunkedBy 16 inputOriginal
     let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
 
-    forAll (choose (0, 15)) $ \(n :: Int) -> do
+    forAll (choose (0, 16)) $ \(n :: Int) -> do
       let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
-      let inputShiftedChunked = chunkedBy 15 inputShifted
+      let inputShiftedChunked = chunkedBy 16 inputShifted
+      let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
+
+      noSpaces (BS.concat inputOriginalBlanked) `shouldBe` noSpaces (BS.concat inputShiftedBlanked)
+  it "Can blank across chunk boundaries with auto-close tags" $ do
+    let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><statistics><attack>"
+    let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
+    let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
+    let inputOriginalChunked = chunkedBy 16 inputOriginal
+    let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
+
+    forAll (choose (0, 16)) $ \(n :: Int) -> do
+      let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
+      let inputShiftedChunked = chunkedBy 16 inputShifted
       let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
 
       noSpaces (BS.concat inputOriginalBlanked) `shouldBe` noSpaces (BS.concat inputShiftedBlanked)

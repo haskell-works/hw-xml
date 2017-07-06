@@ -50,12 +50,15 @@ blankedXmlToInterestBits' rs = do
     Just bs -> do
       let cs = if BS.length rs /= 0 then BS.concat [rs, bs] else bs
       let lencs = BS.length cs
-      let q = lencs + 7 `quot` 8
+      let q = lencs `quot` 8
       let (ds, es) = BS.splitAt (q * 8) cs
       let (fs, _) = BS.unfoldrN q gen ds
       yield fs
       blankedXmlToInterestBits' es
-    Nothing -> return ()
+    Nothing -> do
+      let lenrs = BS.length rs
+      let q = lenrs + 7 `quot` 8
+      yield (fst (BS.unfoldrN q gen rs))
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing

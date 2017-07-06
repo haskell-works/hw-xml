@@ -19,5 +19,6 @@ getBlankedXml (BlankedXml bs) = bs
 class FromBlankedXml a where
   fromBlankedXml :: BlankedXml -> a
 
+
 instance FromByteString BlankedXml where
   fromByteString bs = BlankedXml (runListConduit blankXml (chunkedBy 4064 bs))

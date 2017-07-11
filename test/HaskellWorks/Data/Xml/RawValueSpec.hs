@@ -9,7 +9,7 @@
 
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
-module HaskellWorks.Data.Xml.ValueSpec (spec) where
+module HaskellWorks.Data.Xml.RawValueSpec (spec) where
 
 import Control.Monad
 import Data.Monoid
@@ -42,7 +42,7 @@ ns = TC.nextSibling
 -- cd = TC.depth
 
 attrs :: [(String, String)] -> RawValue
-attrs as = XmlAttrList $ as >>= (\(k, v) -> [XmlAttrName k, XmlAttrValue v])
+attrs as = RawAttrList $ as >>= (\(k, v) -> [RawAttrName k, RawAttrValue v])
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.ValueSpec" $ do
@@ -56,7 +56,7 @@ rawValueVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
               => Maybe (XmlCursor BS.ByteString t u) -> RawValue
 rawValueVia mk = case mk of
   Just k  -> rawValueAt (xmlIndexAt k) --either (\(DecodeError e) -> XmlError e) id (rawValueAt <$> xmlIndexAt k)
-  Nothing -> XmlError "No such element"
+  Nothing -> RawError "No such element"
 
 genSpec :: forall t u.
   ( Eq                t
@@ -78,50 +78,50 @@ genSpec t _ = do
     let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " <> show cursor) (f cursor)
 
     forXml "<a/>" $ \cursor -> do
-      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` XmlElement "a" []
+      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` RawElement "a" []
 
     forXml "<a attr='value'/>" $ \cursor -> do
       it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
-        XmlElement "a" [attrs [("attr", "value")]]
+        RawElement "a" [attrs [("attr", "value")]]
 
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
       it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
-        XmlElement "a" [attrs [("attr", "value")],
-          XmlElement "b" [attrs [("attr", "value")]]]
+        RawElement "a" [attrs [("attr", "value")],
+          RawElement "b" [attrs [("attr", "value")]]]
 
     forXml "<a>value text</a>" $ \cursor -> do
       it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe`
-        XmlElement "a" [XmlText "value text"]
+        RawElement "a" [RawText "value text"]
 
     forXml "<!-- some comment -->" $ \cursor -> do
       it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
-        XmlComment " some comment "
+        RawComment " some comment "
 
     forXml "<!--some comment ->-->" $ \cursor -> do
       it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
-        XmlComment "some comment ->"
+        RawComment "some comment ->"
 
     forXml "<![CDATA[a <br/> tag]]>" $ \cursor -> do
       it "should parse cdata data" $ rawValueVia (Just cursor) `shouldBe`
-        XmlCData "a <br/> tag"
+        RawCData "a <br/> tag"
 
     forXml "<!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]>" $ \cursor -> do
       it "should parse metas" $ rawValueVia (Just cursor) `shouldBe`
-        XmlMeta "DOCTYPE" [XmlMeta "ELEMENT" []]
+        RawMeta "DOCTYPE" [RawMeta "ELEMENT" []]
 
     forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
       it "should parse xml header" $ rawValueVia (Just cursor) `shouldBe`
-        XmlDocument [
+        RawDocument [
           attrs [("version", "1.0"), ("encoding", "UTF-8")],
-          XmlElement "a" [attrs [("text", "value")],
-          XmlText "free"]]
+          RawElement "a" [attrs [("text", "value")],
+          RawText "free"]]
 
       it "navigate around" $ do
-        rawValueVia (ns cursor) `shouldBe` XmlElement "a" [attrs [("text", "value")], XmlText "free"]
+        rawValueVia (ns cursor) `shouldBe` RawElement "a" [attrs [("text", "value")], RawText "free"]
         rawValueVia ((ns >=> fc) cursor) `shouldBe` attrs [("text", "value")]
-        rawValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` XmlAttrName "text"
-        rawValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` XmlAttrValue "value"
-        rawValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` XmlText "free"
+        rawValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` RawAttrName "text"
+        rawValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` RawAttrValue "value"
+        rawValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` RawText "free"
 
     -- forXml " {}" $ \cursor -> do
     --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonObject [])

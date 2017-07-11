@@ -20,35 +20,35 @@ import           HaskellWorks.Data.Xml.Succinct.Index
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
 data RawValue
-  = XmlDocument [RawValue]
-  | XmlText String
-  | XmlElement String [RawValue]
-  | XmlCData String
-  | XmlComment String
-  | XmlMeta String [RawValue]
-  | XmlAttrName String
-  | XmlAttrValue String
-  | XmlAttrList [RawValue]
-  | XmlError String
+  = RawDocument [RawValue]
+  | RawText String
+  | RawElement String [RawValue]
+  | RawCData String
+  | RawComment String
+  | RawMeta String [RawValue]
+  | RawAttrName String
+  | RawAttrValue String
+  | RawAttrList [RawValue]
+  | RawError String
   deriving (Eq, Show)
 
 instance Pretty RawValue where
   pretty mjpv = case mjpv of
-    XmlText s       -> ctext $ text s
-    XmlAttrName s   -> text s
-    XmlAttrValue s  -> (ctext . dquotes . text) s
-    XmlAttrList ats -> formatAttrs ats
-    XmlComment s    -> text $ "<!-- " <> show s <> "-->"
-    XmlElement s xs -> formatElem s xs
-    XmlDocument xs  -> formatMeta "?" "xml" xs
-    XmlError s      -> red $ text "[error " <> text s <> text "]"
-    XmlCData s      -> cangle "<!" <> ctag (text "[CDATA[") <> text s <> cangle (text "]]>")
-    XmlMeta s xs    -> formatMeta "!" s xs
+    RawText s       -> ctext $ text s
+    RawAttrName s   -> text s
+    RawAttrValue s  -> (ctext . dquotes . text) s
+    RawAttrList ats -> formatAttrs ats
+    RawComment s    -> text $ "<!-- " <> show s <> "-->"
+    RawElement s xs -> formatElem s xs
+    RawDocument xs  -> formatMeta "?" "xml" xs
+    RawError s      -> red $ text "[error " <> text s <> text "]"
+    RawCData s      -> cangle "<!" <> ctag (text "[CDATA[") <> text s <> cangle (text "]]>")
+    RawMeta s xs    -> formatMeta "!" s xs
     where
       formatAttr at = case at of
-        XmlAttrName a  -> text " " <> pretty (XmlAttrName a)
-        XmlAttrValue a -> text "=" <> pretty (XmlAttrValue a)
-        XmlAttrList _ -> red $ text "ATTRS"
+        RawAttrName a  -> text " " <> pretty (RawAttrName a)
+        RawAttrValue a -> text "=" <> pretty (RawAttrValue a)
+        RawAttrList _ -> red $ text "ATTRS"
         _              -> red $ text "booo"
       formatAttrs ats = hcat (formatAttr <$> ats)
       formatElem s xs =
@@ -70,16 +70,16 @@ class RawValueAt a where
 
 instance RawValueAt XmlIndex where
   rawValueAt i = case i of
-    XmlIndexCData s        -> parseTextUntil "]]>" s `as` XmlCData
-    XmlIndexComment s      -> parseTextUntil "-->" s `as` XmlComment
-    XmlIndexMeta s cs      -> XmlMeta s       (rawValueAt <$> cs)
-    XmlIndexElement s cs   -> XmlElement s    (rawValueAt <$> cs)
-    XmlIndexDocument cs    -> XmlDocument     (rawValueAt <$> cs)
-    XmlIndexAttrName cs    -> parseAttrName cs       `as` XmlAttrName
-    XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
-    XmlIndexAttrList cs    -> XmlAttrList     (rawValueAt <$> cs)
-    XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
-    XmlIndexError s        -> XmlError s
+    XmlIndexCData s        -> parseTextUntil "]]>" s `as` RawCData
+    XmlIndexComment s      -> parseTextUntil "-->" s `as` RawComment
+    XmlIndexMeta s cs      -> RawMeta s       (rawValueAt <$> cs)
+    XmlIndexElement s cs   -> RawElement s    (rawValueAt <$> cs)
+    XmlIndexDocument cs    -> RawDocument     (rawValueAt <$> cs)
+    XmlIndexAttrName cs    -> parseAttrName cs       `as` RawAttrName
+    XmlIndexAttrValue cs   -> parseString cs         `as` RawAttrValue
+    XmlIndexAttrList cs    -> RawAttrList     (rawValueAt <$> cs)
+    XmlIndexValue s        -> parseTextUntil "<" s   `as` RawText
+    XmlIndexError s        -> RawError s
     --unknown                -> XmlError ("Not yet supported: " <> show unknown)
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
@@ -107,18 +107,18 @@ ctext :: Doc -> Doc
 ctext = dullgreen
 
 isAttrL :: RawValue -> Bool
-isAttrL (XmlAttrList _) = True
+isAttrL (RawAttrList _) = True
 isAttrL _               = False
 
 isAttr :: RawValue -> Bool
 isAttr v = case v of
-  XmlAttrName  _ -> True
-  XmlAttrValue _ -> True
-  XmlAttrList  _ -> True
+  RawAttrName  _ -> True
+  RawAttrValue _ -> True
+  RawAttrList  _ -> True
   _              -> False
 
 as :: Either String a -> (a -> RawValue) -> RawValue
-as = flip $ either XmlError
+as = flip $ either RawError
 
 decodeErr :: String -> BS.ByteString -> Either String a
 decodeErr reason bs =

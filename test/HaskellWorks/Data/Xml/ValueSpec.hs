@@ -26,7 +26,7 @@ import HaskellWorks.Data.RankSelect.Base.Select1
 import HaskellWorks.Data.RankSelect.Poppy512
 import HaskellWorks.Data.Xml.Succinct.Cursor           as C
 import HaskellWorks.Data.Xml.Succinct.Index
-import HaskellWorks.Data.Xml.Value
+import HaskellWorks.Data.Xml.RawValue
 import Test.Hspec
 
 import qualified Data.ByteString              as BS
@@ -41,7 +41,7 @@ fc = TC.firstChild
 ns = TC.nextSibling
 -- cd = TC.depth
 
-attrs :: [(String, String)] -> XmlValue
+attrs :: [(String, String)] -> RawValue
 attrs as = XmlAttrList $ as >>= (\(k, v) -> [XmlAttrName k, XmlAttrValue v])
 
 spec :: Spec
@@ -52,10 +52,10 @@ spec = describe "HaskellWorks.Data.Xml.ValueSpec" $ do
   genSpec "DVS.Vector Word64" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
   genSpec "Poppy512"          (undefined :: XmlCursor BS.ByteString Poppy512 (SimpleBalancedParens (DVS.Vector Word64)))
 
-xmlValueVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
-              => Maybe (XmlCursor BS.ByteString t u) -> XmlValue
-xmlValueVia mk = case mk of
-  Just k  -> xmlValueAt (xmlIndexAt k) --either (\(DecodeError e) -> XmlError e) id (xmlValueAt <$> xmlIndexAt k)
+rawValueVia  :: XmlIndexAt (XmlCursor BS.ByteString t u)
+              => Maybe (XmlCursor BS.ByteString t u) -> RawValue
+rawValueVia mk = case mk of
+  Just k  -> rawValueAt (xmlIndexAt k) --either (\(DecodeError e) -> XmlError e) id (rawValueAt <$> xmlIndexAt k)
   Nothing -> XmlError "No such element"
 
 genSpec :: forall t u.
@@ -78,74 +78,74 @@ genSpec t _ = do
     let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " <> show cursor) (f cursor)
 
     forXml "<a/>" $ \cursor -> do
-      it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` XmlElement "a" []
+      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` XmlElement "a" []
 
     forXml "<a attr='value'/>" $ \cursor -> do
-      it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
+      it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
         XmlElement "a" [attrs [("attr", "value")]]
 
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
-      it "should have correct value"    $ xmlValueVia (Just cursor) `shouldBe`
+      it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
         XmlElement "a" [attrs [("attr", "value")],
           XmlElement "b" [attrs [("attr", "value")]]]
 
     forXml "<a>value text</a>" $ \cursor -> do
-      it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe`
+      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe`
         XmlElement "a" [XmlText "value text"]
 
     forXml "<!-- some comment -->" $ \cursor -> do
-      it "should parse space separared comment" $ xmlValueVia (Just cursor) `shouldBe`
+      it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
         XmlComment " some comment "
 
     forXml "<!--some comment ->-->" $ \cursor -> do
-      it "should parse space separared comment" $ xmlValueVia (Just cursor) `shouldBe`
+      it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
         XmlComment "some comment ->"
 
     forXml "<![CDATA[a <br/> tag]]>" $ \cursor -> do
-      it "should parse cdata data" $ xmlValueVia (Just cursor) `shouldBe`
+      it "should parse cdata data" $ rawValueVia (Just cursor) `shouldBe`
         XmlCData "a <br/> tag"
 
     forXml "<!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]>" $ \cursor -> do
-      it "should parse metas" $ xmlValueVia (Just cursor) `shouldBe`
+      it "should parse metas" $ rawValueVia (Just cursor) `shouldBe`
         XmlMeta "DOCTYPE" [XmlMeta "ELEMENT" []]
 
     forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
-      it "should parse xml header" $ xmlValueVia (Just cursor) `shouldBe`
+      it "should parse xml header" $ rawValueVia (Just cursor) `shouldBe`
         XmlDocument [
           attrs [("version", "1.0"), ("encoding", "UTF-8")],
           XmlElement "a" [attrs [("text", "value")],
           XmlText "free"]]
 
       it "navigate around" $ do
-        xmlValueVia (ns cursor) `shouldBe` XmlElement "a" [attrs [("text", "value")], XmlText "free"]
-        xmlValueVia ((ns >=> fc) cursor) `shouldBe` attrs [("text", "value")]
-        xmlValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` XmlAttrName "text"
-        xmlValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` XmlAttrValue "value"
-        xmlValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` XmlText "free"
+        rawValueVia (ns cursor) `shouldBe` XmlElement "a" [attrs [("text", "value")], XmlText "free"]
+        rawValueVia ((ns >=> fc) cursor) `shouldBe` attrs [("text", "value")]
+        rawValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` XmlAttrName "text"
+        rawValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` XmlAttrValue "value"
+        rawValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` XmlText "free"
 
     -- forXml " {}" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonObject [])
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonObject [])
     -- forXml "1234" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonNumber 1234)
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonNumber 1234)
     -- forXml "\"Hello\"" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonString "Hello")
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonString "Hello")
     -- forXml "[]" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonArray [])
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonArray [])
     -- forXml "true" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonBool True)
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonBool True)
     -- forXml "false" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonBool False)
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonBool False)
     -- forXml "null" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right JsonNull
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right JsonNull
     -- forXml "[null]" $ \cursor -> do
-    --   it "should have correct value"      $ xmlValueVia (Just cursor) `shouldBe` Right (JsonArray [JsonNull])
-    --   it "should have correct value"      $ xmlValueVia (fc   cursor) `shouldBe` Right  JsonNull
+    --   it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` Right (JsonArray [JsonNull])
+    --   it "should have correct value"      $ rawValueVia (fc   cursor) `shouldBe` Right  JsonNull
     --   it "depth at top"                   $ cd          cursor `shouldBe` Just 1
     --   it "depth at first child of array"  $ (fc >=> cd) cursor `shouldBe` Just 2
     -- forXml "[null, {\"field\": 1}]" $ \cursor -> do
     --   it "cursor can navigate to second child of array" $ do
-    --     xmlValueVia ((fc >=> ns)   cursor) `shouldBe` Right (                     JsonObject [("field", JsonNumber 1)] )
-    --     xmlValueVia (Just          cursor) `shouldBe` Right (JsonArray [JsonNull, JsonObject [("field", JsonNumber 1)]])
+    --     rawValueVia ((fc >=> ns)   cursor) `shouldBe` Right (                     JsonObject [("field", JsonNumber 1)] )
+    --     rawValueVia (Just          cursor) `shouldBe` Right (JsonArray [JsonNull, JsonObject [("field", JsonNumber 1)]])
     --   it "depth at second child of array" $ do
     --     (fc >=> ns >=> cd) cursor `shouldBe` Just 2
     --   it "depth at first child of object at second child of array" $ do
@@ -155,11 +155,11 @@ genSpec t _ = do
     -- describe "For empty json array" $ do
     --   let cursor =  "[]" :: XmlCursor BS.ByteString t u
     --   it "can navigate down and forwards" $ do
-    --     xmlValueVia (Just cursor) `shouldBe` Right (JsonArray [])
+    --     rawValueVia (Just cursor) `shouldBe` Right (JsonArray [])
     -- describe "For empty json array" $ do
     --   let cursor =  "[null]" :: XmlCursor BS.ByteString t u
     --   it "can navigate down and forwards" $ do
-    --     xmlValueVia (Just cursor) `shouldBe` Right (JsonArray [JsonNull])
+    --     rawValueVia (Just cursor) `shouldBe` Right (JsonArray [JsonNull])
     -- describe "For sample Json" $ do
     --   let cursor =  "{ \
     --                 \    \"widget\": { \
@@ -175,19 +175,19 @@ genSpec t _ = do
     --     let object1 = JsonObject ([("name", JsonString "main_window"), ("dimensions", array)]) :: JsonValue
     --     let object2 = JsonObject ([("debug", JsonString "on"), ("window", object1)]) :: JsonValue
     --     let object3 = JsonObject ([("widget", object2)]) :: JsonValue
-    --     xmlValueVia (Just                                                                                                   cursor) `shouldBe` Right object3
-    --     xmlValueVia ((fc                                                                                                  ) cursor) `shouldBe` Right (JsonString "widget"      )
-    --     xmlValueVia ((fc >=> ns                                                                                           ) cursor) `shouldBe` Right (object2                  )
-    --     xmlValueVia ((fc >=> ns >=> fc                                                                                    ) cursor) `shouldBe` Right (JsonString "debug"       )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns                                                                             ) cursor) `shouldBe` Right (JsonString "on"          )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns                                                                      ) cursor) `shouldBe` Right (JsonString "window"      )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns                                                               ) cursor) `shouldBe` Right (object1                  )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                                        ) cursor) `shouldBe` Right (JsonString "name"        )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                                                 ) cursor) `shouldBe` Right (JsonString "main_window" )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                                          ) cursor) `shouldBe` Right (JsonString "dimensions"  )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns                                   ) cursor) `shouldBe` Right (array                    )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                            ) cursor) `shouldBe` Right (JsonNumber 500           )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                     ) cursor) `shouldBe` Right (JsonNumber 600.01e-02    )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns              ) cursor) `shouldBe` Right (JsonBool True            )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns       ) cursor) `shouldBe` Right (JsonBool False           )
-    --     xmlValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns) cursor) `shouldBe` Right JsonNull
+    --     rawValueVia (Just                                                                                                   cursor) `shouldBe` Right object3
+    --     rawValueVia ((fc                                                                                                  ) cursor) `shouldBe` Right (JsonString "widget"      )
+    --     rawValueVia ((fc >=> ns                                                                                           ) cursor) `shouldBe` Right (object2                  )
+    --     rawValueVia ((fc >=> ns >=> fc                                                                                    ) cursor) `shouldBe` Right (JsonString "debug"       )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns                                                                             ) cursor) `shouldBe` Right (JsonString "on"          )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns                                                                      ) cursor) `shouldBe` Right (JsonString "window"      )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns                                                               ) cursor) `shouldBe` Right (object1                  )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                                                        ) cursor) `shouldBe` Right (JsonString "name"        )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                                                 ) cursor) `shouldBe` Right (JsonString "main_window" )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns                                          ) cursor) `shouldBe` Right (JsonString "dimensions"  )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns                                   ) cursor) `shouldBe` Right (array                    )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc                            ) cursor) `shouldBe` Right (JsonNumber 500           )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns                     ) cursor) `shouldBe` Right (JsonNumber 600.01e-02    )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns              ) cursor) `shouldBe` Right (JsonBool True            )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns       ) cursor) `shouldBe` Right (JsonBool False           )
+    --     rawValueVia ((fc >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> fc >=> ns >=> ns >=> ns >=> ns) cursor) `shouldBe` Right JsonNull

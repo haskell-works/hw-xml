@@ -1,13 +1,13 @@
 module HaskellWorks.Data.Xml.TagData where
 
-import Data.Monoid                 ((<>))
-import HaskellWorks.Data.Xml.Value
+import Data.Monoid                    ((<>))
+import HaskellWorks.Data.Xml.RawValue
 
 import qualified Data.Map as M
 
 data TagData = TagData
   { tagDataAttributes :: M.Map String String
-  , tagDataChildNodes :: [XmlValue]
+  , tagDataChildNodes :: [RawValue]
   } deriving (Eq, Show)
 
 instance Monoid TagData where

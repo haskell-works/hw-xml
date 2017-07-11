@@ -1,18 +1,18 @@
 module HaskellWorks.Data.Xml.TagChild where
 
-import HaskellWorks.Data.Xml.Value
+import HaskellWorks.Data.Xml.RawValue
 
 data TagChild
   = TagChildAttr      String String
-  | TagChildDocument  [XmlValue]
+  | TagChildDocument  [RawValue]
   | TagChildText      String
-  | TagChildElement   String [XmlValue]
+  | TagChildElement   String [RawValue]
   | TagChildCData     String
   | TagChildComment   String
-  | TagChildMeta      String [XmlValue]
+  | TagChildMeta      String [RawValue]
   deriving (Eq, Show)
 
-toTagChildren :: [XmlValue] -> [TagChild]
+toTagChildren :: [RawValue] -> [TagChild]
 toTagChildren (XmlAttrName  name:XmlAttrValue value :xs) = TagChildAttr      name value  : toTagChildren xs
 toTagChildren (XmlDocument  vs                      :xs) = TagChildDocument  vs          : toTagChildren xs
 toTagChildren (XmlText      text                    :xs) = TagChildText      text        : toTagChildren xs
@@ -26,11 +26,11 @@ toTagChildren (XmlAttrList  as                      :xs) = toTagChildren as ++  
 toTagChildren (XmlError     _                       :xs) =                                 toTagChildren xs
 toTagChildren []                                         = []
 
-toXmlValues :: TagChild -> [XmlValue]
-toXmlValues (TagChildAttr      name value       ) = [XmlAttrName name, XmlAttrValue value ]
-toXmlValues (TagChildDocument  children         ) = [XmlDocument children                 ]
-toXmlValues (TagChildText      text             ) = [XmlText     text                     ]
-toXmlValues (TagChildElement   tagName children ) = [XmlElement  tagName  children        ]
-toXmlValues (TagChildCData     text             ) = [XmlCData    text                     ]
-toXmlValues (TagChildComment   text             ) = [XmlComment  text                     ]
-toXmlValues (TagChildMeta      metaName children) = [XmlMeta     metaName children        ]
+toRawValues :: TagChild -> [RawValue]
+toRawValues (TagChildAttr      name value       ) = [XmlAttrName name, XmlAttrValue value ]
+toRawValues (TagChildDocument  children         ) = [XmlDocument children                 ]
+toRawValues (TagChildText      text             ) = [XmlText     text                     ]
+toRawValues (TagChildElement   tagName children ) = [XmlElement  tagName  children        ]
+toRawValues (TagChildCData     text             ) = [XmlCData    text                     ]
+toRawValues (TagChildComment   text             ) = [XmlComment  text                     ]
+toRawValues (TagChildMeta      metaName children) = [XmlMeta     metaName children        ]

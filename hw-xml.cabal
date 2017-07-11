@@ -46,6 +46,7 @@ library
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Internal
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Token
                       , HaskellWorks.Data.Xml.Succinct.Index
+                      , HaskellWorks.Data.Xml.RawValue
                       , HaskellWorks.Data.Xml.TagChild
                       , HaskellWorks.Data.Xml.TagData
                       , HaskellWorks.Data.Xml.TagInfo
@@ -53,7 +54,6 @@ library
                       , HaskellWorks.Data.Xml.Token.Types
                       , HaskellWorks.Data.Xml.Token
                       , HaskellWorks.Data.Xml.Type
-                      , HaskellWorks.Data.Xml.Value
   build-depends:        base                          >= 4          && < 5
                       , array
                       , ansi-wl-pprint

@@ -5,9 +5,9 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TupleSections         #-}
 
-module HaskellWorks.Data.Xml.Value
-( XmlValue(..)
-, XmlValueAt(..)
+module HaskellWorks.Data.Xml.RawValue
+( RawValue(..)
+, RawValueAt(..)
 )
 where
 
@@ -19,20 +19,20 @@ import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct.Index
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
-data XmlValue
-  = XmlDocument [XmlValue]
+data RawValue
+  = XmlDocument [RawValue]
   | XmlText String
-  | XmlElement String [XmlValue]
+  | XmlElement String [RawValue]
   | XmlCData String
   | XmlComment String
-  | XmlMeta String [XmlValue]
+  | XmlMeta String [RawValue]
   | XmlAttrName String
   | XmlAttrValue String
-  | XmlAttrList [XmlValue]
+  | XmlAttrList [RawValue]
   | XmlError String
   deriving (Eq, Show)
 
-instance Pretty XmlValue where
+instance Pretty RawValue where
   pretty mjpv = case mjpv of
     XmlText s       -> ctext $ text s
     XmlAttrName s   -> text s
@@ -65,19 +65,19 @@ instance Pretty XmlValue where
               <> cangle rangle
               <> hcat (pretty <$> es)
 
-class XmlValueAt a where
-  xmlValueAt :: a -> XmlValue
+class RawValueAt a where
+  rawValueAt :: a -> RawValue
 
-instance XmlValueAt XmlIndex where
-  xmlValueAt i = case i of
+instance RawValueAt XmlIndex where
+  rawValueAt i = case i of
     XmlIndexCData s        -> parseTextUntil "]]>" s `as` XmlCData
     XmlIndexComment s      -> parseTextUntil "-->" s `as` XmlComment
-    XmlIndexMeta s cs      -> XmlMeta s       (xmlValueAt <$> cs)
-    XmlIndexElement s cs   -> XmlElement s    (xmlValueAt <$> cs)
-    XmlIndexDocument cs    -> XmlDocument     (xmlValueAt <$> cs)
+    XmlIndexMeta s cs      -> XmlMeta s       (rawValueAt <$> cs)
+    XmlIndexElement s cs   -> XmlElement s    (rawValueAt <$> cs)
+    XmlIndexDocument cs    -> XmlDocument     (rawValueAt <$> cs)
     XmlIndexAttrName cs    -> parseAttrName cs       `as` XmlAttrName
     XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
-    XmlIndexAttrList cs    -> XmlAttrList     (xmlValueAt <$> cs)
+    XmlIndexAttrList cs    -> XmlAttrList     (rawValueAt <$> cs)
     XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
     XmlIndexError s        -> XmlError s
     --unknown                -> XmlError ("Not yet supported: " <> show unknown)
@@ -106,18 +106,18 @@ ctag = bold
 ctext :: Doc -> Doc
 ctext = dullgreen
 
-isAttrL :: XmlValue -> Bool
+isAttrL :: RawValue -> Bool
 isAttrL (XmlAttrList _) = True
 isAttrL _               = False
 
-isAttr :: XmlValue -> Bool
+isAttr :: RawValue -> Bool
 isAttr v = case v of
   XmlAttrName  _ -> True
   XmlAttrValue _ -> True
   XmlAttrList  _ -> True
   _              -> False
 
-as :: Either String a -> (a -> XmlValue) -> XmlValue
+as :: Either String a -> (a -> RawValue) -> RawValue
 as = flip $ either XmlError
 
 decodeErr :: String -> BS.ByteString -> Either String a

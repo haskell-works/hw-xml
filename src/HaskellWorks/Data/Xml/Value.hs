@@ -9,14 +9,38 @@ module HaskellWorks.Data.Xml.Value
   ( Value(..)
   ) where
 
-import qualified Data.Map                         as M
+import Data.Monoid                     ((<>))
+import HaskellWorks.Data.Xml.DecodeError
+import HaskellWorks.Data.Xml.RawDecode
+import HaskellWorks.Data.Xml.RawValue
+import HaskellWorks.Data.Xml.TagData
+import HaskellWorks.Data.Xml.TagInfo
+
+import qualified Data.Map as M
 
 data Value
-  = ValueDocument [Value]
-  | ValueText String
-  | ValueElement String (M.Map String String) [Value]
-  | ValueCData String
-  | ValueComment String
-  | ValueMeta String [Value]
-  | ValueError String
+  = XmlDocument [Value]
+  | XmlText String
+  | XmlElement String (M.Map String String) [Value]
+  | XmlCData String
+  | XmlComment String
+  | XmlMeta String [Value]
+  | XmlError String
   deriving (Eq, Show)
+
+instance RawDecode Value where
+  rawDecode (RawDocument  rvs     ) = XmlDocument   (rawDecode <$> rvs)
+  rawDecode (RawText      text    ) = XmlText       text
+  rawDecode (RawElement   name cs ) = mkXmlElement  name cs
+  rawDecode (RawCData     text    ) = XmlCData      text
+  rawDecode (RawComment   text    ) = XmlComment    text
+  rawDecode (RawMeta      name cs ) = XmlMeta       name (rawDecode <$> cs)
+  rawDecode (RawAttrName  name    ) = XmlError      ("Can't decode attribute name: "  <> name   )
+  rawDecode (RawAttrValue value   ) = XmlError      ("Can't decode attribute value: " <> value  )
+  rawDecode (RawAttrList  as      ) = XmlError      ("Can't decode attribute list: "  <> show as)
+  rawDecode (RawError     msg     ) = XmlError      msg
+
+mkXmlElement :: String -> [RawValue] -> Value
+mkXmlElement tagName children = case toTagData children of
+  Right (TagData attrs children') -> XmlElement tagName attrs (rawDecode <$> children')
+  Left  (DecodeError msg        ) -> XmlError msg

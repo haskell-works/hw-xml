@@ -46,6 +46,9 @@ library
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Internal
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Token
                       , HaskellWorks.Data.Xml.Succinct.Index
+                      , HaskellWorks.Data.Xml.TagChild
+                      , HaskellWorks.Data.Xml.TagData
+                      , HaskellWorks.Data.Xml.TagInfo
                       , HaskellWorks.Data.Xml.Token.Tokenize
                       , HaskellWorks.Data.Xml.Token.Types
                       , HaskellWorks.Data.Xml.Token
@@ -57,6 +60,7 @@ library
                       , attoparsec
                       , bytestring
                       , conduit
+                      , containers
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
                       , hw-conduit                    >= 0.1.0.0

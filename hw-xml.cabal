@@ -20,17 +20,11 @@ executable hw-xml-example
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N -O2 -Wall -msse4.2
   build-depends:        base                          >= 4          && < 5
                       , bytestring
-                      , conduit
-                      , criterion
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-conduit                    >= 0.1.0.0
                       , hw-diagnostics                >= 0.0.0.5
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
-                      , hw-rankselect                 >= 0.7.0.0
-                      , mmap
-                      , resourcet
                       , vector
   default-language:     Haskell2010
 
@@ -41,6 +35,8 @@ library
                       , HaskellWorks.Data.Xml.Conduit
                       , HaskellWorks.Data.Xml.Conduit.Blank
                       , HaskellWorks.Data.Xml.Conduit.Words
+                      , HaskellWorks.Data.Xml.Decode
+                      , HaskellWorks.Data.Xml.DecodeError
                       , HaskellWorks.Data.Xml.Grammar
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
@@ -61,7 +57,6 @@ library
                       , attoparsec
                       , bytestring
                       , conduit
-                      , containers
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
                       , hw-conduit                    >= 0.1.0.0
@@ -69,9 +64,7 @@ library
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
-                      , mono-traversable
                       , resourcet
-                      , text
                       , vector
                       , word8
 
@@ -93,7 +86,6 @@ test-suite hw-xml-test
                       , attoparsec
                       , bytestring
                       , conduit
-                      , containers
                       , hspec
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
@@ -102,11 +94,7 @@ test-suite hw-xml-test
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
-                      , mmap
-                      , parsec
                       , QuickCheck
-                      , resourcet
-                      , transformers
                       , vector
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N
   -- -Wall
@@ -131,7 +119,6 @@ benchmark bench
                       , hw-conduit                    >= 0.1.0.0
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
-                      , hw-rankselect                 >= 0.7.0.0
                       , mmap
                       , resourcet
                       , vector

@@ -20,17 +20,11 @@ executable hw-xml-example
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N -O2 -Wall -msse4.2
   build-depends:        base                          >= 4          && < 5
                       , bytestring
-                      , conduit
-                      , criterion
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-conduit                    >= 0.1.0.0
                       , hw-diagnostics                >= 0.0.0.5
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
-                      , hw-rankselect                 >= 0.7.0.0
-                      , mmap
-                      , resourcet
                       , vector
   default-language:     Haskell2010
 
@@ -41,6 +35,9 @@ library
                       , HaskellWorks.Data.Xml.Conduit
                       , HaskellWorks.Data.Xml.Conduit.Blank
                       , HaskellWorks.Data.Xml.Conduit.Words
+                      , HaskellWorks.Data.Xml.Decode
+                      , HaskellWorks.Data.Xml.DecodeError
+                      , HaskellWorks.Data.Xml.DecodeResult
                       , HaskellWorks.Data.Xml.Grammar
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
@@ -50,6 +47,11 @@ library
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Internal
                       , HaskellWorks.Data.Xml.Succinct.Cursor.Token
                       , HaskellWorks.Data.Xml.Succinct.Index
+                      , HaskellWorks.Data.Xml.RawDecode
+                      , HaskellWorks.Data.Xml.RawValue
+                      , HaskellWorks.Data.Xml.TagChild
+                      , HaskellWorks.Data.Xml.TagData
+                      , HaskellWorks.Data.Xml.TagInfo
                       , HaskellWorks.Data.Xml.Token.Tokenize
                       , HaskellWorks.Data.Xml.Token.Types
                       , HaskellWorks.Data.Xml.Token
@@ -69,9 +71,9 @@ library
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
-                      , mono-traversable
+                      , mtl
                       , resourcet
-                      , text
+                      , transformers
                       , vector
                       , word8
 
@@ -83,17 +85,16 @@ test-suite hw-xml-test
   hs-source-dirs:       test
   main-is:              Spec.hs
   other-modules:        HaskellWorks.Data.Xml.Conduit.BlankSpec
+                      , HaskellWorks.Data.Xml.RawValueSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec
                       , HaskellWorks.Data.Xml.Succinct.CursorSpec
                       , HaskellWorks.Data.Xml.Token.TokenizeSpec
                       , HaskellWorks.Data.Xml.TypeSpec
-                      , HaskellWorks.Data.Xml.ValueSpec
   build-depends:        base                          >= 4          && < 5
                       , attoparsec
                       , bytestring
                       , conduit
-                      , containers
                       , hspec
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
@@ -102,11 +103,7 @@ test-suite hw-xml-test
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
-                      , mmap
-                      , parsec
                       , QuickCheck
-                      , resourcet
-                      , transformers
                       , vector
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N
   -- -Wall
@@ -131,7 +128,6 @@ benchmark bench
                       , hw-conduit                    >= 0.1.0.0
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
-                      , hw-rankselect                 >= 0.7.0.0
                       , mmap
                       , resourcet
                       , vector

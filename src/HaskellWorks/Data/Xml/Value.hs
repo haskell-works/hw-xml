@@ -6,120 +6,42 @@
 {-# LANGUAGE TupleSections         #-}
 
 module HaskellWorks.Data.Xml.Value
-( XmlValue(..)
-, XmlValueAt(..)
-)
-where
+  ( Value(..)
+  ) where
 
-import qualified Data.Attoparsec.ByteString.Char8     as ABC
-import qualified Data.ByteString                      as BS
-import           Data.Monoid
-import           Data.List
-import           HaskellWorks.Data.Xml.Grammar
-import           HaskellWorks.Data.Xml.Succinct.Index
-import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import Data.Monoid                     ((<>))
+import HaskellWorks.Data.Xml.DecodeError
+import HaskellWorks.Data.Xml.DecodeResult
+import HaskellWorks.Data.Xml.RawDecode
+import HaskellWorks.Data.Xml.RawValue
+import HaskellWorks.Data.Xml.TagData
+import HaskellWorks.Data.Xml.TagInfo
 
-data XmlValue
-  = XmlDocument [XmlValue]
+import qualified Data.Map as M
+
+data Value
+  = XmlDocument [Value]
   | XmlText String
-  | XmlElement String [XmlValue]
+  | XmlElement String (M.Map String String) [Value]
   | XmlCData String
   | XmlComment String
-  | XmlMeta String [XmlValue]
-  | XmlAttrName String
-  | XmlAttrValue String
-  | XmlAttrList [XmlValue]
+  | XmlMeta String [Value]
   | XmlError String
   deriving (Eq, Show)
 
-instance Pretty XmlValue where
-  pretty mjpv = case mjpv of
-    XmlText s       -> ctext $ text s
-    XmlAttrName s   -> text s
-    XmlAttrValue s  -> (ctext . dquotes . text) s
-    XmlAttrList ats -> formatAttrs ats
-    XmlComment s    -> text $ "<!-- " <> show s <> "-->"
-    XmlElement s xs -> formatElem s xs
-    XmlDocument xs  -> formatMeta "?" "xml" xs
-    XmlError s      -> red $ text "[error " <> text s <> text "]"
-    XmlCData s      -> cangle "<!" <> ctag (text "[CDATA[") <> text s <> cangle (text "]]>")
-    XmlMeta s xs    -> formatMeta "!" s xs
-    where
-      formatAttr at = case at of
-        XmlAttrName a  -> text " " <> pretty (XmlAttrName a)
-        XmlAttrValue a -> text "=" <> pretty (XmlAttrValue a)
-        XmlAttrList _ -> red $ text "ATTRS"
-        _              -> red $ text "booo"
-      formatAttrs ats = hcat (formatAttr <$> ats)
-      formatElem s xs =
-        let (ats, es) = partition isAttrL xs
-        in  cangle langle <> ctag (text s)
-              <> hcat (pretty <$> ats)
-              <> cangle rangle
-              <> hcat (pretty <$> es)
-              <> cangle (text "</") <> ctag (text s) <> cangle rangle
-      formatMeta b s xs =
-        let (ats, es) = partition isAttr xs
-        in  cangle (langle <> text b) <> ctag (text s)
-              <> hcat (pretty <$> ats)
-              <> cangle rangle
-              <> hcat (pretty <$> es)
+instance RawDecode Value where
+  rawDecode (RawDocument  rvs     ) = XmlDocument   (rawDecode <$> rvs)
+  rawDecode (RawText      text    ) = XmlText       text
+  rawDecode (RawElement   name cs ) = mkXmlElement  name cs
+  rawDecode (RawCData     text    ) = XmlCData      text
+  rawDecode (RawComment   text    ) = XmlComment    text
+  rawDecode (RawMeta      name cs ) = XmlMeta       name (rawDecode <$> cs)
+  rawDecode (RawAttrName  name    ) = XmlError      ("Can't decode attribute name: "  <> name   )
+  rawDecode (RawAttrValue value   ) = XmlError      ("Can't decode attribute value: " <> value  )
+  rawDecode (RawAttrList  as      ) = XmlError      ("Can't decode attribute list: "  <> show as)
+  rawDecode (RawError     msg     ) = XmlError      msg
 
-class XmlValueAt a where
-  xmlValueAt :: a -> XmlValue
-
-instance XmlValueAt XmlIndex where
-  xmlValueAt i = case i of
-    XmlIndexCData s        -> parseTextUntil "]]>" s `as` XmlCData
-    XmlIndexComment s      -> parseTextUntil "-->" s `as` XmlComment
-    XmlIndexMeta s cs      -> XmlMeta s       (xmlValueAt <$> cs)
-    XmlIndexElement s cs   -> XmlElement s    (xmlValueAt <$> cs)
-    XmlIndexDocument cs    -> XmlDocument     (xmlValueAt <$> cs)
-    XmlIndexAttrName cs    -> parseAttrName cs       `as` XmlAttrName
-    XmlIndexAttrValue cs   -> parseString cs         `as` XmlAttrValue
-    XmlIndexAttrList cs    -> XmlAttrList     (xmlValueAt <$> cs)
-    XmlIndexValue s        -> parseTextUntil "<" s   `as` XmlText
-    XmlIndexError s        -> XmlError s
-    --unknown                -> XmlError ("Not yet supported: " <> show unknown)
-    where
-      parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)
-
-      parseTextUntil s bs = case ABC.parse (parseUntil s) bs of
-        ABC.Fail    {}  -> decodeErr ("Unable to find " <> show s <> ".") bs
-        ABC.Partial _   -> decodeErr ("Unexpected end, expected " <> show s <> ".") bs
-        ABC.Done    _ r -> Right r
-      parseString bs = case ABC.parse parseXmlString bs of
-        ABC.Fail    {}  -> decodeErr "Unable to parse string" bs
-        ABC.Partial _   -> decodeErr "Unexpected end of string, expected" bs
-        ABC.Done    _ r -> Right r
-      parseAttrName bs = case ABC.parse parseXmlAttributeName bs of
-        ABC.Fail    {}  -> decodeErr "Unable to parse attribute name" bs
-        ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
-        ABC.Done    _ r -> Right r
-
-cangle :: Doc -> Doc
-cangle = dullwhite
-
-ctag :: Doc -> Doc
-ctag = bold
-
-ctext :: Doc -> Doc
-ctext = dullgreen
-
-isAttrL :: XmlValue -> Bool
-isAttrL (XmlAttrList _) = True
-isAttrL _               = False
-
-isAttr :: XmlValue -> Bool
-isAttr v = case v of
-  XmlAttrName  _ -> True
-  XmlAttrValue _ -> True
-  XmlAttrList  _ -> True
-  _              -> False
-
-as :: Either String a -> (a -> XmlValue) -> XmlValue
-as = flip $ either XmlError
-
-decodeErr :: String -> BS.ByteString -> Either String a
-decodeErr reason bs =
-  Left $ reason <>" (" <> show (BS.take 20 bs) <> "...)"
+mkXmlElement :: String -> [RawValue] -> Value
+mkXmlElement tagName children = case toTagData children of
+  DecodeOk      (TagData attrs children') -> XmlElement tagName attrs (rawDecode <$> children')
+  DecodeFailed  (DecodeError msg        ) -> XmlError msg

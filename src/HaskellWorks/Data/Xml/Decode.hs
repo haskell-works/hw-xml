@@ -2,22 +2,23 @@ module HaskellWorks.Data.Xml.Decode where
 
 import Data.Monoid                       ((<>))
 import HaskellWorks.Data.Xml.DecodeError
+import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.Value
 
 import qualified Data.Map as M
 
 class Decode a where
-  decode :: Value -> Either DecodeError a
+  decode :: Value -> DecodeResult a
 
 instance Decode Value where
-  decode = Right
+  decode = DecodeOk
   {-# INLINE decode #-}
 
-failDecode :: String -> Either DecodeError a
-failDecode = Left . DecodeError
+failDecode :: String -> DecodeResult a
+failDecode = DecodeFailed . DecodeError
 
-(~@) :: Value -> String -> Either DecodeError String
+(~@) :: Value -> String -> DecodeResult String
 (~@) (XmlElement _ as _) name = case M.lookup name as of
-  Just text -> Right text
+  Just text -> DecodeOk text
   Nothing   -> failDecode $ "No such attribute " <> show name
 (~@) _ name = failDecode $ "Not an element whilst looking up attribute " <> show name

@@ -37,6 +37,7 @@ library
                       , HaskellWorks.Data.Xml.Conduit.Words
                       , HaskellWorks.Data.Xml.Decode
                       , HaskellWorks.Data.Xml.DecodeError
+                      , HaskellWorks.Data.Xml.DecodeResult
                       , HaskellWorks.Data.Xml.Grammar
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
@@ -70,7 +71,9 @@ library
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
+                      , mtl
                       , resourcet
+                      , transformers
                       , vector
                       , word8
 

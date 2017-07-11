@@ -11,6 +11,7 @@ module HaskellWorks.Data.Xml.Value
 
 import Data.Monoid                     ((<>))
 import HaskellWorks.Data.Xml.DecodeError
+import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
 import HaskellWorks.Data.Xml.TagData
@@ -42,5 +43,5 @@ instance RawDecode Value where
 
 mkXmlElement :: String -> [RawValue] -> Value
 mkXmlElement tagName children = case toTagData children of
-  Right (TagData attrs children') -> XmlElement tagName attrs (rawDecode <$> children')
-  Left  (DecodeError msg        ) -> XmlError msg
+  DecodeOk      (TagData attrs children') -> XmlElement tagName attrs (rawDecode <$> children')
+  DecodeFailed  (DecodeError msg        ) -> XmlError msg

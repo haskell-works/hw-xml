@@ -71,6 +71,7 @@ library
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
                       , hw-rankselect-base            >= 0.2.0.0
+                      , lens
                       , mtl
                       , resourcet
                       , transformers

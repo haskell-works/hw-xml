@@ -33,3 +33,7 @@ instance Alternative DecodeResult where
   (<|>) _            (DecodeOk     b) = DecodeOk     b
   (<|>) _            (DecodeFailed e) = DecodeFailed e
   {-# INLINE (<|>) #-}
+
+instance Foldable DecodeResult where
+  foldr f z (DecodeOk     a) = f a z
+  foldr _ z (DecodeFailed _) = z

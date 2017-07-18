@@ -39,6 +39,7 @@ library
                       , HaskellWorks.Data.Xml.DecodeError
                       , HaskellWorks.Data.Xml.DecodeResult
                       , HaskellWorks.Data.Xml.Grammar
+                      , HaskellWorks.Data.Xml.Lens
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
                       , HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens

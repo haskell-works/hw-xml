@@ -37,7 +37,7 @@ jobs:
           key: dot-cabal
           paths:
             - ~/.cabal
-      
+
       ##### Fetching latest organisation package versions
       - run:
           name: Fetching latest organisation package versions
@@ -69,10 +69,6 @@ jobs:
           name: Building dependencies
           command: stack --stack-yaml stack-ci.yaml build --only-dependencies
 
-      - run:
-          name: Compiling
-          command: stack --stack-yaml stack-ci.yaml build --test --no-run-tests
-
       - save_cache:
           key: dot-stack-{{ checksum "stack.yaml" }}-{{ checksum "hw-xml.cabal" }}
           paths:
@@ -85,6 +81,10 @@ jobs:
       - save_cache:
           key: dot-stack-work-{{ checksum "stack.yaml" }}
           paths: ~/hw-xml/.stack-work
+
+      - run:
+          name: Compiling
+          command: stack --stack-yaml stack-ci.yaml build --test --no-run-tests
 
       ##### Running tests
       - run:

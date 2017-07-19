@@ -1,5 +1,6 @@
 module HaskellWorks.Data.Xml.Decode where
 
+import Control.Applicative
 import Data.Monoid                       ((<>))
 import HaskellWorks.Data.Xml.DecodeError
 import HaskellWorks.Data.Xml.DecodeResult
@@ -31,6 +32,9 @@ failDecode = DecodeFailed . DecodeError
           _                               -> go rs
 (/>) _ n = failDecode $ "Expecting parent of element " <> show n
 
+(?>) :: Value -> (Value -> DecodeResult Value) -> DecodeResult Value
+(?>) v f = f v <|> pure v
+
 -- Contextful
 
 (</>) :: DecodeResult Value -> String -> DecodeResult Value
@@ -38,6 +42,9 @@ failDecode = DecodeFailed . DecodeError
 
 (<@>) :: DecodeResult Value -> String -> DecodeResult String
 (<@>) ma n = ma >>= (@> n)
+
+(<?>) :: DecodeResult Value -> (Value -> DecodeResult Value) -> DecodeResult Value
+(<?>) ma f = ma >>= (?> f)
 
 -- Deprecated
 (~@) :: Value -> String -> DecodeResult String

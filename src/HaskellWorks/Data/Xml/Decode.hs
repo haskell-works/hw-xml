@@ -1,6 +1,9 @@
 module HaskellWorks.Data.Xml.Decode where
 
 import Control.Applicative
+import Control.Lens
+import Control.Monad
+import Data.Foldable
 import Data.Monoid                       ((<>))
 import HaskellWorks.Data.Xml.DecodeError
 import HaskellWorks.Data.Xml.DecodeResult
@@ -34,6 +37,13 @@ failDecode = DecodeFailed . DecodeError
 
 (?>) :: Value -> (Value -> DecodeResult Value) -> DecodeResult Value
 (?>) v f = f v <|> pure v
+
+(~>) :: Value -> String -> DecodeResult Value
+(~>) e@(XmlElement n' _ _)  n | n' == n = DecodeOk e
+(~>) _                      n           = failDecode $ "Expecting parent of element " <> show n
+
+(/>>) :: Value -> String -> DecodeResult [Value]
+(/>>) v n = v ^. childNodes <&> (~> n) <&> toList & join & pure
 
 -- Contextful
 

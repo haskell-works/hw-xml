@@ -53,6 +53,21 @@ benchRankXmlBigConduits =
     ]
   ]
 
+setupInterestingWord8s :: IO ()
+setupInterestingWord8s = do
+  let !_ = interestingWord8s
+  return ()
+
+benchIsInterestingWord8 :: [Benchmark]
+benchIsInterestingWord8 =
+  [ env setupInterestingWord8s $ \_ -> bgroup "Interesting Word8 lookup"
+    [ bench "isInterestingWord8"  (whnf isInterestingWord8 0)
+    ]
+  ]
+
 main :: IO ()
---main = defaultMain benchRankXml8mbConduits
-main = defaultMain benchRankXmlBigConduits
+main = defaultMain $ concat
+  [ benchIsInterestingWord8
+  , benchRankXmlBigConduits
+  , benchRankXml8mbConduits
+  ]

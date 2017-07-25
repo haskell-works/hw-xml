@@ -42,13 +42,6 @@ isInterestingWord8 b = interestingWord8s ! b
 blankedXmlToInterestBits :: Monad m => Conduit BS.ByteString m BS.ByteString
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
 
-padRight :: Word8 -> Int -> BS.ByteString -> BS.ByteString
-padRight w n bs = if BS.length bs >= n then bs else fst (BS.unfoldrN n gen bs)
-  where gen :: ByteString -> Maybe (Word8, ByteString)
-        gen cs = case BS.uncons cs of
-          Just (c, ds) -> Just (c, ds)
-          Nothing      -> Just (w, BS.empty)
-
 blankedXmlToInterestBits' :: Monad m => BS.ByteString -> Conduit BS.ByteString m BS.ByteString
 blankedXmlToInterestBits' rs = do
   mbs <- await
@@ -68,7 +61,7 @@ blankedXmlToInterestBits' rs = do
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
-          else Just ( BS.foldr' (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (padRight 0 8 (BS.take 8 as))
+          else Just ( BS.foldr' (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (BS.take 8 as)
                     , BS.drop 8 as
                     )
 
@@ -120,7 +113,7 @@ compressWordAsBit' aBS = do
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen xs = if BS.length xs == 0
           then Nothing
-          else Just ( BS.foldr' (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (padRight 0 8 (BS.take 8 xs))
+          else Just ( BS.foldr' (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (BS.take 8 xs)
                     , BS.drop 8 xs
                     )
 

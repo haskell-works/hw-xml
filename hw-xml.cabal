@@ -65,6 +65,7 @@ library
                       , bytestring
                       , conduit
                       , containers
+                      , ghc-prim
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
                       , hw-conduit                    >= 0.1.0.0

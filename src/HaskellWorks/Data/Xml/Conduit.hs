@@ -8,6 +8,7 @@ module HaskellWorks.Data.Xml.Conduit
   , blankedXmlToBalancedParens2
   , compressWordAsBit
   , interestingWord8s
+  , isInterestingWord8
   ) where
 
 import           Control.Monad
@@ -32,6 +33,11 @@ interestingWord8s = A.array (0, 255) [
     then 1
     else 0)
   | w <- [0 .. 255]]
+{-# NOINLINE interestingWord8s #-}
+
+isInterestingWord8 :: Word8 -> Word8
+isInterestingWord8 b = interestingWord8s ! b
+{-# INLINABLE isInterestingWord8 #-}
 
 blankedXmlToInterestBits :: Monad m => Conduit BS.ByteString m BS.ByteString
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
@@ -62,7 +68,7 @@ blankedXmlToInterestBits' rs = do
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
-          else Just ( BS.foldr (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (padRight 0 8 (BS.take 8 as))
+          else Just ( BS.foldr' (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (padRight 0 8 (BS.take 8 as))
                     , BS.drop 8 as
                     )
 
@@ -114,7 +120,7 @@ compressWordAsBit' aBS = do
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen xs = if BS.length xs == 0
           then Nothing
-          else Just ( BS.foldr (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (padRight 0 8 (BS.take 8 xs))
+          else Just ( BS.foldr' (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (padRight 0 8 (BS.take 8 xs))
                     , BS.drop 8 xs
                     )
 

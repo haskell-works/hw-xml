@@ -11,16 +11,16 @@ module HaskellWorks.Data.Xml.Conduit
   , isInterestingWord8
   ) where
 
-import           Control.Monad
-import           Data.Array.Unboxed             as A
-import qualified Data.Bits                      as BITS
-import           Data.ByteString                as BS
-import           Data.Conduit
-import           Data.Int
-import           Data.Word
-import           Data.Word8
-import           HaskellWorks.Data.Bits.BitWise
-import           Prelude                        as P
+import Control.Monad
+import Data.Array.Unboxed             as A
+import Data.ByteString                as BS
+import Data.Conduit
+import Data.Word
+import Data.Word8
+import HaskellWorks.Data.Bits.BitWise
+import Prelude                        as P
+
+import qualified Data.Bits as BITS
 
 interestingWord8s :: A.UArray Word8 Word8
 interestingWord8s = A.array (0, 255) [
@@ -131,10 +131,10 @@ blankedXmlToBalancedParens2 = do
         gen (Just False , bs) = Just (0x00, (Nothing, bs))
         gen (Nothing    , bs) = case BS.uncons bs of
           Just (c, cs) -> case balancedParensOf c of
-            MiniN   -> gen        (Nothing    , cs)
-            MiniT   -> Just (0xFF, (Nothing    , cs))
-            MiniF   -> Just (0x00, (Nothing    , cs))
-            MiniTF  -> Just (0xFF, (Just False , cs))
+            MiniN  -> gen         (Nothing    , cs)
+            MiniT  -> Just (0xFF, (Nothing    , cs))
+            MiniF  -> Just (0x00, (Nothing    , cs))
+            MiniTF -> Just (0xFF, (Just False , cs))
           Nothing   -> Nothing
 
 data MiniBP = MiniN | MiniT | MiniF | MiniTF

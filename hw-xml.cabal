@@ -31,6 +31,7 @@ executable hw-xml-example
 library
   hs-source-dirs:       src
   exposed-modules:      HaskellWorks.Data.Xml
+                      , HaskellWorks.Data.Xml.Blank
                       , HaskellWorks.Data.Xml.CharLike
                       , HaskellWorks.Data.Xml.Conduit
                       , HaskellWorks.Data.Xml.Conduit.Blank

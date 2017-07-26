@@ -39,12 +39,14 @@ blankXml as = fst (BS.unfoldrN (BS.length as) go (InXml, as))
           Just (!c, !cs) | isEndTag c cs            -> Just (_space       , (InCloseTag   , cs))
           Just (!c, !cs) | isTextStart c            -> Just (_t           , (InText       , cs))
           Just (!c, !cs) | c == _less               -> Just (_less        , (InTag        , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InXml        , cs))
           Just ( _, !cs)                            -> Just (_space       , (InXml        , cs))
           Nothing                                   -> Nothing
         go (InTag, bs) = case BS.uncons bs of
           Just (!c, !cs) | isSpace c                -> Just (_parenleft   , (InAttrList   , cs))
           Just (!c, !cs) | isTagClose c cs          -> Just (_space       , (InClose      , cs))
           Just (!c, !cs) | c == _greater            -> Just (_space       , (InXml        , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InTag        , cs))
           Just ( _, !cs)                            -> Just (_space       , (InTag        , cs))
           Nothing                                   -> Nothing
         go (InCloseTag, bs) = case BS.uncons bs of
@@ -56,6 +58,7 @@ blankXml as = fst (BS.unfoldrN (BS.length as) go (InXml, as))
           Just (!c, !cs) | isTagClose c cs          -> Just (_parenright  , (InClose      , cs))
           Just (!c, !cs) | isNameStartChar c        -> Just (_a           , (InIdent      , cs))
           Just (!c, !cs) | isQuote c                -> Just (_v           , (InString c   , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InAttrList   , cs))
           Just ( _, !cs)                            -> Just (_space       , (InAttrList   , cs))
           Nothing                                   -> Nothing
         go (InClose, bs) = case BS.uncons bs of
@@ -65,15 +68,18 @@ blankXml as = fst (BS.unfoldrN (BS.length as) go (InXml, as))
           Just (!c, !cs) | isNameChar c             -> Just (_space       , (InIdent      , cs))
           Just (!c, !cs) | isSpace c                -> Just (_space       , (InAttrList   , cs))
           Just (!c, !cs) | c == _equal              -> Just (_space       , (InAttrList   , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InAttrList   , cs))
           Just ( _, !cs)                            -> Just (_space       , (InAttrList   , cs))
           Nothing                                   -> Nothing
         go (InString q, bs) = case BS.uncons bs of
           Just (!c, !cs) | c == q                   -> Just (_space       , (InAttrList   , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InString q   , cs))
           Just ( _, !cs)                            -> Just (_space       , (InString q   , cs))
           Nothing                                   -> Nothing
         go (InText, bs) = case BS.uncons bs of
           Just (!c, !cs) | isEndTag c cs            -> Just (_space       , (InCloseTag   , cs))
           Just ( _, !cs) | headIs (== _less) cs     -> Just (_space       , (InXml        , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InText       , cs))
           Just ( _, !cs)                            -> Just (_space       , (InText       , cs))
           Nothing                                   -> Nothing
         go (InMeta, bs) = case BS.uncons bs of
@@ -81,27 +87,32 @@ blankXml as = fst (BS.unfoldrN (BS.length as) go (InXml, as))
           Just (!c, !cs) | c == _hyphen             -> Just (_space       , (InRem 0      , cs))
           Just (!c, !cs) | c == _bracketleft        -> Just (_space       , (InCdataTag   , cs))
           Just (!c, !cs) | c == _greater            -> Just (_bracketright, (InXml        , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InBang 1     , cs))
           Just ( _, !cs)                            -> Just (_space       , (InBang 1     , cs))
           Nothing                                   -> Nothing
         go (InCdataTag, bs) = case BS.uncons bs of
           Just (!c, !cs) | c == _bracketleft        -> Just (_space       , (InCdata 0    , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InCdataTag   , cs))
           Just ( _, !cs)                            -> Just (_space       , (InCdataTag   , cs))
           Nothing                                   -> Nothing
         go (InCdata n, bs) = case BS.uncons bs of
           Just (!c, !cs) | c == _greater && n >= 2  -> Just (_bracketright, (InXml        , cs))
           Just (!c, !cs) | isCdataEnd c cs && n > 0 -> Just (_space       , (InCdata (n+1), cs))
           Just (!c, !cs) | c == _bracketright       -> Just (_space       , (InCdata (n+1), cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InCdata 0    , cs))
           Just ( _, !cs)                            -> Just (_space       , (InCdata 0    , cs))
           Nothing                                   -> Nothing
         go (InRem n, bs) = case BS.uncons bs of
           Just (!c, !cs) | c == _greater && n >= 2  -> Just (_bracketright, (InXml        , cs))
           Just (!c, !cs) | c == _hyphen             -> Just (_space       , (InRem (n+1)  , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InRem 0      , cs))
           Just ( _, !cs)                            -> Just (_space       , (InRem 0      , cs))
           Nothing                                   -> Nothing
         go (InBang n, bs) = case BS.uncons bs of
           Just (!c, !cs) | c == _less               -> Just (_bracketleft , (InBang (n+1) , cs))
           Just (!c, !cs) | c == _greater && n == 1  -> Just (_bracketright, (InXml        , cs))
           Just (!c, !cs) | c == _greater            -> Just (_bracketright, (InBang (n-1) , cs))
+          Just (!c, !cs) | isSpace c                -> Just (c            , (InBang n     , cs))
           Just ( _, !cs)                            -> Just (_space       , (InBang n     , cs))
           Nothing                                   -> Nothing
 

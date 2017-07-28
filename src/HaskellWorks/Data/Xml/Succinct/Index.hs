@@ -11,14 +11,14 @@ module HaskellWorks.Data.Xml.Succinct.Index
 where
 
 import           Control.Arrow
-import qualified Data.Attoparsec.ByteString.Char8           as ABC
-import qualified Data.ByteString                            as BS
-import qualified Data.List                                  as L
+import qualified Data.Attoparsec.ByteString.Char8          as ABC
+import qualified Data.ByteString                           as BS
+import qualified Data.List                                 as L
 import           Data.Monoid
+import qualified HaskellWorks.Data.BalancedParens          as BP
 import           HaskellWorks.Data.Bits.BitWise
 import           HaskellWorks.Data.Drop
 import           HaskellWorks.Data.Positioning
-import qualified HaskellWorks.Data.BalancedParens           as BP
 import           HaskellWorks.Data.RankSelect.Base.Rank0
 import           HaskellWorks.Data.RankSelect.Base.Rank1
 import           HaskellWorks.Data.RankSelect.Base.Select1
@@ -27,7 +27,7 @@ import           HaskellWorks.Data.Uncons
 import           HaskellWorks.Data.Xml.CharLike
 import           HaskellWorks.Data.Xml.Grammar
 import           HaskellWorks.Data.Xml.Succinct
-import           Prelude hiding (drop)
+import           Prelude                                   hiding (drop)
 
 data XmlIndex
   = XmlIndexDocument [XmlIndex]
@@ -42,6 +42,12 @@ data XmlIndex
   | XmlIndexError String
   deriving (Eq, Show)
 
+data XmlIndexState
+  = InAttrList
+  | InElement
+  | Unknown
+  deriving (Eq, Show)
+
 class XmlIndexAt a where
   xmlIndexAt :: a -> XmlIndex
 
@@ -53,30 +59,36 @@ remText c = drop (toCount (pos c)) (cursorText c)
 
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexAt (XmlCursor BS.ByteString v w) where
   xmlIndexAt :: XmlCursor BS.ByteString v w -> XmlIndex
-  xmlIndexAt k = case uncons remainder of
-    Just (!c, cs) | isElementStart c          -> parseElem cs
-    Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom (firstChild k)
-    Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
-    Just _        | isAttribute               -> XmlIndexAttrName remainder
-    Just _                                    -> XmlIndexValue remainder
-    Nothing                                   -> XmlIndexError "End of data"
-    where remainder         = remText k
-          mapValuesFrom     = L.unfoldr (fmap (xmlIndexAt &&& nextSibling))
-          isAttribute = case remText <$> parent k >>= uncons of
+  xmlIndexAt = getIndexAt Unknown
+
+
+getIndexAt :: (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexState -> XmlCursor BS.ByteString v w -> XmlIndex
+getIndexAt state k = case uncons remainder of
+  Just (!c, cs) | isElementStart c          -> parseElem cs
+  Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom InAttrList (firstChild k)
+  Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
+  Just _        | isAttribute               -> XmlIndexAttrName remainder
+  Just _        -> XmlIndexValue remainder
+  Nothing       -> XmlIndexError "End of data"
+  where remainder         = remText k
+        mapValuesFrom s   = L.unfoldr (fmap (getIndexAt s &&& nextSibling))
+        isAttribute = case state of
+          InAttrList -> True
+          InElement  -> False
+          Unknown    -> case remText <$> parent k >>= uncons of
             Just (!c, _) | isSpace c -> True
-            _                        -> False
+            _            -> False
 
-          parseElem bs =
-            case ABC.parse parseXmlElement bs of
-              ABC.Fail {}    -> decodeErr "Unable to parse element name" bs
-              ABC.Partial _  -> decodeErr "Unexpected end of string" bs
-              ABC.Done i r   -> case r of
-                XmlElementTypeCData     -> XmlIndexCData i
-                XmlElementTypeComment   -> XmlIndexComment i
-                XmlElementTypeMeta s    -> XmlIndexMeta s    (mapValuesFrom $ firstChild k)
-                XmlElementTypeElement s -> XmlIndexElement s (mapValuesFrom $ firstChild k)
-                XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom (firstChild k) <> mapValuesFrom (nextSibling k))
-
+        parseElem bs =
+          case ABC.parse parseXmlElement bs of
+            ABC.Fail {}    -> decodeErr "Unable to parse element name" bs
+            ABC.Partial _  -> decodeErr "Unexpected end of string" bs
+            ABC.Done i r   -> case r of
+              XmlElementTypeCData     -> XmlIndexCData i
+              XmlElementTypeComment   -> XmlIndexComment i
+              XmlElementTypeMeta s    -> XmlIndexMeta s    (mapValuesFrom InElement $ firstChild k)
+              XmlElementTypeElement s -> XmlIndexElement s (mapValuesFrom InElement $ firstChild k)
+              XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom InElement (firstChild k) <> mapValuesFrom InElement (nextSibling k))
 
 decodeErr :: String -> BS.ByteString -> XmlIndex
 decodeErr reason bs =

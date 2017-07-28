@@ -37,3 +37,15 @@ instance Alternative DecodeResult where
 instance Foldable DecodeResult where
   foldr f z (DecodeOk     a) = f a z
   foldr _ z (DecodeFailed _) = z
+
+toEither :: DecodeResult a -> Either DecodeError a
+toEither (DecodeOk     a) = Right a
+toEither (DecodeFailed e) = Left  e
+
+isOk :: DecodeResult a -> Bool
+isOk (DecodeOk _) = True
+isOk _            = False
+
+isFailed :: DecodeResult a -> Bool
+isFailed (DecodeFailed _) = True
+isFailed _                = False

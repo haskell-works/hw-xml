@@ -42,6 +42,12 @@ data XmlIndex
   | XmlIndexError String
   deriving (Eq, Show)
 
+data XmlIndexState
+  = InAttrList
+  | InElement
+  | Unknown
+  deriving (Eq, Show)
+
 class XmlIndexAt a where
   xmlIndexAt :: a -> XmlIndex
 
@@ -53,23 +59,25 @@ remText c = drop (toCount (pos c)) (cursorText c)
 
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexAt (XmlCursor BS.ByteString v w) where
   xmlIndexAt :: XmlCursor BS.ByteString v w -> XmlIndex
-  xmlIndexAt = getIndexAt False
+  xmlIndexAt = getIndexAt Unknown
 
 
-getIndexAt :: (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => Bool -> XmlCursor BS.ByteString v w -> XmlIndex
-getIndexAt inAttrList k = case uncons remainder of
+getIndexAt :: (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexState -> XmlCursor BS.ByteString v w -> XmlIndex
+getIndexAt state k = case uncons remainder of
   Just (!c, cs) | isElementStart c          -> parseElem cs
-  Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapAttrsFrom (firstChild k)
+  Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom InAttrList (firstChild k)
   Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
   Just _        | isAttribute               -> XmlIndexAttrName remainder
   Just _        -> XmlIndexValue remainder
   Nothing       -> XmlIndexError "End of data"
   where remainder         = remText k
-        mapValuesFrom     = L.unfoldr (fmap (getIndexAt False &&& nextSibling))
-        mapAttrsFrom      = L.unfoldr (fmap (getIndexAt True &&& nextSibling))
-        isAttribute = inAttrList || case remText <$> parent k >>= uncons of
-          Just (!c, _) | isSpace c -> True
-          _            -> False
+        mapValuesFrom s   = L.unfoldr (fmap (getIndexAt s &&& nextSibling))
+        isAttribute = case state of
+          InAttrList -> True
+          InElement  -> False
+          Unknown    -> case remText <$> parent k >>= uncons of
+            Just (!c, _) | isSpace c -> True
+            _            -> False
 
         parseElem bs =
           case ABC.parse parseXmlElement bs of
@@ -78,9 +86,9 @@ getIndexAt inAttrList k = case uncons remainder of
             ABC.Done i r   -> case r of
               XmlElementTypeCData     -> XmlIndexCData i
               XmlElementTypeComment   -> XmlIndexComment i
-              XmlElementTypeMeta s    -> XmlIndexMeta s    (mapValuesFrom $ firstChild k)
-              XmlElementTypeElement s -> XmlIndexElement s (mapValuesFrom $ firstChild k)
-              XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom (firstChild k) <> mapValuesFrom (nextSibling k))
+              XmlElementTypeMeta s    -> XmlIndexMeta s    (mapValuesFrom InElement $ firstChild k)
+              XmlElementTypeElement s -> XmlIndexElement s (mapValuesFrom InElement $ firstChild k)
+              XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom InElement (firstChild k) <> mapValuesFrom InElement (nextSibling k))
 
 decodeErr :: String -> BS.ByteString -> XmlIndex
 decodeErr reason bs =

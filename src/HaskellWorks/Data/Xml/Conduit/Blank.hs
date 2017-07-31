@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC-funbox-strict-fields #-}
 {-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -17,15 +18,20 @@ import           Prelude                             as P
 type ExpectedChar      = Word8
 data BlankState
   = InXml
-  | InTag | InAttrList | InCloseTag | InClose
-  | InBang Int
-  | InString ExpectedChar | InText
+  | InTag
+  | InAttrList
+  | InCloseTag
+  | InClose
+  | InBang !Int
+  | InString !ExpectedChar
+  | InText
   | InMeta
-  | InCdataTag | InCdata Int
-  | InRem Int
+  | InCdataTag
+  | InCdata !Int
+  | InRem !Int
   | InIdent
 
-data ByteStringP = BSP Word8 ByteString | EmptyBSP deriving Show
+data ByteStringP = BSP !Word8 !ByteString | EmptyBSP deriving Show
 
 blankXml :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
 blankXml = blankXml' Nothing InXml

@@ -40,6 +40,7 @@ library
                       , HaskellWorks.Data.Xml.DecodeError
                       , HaskellWorks.Data.Xml.DecodeResult
                       , HaskellWorks.Data.Xml.Grammar
+                      , HaskellWorks.Data.Xml.Index
                       , HaskellWorks.Data.Xml.Lens
                       , HaskellWorks.Data.Xml.Succinct
                       , HaskellWorks.Data.Xml.Succinct.Cursor
@@ -64,6 +65,7 @@ library
                       , ansi-wl-pprint
                       , attoparsec
                       , bytestring
+                      , cereal
                       , conduit
                       , containers
                       , ghc-prim

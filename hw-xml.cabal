@@ -35,6 +35,7 @@ library
                       , HaskellWorks.Data.Xml.CharLike
                       , HaskellWorks.Data.Xml.Conduit
                       , HaskellWorks.Data.Xml.Conduit.Blank
+                      , HaskellWorks.Data.Xml.Conduit.Blank2
                       , HaskellWorks.Data.Xml.Conduit.Words
                       , HaskellWorks.Data.Xml.Decode
                       , HaskellWorks.Data.Xml.DecodeError

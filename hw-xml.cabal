@@ -21,7 +21,7 @@ executable hw-xml-example
   build-depends:        base                          >= 4          && < 5
                       , bytestring
                       , hw-balancedparens             >= 0.1.0.0
-                      , hw-bits                       >= 0.4.0.0
+                      , hw-bits                       >= 0.5.0.2
                       , hw-diagnostics                >= 0.0.0.5
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
@@ -70,7 +70,7 @@ library
                       , containers
                       , ghc-prim
                       , hw-balancedparens             >= 0.1.0.0
-                      , hw-bits                       >= 0.4.0.0
+                      , hw-bits                       >= 0.5.0.2
                       , hw-conduit                    >= 0.1.0.0
                       , hw-parser
                       , hw-prim                       >= 0.4.0.0
@@ -80,6 +80,7 @@ library
                       , mtl
                       , resourcet
                       , transformers
+                      , utf8-string
                       , vector
                       , word8
 
@@ -91,6 +92,7 @@ test-suite hw-xml-test
   hs-source-dirs:       test
   main-is:              Spec.hs
   other-modules:        HaskellWorks.Data.Xml.Conduit.BlankSpec
+                      , HaskellWorks.Data.Xml.IndexSpec
                       , HaskellWorks.Data.Xml.RawValueSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
                       , HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec
@@ -100,10 +102,14 @@ test-suite hw-xml-test
   build-depends:        base                          >= 4          && < 5
                       , attoparsec
                       , bytestring
+                      , cereal
                       , conduit
+                      , hedgehog
+                      , hw-hedgehog
+                      , hw-hspec-hedgehog
                       , hspec
                       , hw-balancedparens             >= 0.1.0.0
-                      , hw-bits                       >= 0.4.0.0
+                      , hw-bits                       >= 0.5.0.2
                       , hw-conduit                    >= 0.1.0.0
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
@@ -130,7 +136,7 @@ benchmark bench
                       , conduit
                       , criterion
                       , hw-balancedparens             >= 0.1.0.0
-                      , hw-bits                       >= 0.4.0.0
+                      , hw-bits                       >= 0.5.0.2
                       , hw-conduit                    >= 0.1.0.0
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0

@@ -4,18 +4,21 @@
 
 module HaskellWorks.Data.Xml.Conduit.Blank
   ( blankXml
+  , BlankData(..)
   ) where
 
-import           Control.Monad
-import           Control.Monad.Trans.Resource        (MonadThrow)
-import           Data.ByteString                     as BS
-import           Data.Conduit
-import           Data.Word
-import           Data.Word8
-import           HaskellWorks.Data.Xml.Conduit.Words
-import           Prelude                             as P
+import Control.Monad
+import Control.Monad.Trans.Resource        (MonadThrow)
+import Data.ByteString                     as BS
+import Data.Conduit
+import Data.Monoid ((<>))
+import Data.Word
+import Data.Word8
+import HaskellWorks.Data.Xml.Conduit.Words
+import Prelude                             as P
 
 type ExpectedChar      = Word8
+
 data BlankState
   = InXml
   | InTag
@@ -31,153 +34,124 @@ data BlankState
   | InRem !Int
   | InIdent
 
-data ByteStringP = BSP !Word8 !ByteString | EmptyBSP deriving Show
+data BlankData = BlankData
+  { blankState  :: !BlankState
+  , blankA      :: !Word8
+  , blankB      :: !Word8
+  , blankC      :: !ByteString
+  }
 
 blankXml :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
-blankXml = blankXml' Nothing InXml
+blankXml = blankXmlPlan1 BS.empty InXml
 
-blankXml' :: MonadThrow m => Maybe Word8 -> BlankState -> Conduit BS.ByteString m BS.ByteString
-blankXml' lastChar lastState = do
+blankXmlPlan1 :: MonadThrow m => BS.ByteString -> BlankState -> Conduit BS.ByteString m BS.ByteString
+blankXmlPlan1 as lastState = do
   mbs <- await
-  case prefix lastChar mbs of
-    Just bsp -> do
-      let (safe, next) = unsnocUndecided bsp
-      let (!cs, Just (!nextState, _)) = unfoldrN (lenBSP safe) blankByteString (lastState, safe)
-      yield cs
-      blankXml' next nextState
-    Nothing -> return ()
-  where
-    blankByteString :: (BlankState, ByteStringP) -> Maybe (Word8, (BlankState, ByteStringP))
-    blankByteString (InXml, bs) = case bs of
-      BSP !c !cs | isMetaStart c cs     -> Just (_bracketleft , (InMeta    , toBSP cs))
-      BSP !c !cs | isEndTag c cs        -> Just (_space       , (InCloseTag, toBSP cs))
-      BSP !c !cs | isTextStart c        -> Just (_t           , (InText    , toBSP cs))
-      BSP !c !cs | c == _less           -> Just (_less        , (InTag     , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InXml     , toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InXml     , toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InTag, bs) = case bs of
-      BSP !c !cs | isSpace c            -> Just (_parenleft   , (InAttrList, toBSP cs))
-      BSP !c !cs | isTagClose c cs      -> Just (_space       , (InClose   , toBSP cs))
-      BSP !c !cs | c == _greater        -> Just (_space       , (InXml     , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InTag     , toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InTag     , toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InCloseTag, bs) = case bs of
-      BSP !c !cs | c == _greater        -> Just (_greater     , (InXml     , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InCloseTag, toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InCloseTag, toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InAttrList, bs) = case bs of
-      BSP !c !cs | c == _greater        -> Just (_parenright  , (InXml     , toBSP cs))
-      BSP !c !cs | isTagClose c cs      -> Just (_parenright  , (InClose   , toBSP cs))
-      BSP !c !cs | isNameStartChar c    -> Just (_a           , (InIdent   , toBSP cs))
-      BSP !c !cs | isQuote c            -> Just (_v           , (InString c, toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InAttrList, toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InAttrList, toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InClose, bs) = case bs of
-      (BSP _ !cs) -> Just (_greater     , (InXml     , toBSP cs))
-      EmptyBSP    -> Nothing
-    blankByteString (InIdent, bs) = case bs of
-      BSP !c !cs | isNameChar c         -> Just (_space       , (InIdent   , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (_space       , (InAttrList, toBSP cs))
-      BSP !c !cs | c == _equal          -> Just (_space       , (InAttrList, toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InAttrList, toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InAttrList, toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InString q, bs) = case bs of
-      BSP !c !cs | c == q               -> Just (_space       , (InAttrList, toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InString q, toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InString q, toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InText, bs) = case bs of
-      BSP !c !cs | isEndTag c cs        -> Just (_space       , (InCloseTag, toBSP cs))
-      BSP _  !cs | headIs (== _less) cs -> Just (_space       , (InXml     , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InText    , toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InText    , toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InMeta, bs) = case bs of
-      BSP !c !cs | c == _exclam         -> Just (_space       , (InMeta       , toBSP cs))
-      BSP !c !cs | c == _hyphen         -> Just (_space       , (InRem 0      , toBSP cs))
-      BSP !c !cs | c == _bracketleft    -> Just (_space       , (InCdataTag   , toBSP cs))
-      BSP !c !cs | c == _greater        -> Just (_bracketright, (InXml        , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InBang 1     , toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InBang 1     , toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InCdataTag, bs) = case bs of
-      BSP !c !cs | c == _bracketleft    -> Just (_space       , (InCdata 0    , toBSP cs))
-      BSP !c !cs | isSpace c            -> Just (c            , (InCdataTag   , toBSP cs))
-      BSP _  !cs                        -> Just (_space       , (InCdataTag   , toBSP cs))
-      EmptyBSP                          -> Nothing
-    blankByteString (InCdata n, bs) = case bs of
-      BSP !c !cs | c == _greater && n >= 2 -> Just (_bracketright, (InXml        , toBSP cs))
-      BSP !c !cs | isCdataEnd c cs && n>0  -> Just (_space       , (InCdata (n+1), toBSP cs))
-      BSP !c !cs | c == _bracketright      -> Just (_space       , (InCdata (n+1), toBSP cs))
-      BSP !c !cs | isSpace c               -> Just (c            , (InCdata 0    , toBSP cs))
-      BSP _  !cs                           -> Just (_space       , (InCdata 0    , toBSP cs))
-      EmptyBSP                             -> Nothing
-    blankByteString (InRem n, bs) = case bs of
-      BSP !c !cs | c == _greater && n >= 2 -> Just (_bracketright, (InXml        , toBSP cs))
-      BSP !c !cs | c == _hyphen            -> Just (_space       , (InRem (n+1)  , toBSP cs))
-      BSP !c !cs | isSpace c               -> Just (c            , (InRem 0      , toBSP cs))
-      BSP _  !cs                           -> Just (_space       , (InRem 0      , toBSP cs))
-      EmptyBSP                             -> Nothing
-    blankByteString (InBang n, bs) = case bs of
-      BSP !c !cs | c == _less              -> Just (_bracketleft , (InBang (n+1) , toBSP cs))
-      BSP !c !cs | c == _greater && n == 1 -> Just (_bracketright, (InXml        , toBSP cs))
-      BSP !c !cs | c == _greater           -> Just (_bracketright, (InBang (n-1) , toBSP cs))
-      BSP !c !cs | isSpace c               -> Just (c            , (InBang n     , toBSP cs))
-      BSP _  !cs                           -> Just (_space       , (InBang n     , toBSP cs))
-      EmptyBSP                             -> Nothing
+  case mbs of
+    Just bs -> do
+      let cs = as <> bs
+      case BS.uncons cs of
+        Just (d, ds) -> case BS.uncons ds of
+          Just (e, es) -> blankXmlRun False d e es lastState
+          Nothing -> blankXmlPlan1 cs lastState
+        Nothing -> blankXmlPlan1 cs lastState
+    Nothing -> yield $ BS.map (const _space) as
 
-prefix :: Maybe Word8 -> Maybe ByteString -> Maybe ByteStringP
-prefix (Just s) (Just bs) = Just $ BSP s bs
-prefix (Just s) Nothing   = Just $ BSP s BS.empty
-prefix Nothing  (Just bs) = (\(!c, !cs) -> BSP c cs) <$> BS.uncons bs
-prefix Nothing  Nothing   = Nothing
+blankXmlPlan2 :: MonadThrow m => Word8 -> Word8 -> BlankState -> Conduit BS.ByteString m BS.ByteString
+blankXmlPlan2 a b lastState = do
+  mcs <- await
+  case mcs of
+    Just cs -> blankXmlRun False a b cs lastState
+    Nothing -> blankXmlRun True a b (BS.pack [_space, _space]) lastState
 
-toBSP :: ByteString -> ByteStringP
-toBSP bs = case BS.uncons bs of
-  Just (!c, !cs) -> BSP c cs
-  Nothing        -> EmptyBSP
+blankXmlRun :: MonadThrow m => Bool -> Word8 -> Word8 -> BS.ByteString -> BlankState -> Conduit BS.ByteString m BS.ByteString
+blankXmlRun done a b cs lastState = do
+  let (!ds, Just (BlankData !nextState _ _ _)) = unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
+  yield ds
+  let (yy, zz) = case BS.unsnoc cs of
+        Just (ys, z) -> case BS.unsnoc ys of
+          Just (_, y) -> (y, z)
+          Nothing -> (b, z)
+        Nothing -> (a, b)
+  unless done (blankXmlPlan2 yy zz nextState)
 
-lenBSP :: ByteStringP -> Int
-lenBSP (BSP _ bs) = BS.length bs + 1
-lenBSP EmptyBSP   = 0
+mkNext :: Word8 -> BlankState -> Word8 -> BS.ByteString -> Maybe (Word8, BlankData)
+mkNext w s a bs = case BS.uncons bs of
+  Just (b, cs)  -> Just (w, BlankData s a b cs)
+  Nothing       -> error "This should never happen"
+{-# INLINE mkNext #-}
 
-isEndTag :: Word8 -> ByteString -> Bool
-isEndTag c cs = c == _less && headIs (== _slash) cs
+blankByteString :: BlankData -> Maybe (Word8, BlankData)
+blankByteString (BlankData  InXml        a b cs) | isMetaStart a b         = mkNext _bracketleft   InMeta          b cs
+blankByteString (BlankData  InXml        a b cs) | isEndTag    a b         = mkNext _space         InCloseTag      b cs
+blankByteString (BlankData  InXml        a b cs) | isTextStart a           = mkNext _t             InText          b cs
+blankByteString (BlankData  InXml        a b cs) | a == _less              = mkNext _less          InTag           b cs
+blankByteString (BlankData  InXml        a b cs) | isSpace a               = mkNext a              InXml           b cs
+blankByteString (BlankData  InXml        _ b cs)                           = mkNext _space         InXml           b cs
+blankByteString (BlankData  InTag        a b cs) | isSpace a               = mkNext _parenleft     InAttrList      b cs
+blankByteString (BlankData  InTag        a b cs) | isTagClose a b          = mkNext _space         InClose         b cs
+blankByteString (BlankData  InTag        a b cs) | a == _greater           = mkNext _space         InXml           b cs
+blankByteString (BlankData  InTag        a b cs) | isSpace a               = mkNext a              InTag           b cs
+blankByteString (BlankData  InTag        _ b cs)                           = mkNext _space         InTag           b cs
+blankByteString (BlankData  InCloseTag   a b cs) | a == _greater           = mkNext _greater       InXml           b cs
+blankByteString (BlankData  InCloseTag   a b cs) | isSpace a               = mkNext a              InCloseTag      b cs
+blankByteString (BlankData  InCloseTag   _ b cs)                           = mkNext _space         InCloseTag      b cs
+blankByteString (BlankData  InAttrList   a b cs) | a == _greater           = mkNext _parenright    InXml           b cs
+blankByteString (BlankData  InAttrList   a b cs) | isTagClose a b          = mkNext _parenright    InClose         b cs
+blankByteString (BlankData  InAttrList   a b cs) | isNameStartChar a       = mkNext _a             InIdent         b cs
+blankByteString (BlankData  InAttrList   a b cs) | isQuote a               = mkNext _v             (InString a)    b cs
+blankByteString (BlankData  InAttrList   a b cs) | isSpace a               = mkNext a              InAttrList      b cs
+blankByteString (BlankData  InAttrList   _ b cs)                           = mkNext _space         InAttrList      b cs
+blankByteString (BlankData  InClose      _ b cs)                           = mkNext _greater       InXml           b cs
+blankByteString (BlankData  InIdent      a b cs) | isNameChar a            = mkNext _space         InIdent         b cs
+blankByteString (BlankData  InIdent      a b cs) | isSpace a               = mkNext _space         InAttrList      b cs
+blankByteString (BlankData  InIdent      a b cs) | a == _equal             = mkNext _space         InAttrList      b cs
+blankByteString (BlankData  InIdent      a b cs) | isSpace a               = mkNext a              InAttrList      b cs
+blankByteString (BlankData  InIdent      _ b cs)                           = mkNext _space         InAttrList      b cs
+blankByteString (BlankData (InString q ) a b cs) | a == q                  = mkNext _space         InAttrList      b cs
+blankByteString (BlankData (InString q ) a b cs) | isSpace a               = mkNext a              (InString q)    b cs
+blankByteString (BlankData (InString q ) _ b cs)                           = mkNext _space         (InString q)    b cs
+blankByteString (BlankData  InText       a b cs) | isEndTag a b            = mkNext _space         InCloseTag      b cs
+blankByteString (BlankData  InText       _ b cs) | b == _less              = mkNext _space         InXml           b cs
+blankByteString (BlankData  InText       a b cs) | isSpace a               = mkNext a              InText          b cs
+blankByteString (BlankData  InText       _ b cs)                           = mkNext _space         InText          b cs
+blankByteString (BlankData  InMeta       a b cs) | a == _exclam            = mkNext _space         InMeta          b cs
+blankByteString (BlankData  InMeta       a b cs) | a == _hyphen            = mkNext _space         (InRem 0)       b cs
+blankByteString (BlankData  InMeta       a b cs) | a == _bracketleft       = mkNext _space         InCdataTag      b cs
+blankByteString (BlankData  InMeta       a b cs) | a == _greater           = mkNext _bracketright  InXml           b cs
+blankByteString (BlankData  InMeta       a b cs) | isSpace a               = mkNext a              (InBang 1)      b cs
+blankByteString (BlankData  InMeta       _ b cs)                           = mkNext _space         (InBang 1)      b cs
+blankByteString (BlankData  InCdataTag   a b cs) | a == _bracketleft       = mkNext _space         (InCdata 0)     b cs
+blankByteString (BlankData  InCdataTag   a b cs) | isSpace a               = mkNext a              InCdataTag      b cs
+blankByteString (BlankData  InCdataTag   _ b cs)                           = mkNext _space         InCdataTag      b cs
+blankByteString (BlankData (InCdata n  ) a b cs) | a == _greater && n >= 2 = mkNext _bracketright  InXml           b cs
+blankByteString (BlankData (InCdata n  ) a b cs) | isCdataEnd a b && n > 0 = mkNext _space         (InCdata (n+1)) b cs
+blankByteString (BlankData (InCdata n  ) a b cs) | a == _bracketright      = mkNext _space         (InCdata (n+1)) b cs
+blankByteString (BlankData (InCdata _  ) a b cs) | isSpace a               = mkNext a              (InCdata 0)     b cs
+blankByteString (BlankData (InCdata _  ) _ b cs)                           = mkNext _space         (InCdata 0)     b cs
+blankByteString (BlankData (InRem n    ) a b cs) | a == _greater && n >= 2 = mkNext _bracketright  InXml           b cs
+blankByteString (BlankData (InRem n    ) a b cs) | a == _hyphen            = mkNext _space         (InRem (n+1))   b cs
+blankByteString (BlankData (InRem _    ) a b cs) | isSpace a               = mkNext a              (InRem 0)       b cs
+blankByteString (BlankData (InRem _    ) _ b cs)                           = mkNext _space         (InRem 0)       b cs
+blankByteString (BlankData (InBang n   ) a b cs) | a == _less              = mkNext _bracketleft   (InBang (n+1))  b cs
+blankByteString (BlankData (InBang n   ) a b cs) | a == _greater && n == 1 = mkNext _bracketright  InXml           b cs
+blankByteString (BlankData (InBang n   ) a b cs) | a == _greater           = mkNext _bracketright  (InBang (n-1))  b cs
+blankByteString (BlankData (InBang n   ) a b cs) | isSpace a               = mkNext a              (InBang n)      b cs
+blankByteString (BlankData (InBang n   ) _ b cs)                           = mkNext _space         (InBang n)      b cs
+{-# INLINE blankByteString #-}
 
--- isStartTag :: Word8 -> ByteString -> Bool
--- isStartTag c cs = c == _less && headIs isNameStartChar cs
+isEndTag :: Word8 -> Word8 -> Bool
+isEndTag a b = a == _less && b == _slash
+{-# INLINE isEndTag #-}
 
-isTagClose :: Word8 -> ByteString -> Bool
-isTagClose c cs = (c == _slash) || ((c == _slash || c == _question) && headIs (== _greater) cs)
+isTagClose :: Word8 -> Word8 -> Bool
+isTagClose a b = a == _slash || ((a == _slash || a == _question) && b == _greater)
+{-# INLINE isTagClose #-}
 
-isMetaStart :: Word8 -> ByteString -> Bool
-isMetaStart c cs = c == _less && headIs (== _exclam) cs
+isMetaStart :: Word8 -> Word8 -> Bool
+isMetaStart a b = a == _less && b == _exclam
+{-# INLINE isMetaStart #-}
 
-isCdataEnd :: Word8 -> ByteString -> Bool
-isCdataEnd c cs = c == _bracketright && headIs (== _greater) cs
-
-unsnocUndecided :: ByteStringP -> (ByteStringP, Maybe Word8)
-unsnocUndecided = unscnocIf (\w -> w ==_less           -- <elem> or </elem>?
-                                -- || w == _slash         -- <elem /> or not?
-                                || w == _hyphen        -- closing comment or just - ?
-                                || w == _bracketright) -- closing CDATA or just data?
-{-# INLINE unsnocUndecided #-}
-
-headIs :: (Word8 -> Bool) -> ByteString -> Bool
-headIs p bs = case BS.uncons bs of
-  Just (!c, _) -> p c
-  Nothing      -> False
-{-# INLINE headIs #-}
-
-unscnocIf :: (Word8 -> Bool) -> ByteStringP -> (ByteStringP, Maybe Word8)
-unscnocIf _ EmptyBSP = (EmptyBSP, Nothing)
-unscnocIf p (BSP !c !bs) =
-  case BS.unsnoc bs of
-    Just (bs', w) | p w -> (BSP c bs', Just w)
-    _             -> (BSP c bs , Nothing)
-{-# INLINE unscnocIf #-}
+isCdataEnd :: Word8 -> Word8 -> Bool
+isCdataEnd a b = a == _bracketright && b == _greater
+{-# INLINE isCdataEnd #-}

@@ -20,14 +20,8 @@ module HaskellWorks.Data.Xml.Value
 
 import Control.Lens
 import Data.Monoid                     ((<>))
-import HaskellWorks.Data.Xml.DecodeError
-import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
-import HaskellWorks.Data.Xml.TagData
-import HaskellWorks.Data.Xml.TagInfo
-
-import qualified Data.Map as M
 
 data Value
   = XmlDocument
@@ -38,7 +32,7 @@ data Value
     }
   | XmlElement
     { _name       :: String
-    , _attributes :: M.Map String String
+    , _attributes :: [(String, String)]
     , _childNodes :: [Value]
     }
   | XmlCData
@@ -72,6 +66,10 @@ instance RawDecode Value where
   rawDecode (RawError     msg       ) = XmlError      msg
 
 mkXmlElement :: String -> [RawValue] -> Value
-mkXmlElement n cs = case toTagData cs of
-  DecodeOk      (TagData      attrs cs' ) -> XmlElement n attrs (rawDecode <$> cs')
-  DecodeFailed  (DecodeError  msg       ) -> XmlError msg
+mkXmlElement n (RawAttrList as:cs)  = XmlElement n (mkAttrs as) (rawDecode <$> cs)
+mkXmlElement n cs                   = XmlElement n []           (rawDecode <$> cs)
+
+mkAttrs :: [RawValue] -> [(String, String)]
+mkAttrs (RawAttrName n:RawAttrValue v:cs) = (n, v):mkAttrs cs
+mkAttrs (_:cs)                            = mkAttrs cs
+mkAttrs []                                = []

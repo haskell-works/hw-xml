@@ -9,8 +9,6 @@ import HaskellWorks.Data.Xml.DecodeError
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.Value
 
-import qualified Data.Map as M
-
 class Decode a where
   decode :: Value -> DecodeResult a
 
@@ -22,9 +20,9 @@ failDecode :: String -> DecodeResult a
 failDecode = DecodeFailed . DecodeError
 
 (@>) :: Value -> String -> DecodeResult String
-(@>) (XmlElement _ as _) n = case M.lookup n as of
-  Just text -> DecodeOk text
-  Nothing   -> failDecode $ "No such attribute " <> show n
+(@>) (XmlElement _ as _) n = case find (\v -> fst v == n) as of
+  Just (_, text)  -> DecodeOk text
+  Nothing         -> failDecode $ "No such attribute " <> show n
 (@>) _ n = failDecode $ "Not an element whilst looking up attribute " <> show n
 
 (/>) :: Value -> String -> DecodeResult Value
@@ -55,10 +53,3 @@ failDecode = DecodeFailed . DecodeError
 
 (<?>) :: DecodeResult Value -> (Value -> DecodeResult Value) -> DecodeResult Value
 (<?>) ma f = ma >>= (?> f)
-
--- Deprecated
-(~@) :: Value -> String -> DecodeResult String
-(~@) = (@>)
-
-(/*) :: Value -> String -> DecodeResult Value
-(/*) = (/>)

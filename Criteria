@@ -1,0 +1,32 @@
+# Criteria
+
+## Data ingestion
+* with various options
+* over 1G chunks of data (by unzipped)
+* and measure ingestion time (in seconds)
+
+## API support
+* Which languages?
+* Is the API convenient?
+
+## Resiliance against bad/slow queries
+* What is the impact of a bad query on the database
+* How easy is it to recover from a bad query
+* What happens on node failure, etc.
+
+## Query Capabilities
+* Is it possible to filter by time range?
+* Is it possible to have dynamic querying?
+
+## Query performance
+* Performance of querying all data for specific attacks
+* Performance of metadata for specific attacks
+* Performance of time range query
+* Performance of dynamic filter query
+* Performance of aggressive (duration filter) query for fast-forward
+
+## Cost
+* How does it cost to handle today's data?
+* How does it cost to scale?
+
+

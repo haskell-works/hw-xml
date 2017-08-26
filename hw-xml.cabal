@@ -22,7 +22,6 @@ executable hw-xml-example
                       , bytestring
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-diagnostics                >= 0.0.0.5
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
                       , vector

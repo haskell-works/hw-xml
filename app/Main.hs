@@ -11,14 +11,13 @@ import           HaskellWorks.Data.Bits.BitShown
 import           HaskellWorks.Data.FromByteString
 import           HaskellWorks.Data.BalancedParens.Simple
 import           HaskellWorks.Data.Xml.Succinct.Cursor
-import           HaskellWorks.Diagnostics.Time
 import           System.Mem
 
 readXml :: String -> IO (XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
 readXml path = do
   bs <- BS.readFile path
   print "Read file"
-  !cursor <- measure (fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
+  let !cursor = fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
   print "Created cursor"
   return cursor
 

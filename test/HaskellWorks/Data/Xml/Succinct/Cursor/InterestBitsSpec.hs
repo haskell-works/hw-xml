@@ -3,15 +3,15 @@
 
 module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec(spec) where
 
+import Data.Monoid                                        ((<>))
 import Data.String
 import Data.Word
 import HaskellWorks.Data.Bits.BitShown
+import HaskellWorks.Data.Conduit.List
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
 import Test.Hspec
-import Data.Monoid ((<>))
-import           HaskellWorks.Data.Conduit.List
 
 import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS

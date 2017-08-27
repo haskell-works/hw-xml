@@ -10,17 +10,18 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
   , blankedXmlBssToInterestBitsBs
   ) where
 
-import           Control.Applicative
-import qualified Data.ByteString                                       as BS
-import           Data.ByteString.Internal
-import qualified Data.Vector.Storable                                  as DVS
-import           Data.Word
-import           HaskellWorks.Data.Bits.BitShown
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.FromByteString
-import           HaskellWorks.Data.RankSelect.Poppy512
-import           HaskellWorks.Data.Xml.Conduit
-import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+import Control.Applicative
+import Data.ByteString.Internal
+import Data.Word
+import HaskellWorks.Data.Bits.BitShown
+import HaskellWorks.Data.Conduit.List
+import HaskellWorks.Data.FromByteString
+import HaskellWorks.Data.RankSelect.Poppy512
+import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+
+import qualified Data.ByteString      as BS
+import qualified Data.Vector.Storable as DVS
 
 newtype XmlInterestBits a = XmlInterestBits a
 

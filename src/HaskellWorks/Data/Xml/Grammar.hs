@@ -3,15 +3,15 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TupleSections         #-}
 
 module HaskellWorks.Data.Xml.Grammar where
 
-import           Control.Applicative
-import qualified Data.Attoparsec.Types    as T
-import           Data.Char
-import           Data.String
-import           HaskellWorks.Data.Parser as P
+import Control.Applicative
+import Data.Char
+import Data.String
+import HaskellWorks.Data.Parser as P
+
+import qualified Data.Attoparsec.Types as T
 
 data XmlElementType
   = XmlElementTypeDocument

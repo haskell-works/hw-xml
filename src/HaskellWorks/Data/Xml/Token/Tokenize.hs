@@ -10,18 +10,19 @@ module HaskellWorks.Data.Xml.Token.Tokenize
     , ParseXml(..)
     ) where
 
-import           Control.Applicative
-import qualified Data.Attoparsec.ByteString.Char8  as BC
-import qualified Data.Attoparsec.Combinator        as AC
-import qualified Data.Attoparsec.Types             as T
-import           Data.Bits
-import qualified Data.ByteString                   as BS
-import           Data.Char
-import           Data.Word
-import           Data.Word8
-import           HaskellWorks.Data.Char.IsChar
-import           HaskellWorks.Data.Parser          as P
-import           HaskellWorks.Data.Xml.Token.Types
+import Control.Applicative
+import Data.Bits
+import Data.Char
+import Data.Word
+import Data.Word8
+import HaskellWorks.Data.Char.IsChar
+import HaskellWorks.Data.Parser          as P
+import HaskellWorks.Data.Xml.Token.Types
+
+import qualified Data.Attoparsec.ByteString.Char8 as BC
+import qualified Data.Attoparsec.Combinator       as AC
+import qualified Data.Attoparsec.Types            as T
+import qualified Data.ByteString                  as BS
 
 hexDigitNumeric :: P.Parser t => T.Parser t Int
 hexDigitNumeric = do

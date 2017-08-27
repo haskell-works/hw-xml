@@ -67,7 +67,7 @@ library
                       , ghc-prim
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-conduit                    >= 0.1.0.0
+                      , hw-conduit                    >= 0.2.0.2
                       , hw-parser
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
@@ -100,7 +100,7 @@ test-suite hw-xml-test
                       , hspec
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-conduit                    >= 0.1.0.0
+                      , hw-conduit                    >= 0.2.0.2
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
                       , hw-rankselect                 >= 0.7.0.0
@@ -127,7 +127,7 @@ benchmark bench
                       , criterion
                       , hw-balancedparens             >= 0.1.0.0
                       , hw-bits                       >= 0.4.0.0
-                      , hw-conduit                    >= 0.1.0.0
+                      , hw-conduit                    >= 0.2.0.2
                       , hw-xml
                       , hw-prim                       >= 0.4.0.0
                       , mmap

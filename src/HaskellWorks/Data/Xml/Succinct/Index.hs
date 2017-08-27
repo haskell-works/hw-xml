@@ -10,24 +10,25 @@ module HaskellWorks.Data.Xml.Succinct.Index
 )
 where
 
-import           Control.Arrow
-import qualified Data.Attoparsec.ByteString.Char8          as ABC
-import qualified Data.ByteString                           as BS
-import qualified Data.List                                 as L
-import           Data.Monoid
-import qualified HaskellWorks.Data.BalancedParens          as BP
-import           HaskellWorks.Data.Bits.BitWise
-import           HaskellWorks.Data.Drop
-import           HaskellWorks.Data.Positioning
-import           HaskellWorks.Data.RankSelect.Base.Rank0
-import           HaskellWorks.Data.RankSelect.Base.Rank1
-import           HaskellWorks.Data.RankSelect.Base.Select1
-import           HaskellWorks.Data.TreeCursor
-import           HaskellWorks.Data.Uncons
-import           HaskellWorks.Data.Xml.CharLike
-import           HaskellWorks.Data.Xml.Grammar
-import           HaskellWorks.Data.Xml.Succinct
-import           Prelude                                   hiding (drop)
+import Control.Arrow
+import Data.Monoid
+import HaskellWorks.Data.Bits.BitWise
+import HaskellWorks.Data.Drop
+import HaskellWorks.Data.Positioning
+import HaskellWorks.Data.RankSelect.Base.Rank0
+import HaskellWorks.Data.RankSelect.Base.Rank1
+import HaskellWorks.Data.RankSelect.Base.Select1
+import HaskellWorks.Data.TreeCursor
+import HaskellWorks.Data.Uncons
+import HaskellWorks.Data.Xml.CharLike
+import HaskellWorks.Data.Xml.Grammar
+import HaskellWorks.Data.Xml.Succinct
+import Prelude                                   hiding (drop)
+
+import qualified Data.Attoparsec.ByteString.Char8 as ABC
+import qualified Data.ByteString                  as BS
+import qualified Data.List                        as L
+import qualified HaskellWorks.Data.BalancedParens as BP
 
 data XmlIndex
   = XmlIndexDocument [XmlIndex]

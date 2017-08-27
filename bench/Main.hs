@@ -3,22 +3,23 @@
 
 module Main where
 
-import           Criterion.Main
-import           Control.Monad.Trans.Resource                        (MonadThrow)
-import qualified Data.ByteString                                     as BS
-import qualified Data.ByteString.Internal                            as BSI
-import           Data.Conduit
-import qualified Data.Vector.Storable                                as DVS
-import           Data.Word
-import           Foreign
-import           HaskellWorks.Data.Bits.BitShown
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.FromByteString
-import           HaskellWorks.Data.Xml.Conduit
-import           HaskellWorks.Data.Xml.Conduit.Blank
-import           HaskellWorks.Data.Xml.Succinct.Cursor
-import           HaskellWorks.Data.BalancedParens.Simple
-import           System.IO.MMap
+import Control.Monad.Trans.Resource            (MonadThrow)
+import Criterion.Main
+import Data.Conduit
+import Data.Word
+import Foreign
+import HaskellWorks.Data.BalancedParens.Simple
+import HaskellWorks.Data.Bits.BitShown
+import HaskellWorks.Data.Conduit.List
+import HaskellWorks.Data.FromByteString
+import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.Xml.Succinct.Cursor
+import System.IO.MMap
+
+import qualified Data.ByteString          as BS
+import qualified Data.ByteString.Internal as BSI
+import qualified Data.Vector.Storable     as DVS
 
 setupEnvXml :: FilePath -> IO BS.ByteString
 setupEnvXml filepath = do

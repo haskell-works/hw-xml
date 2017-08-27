@@ -5,11 +5,12 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   , getBlankedXml
   ) where
 
-import qualified Data.ByteString                     as BS
-import           HaskellWorks.Data.ByteString
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.FromByteString
-import           HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.ByteString
+import HaskellWorks.Data.Conduit.List
+import HaskellWorks.Data.FromByteString
+import HaskellWorks.Data.Xml.Conduit.Blank
+
+import qualified Data.ByteString as BS
 
 newtype BlankedXml = BlankedXml [BS.ByteString] deriving (Eq, Show)
 

@@ -1,8 +1,3 @@
--- |
--- Copyright: 2017 John Ky
--- License: MIT
---
--- Xml
 module HaskellWorks.Data.Xml
     ( module X
     ) where

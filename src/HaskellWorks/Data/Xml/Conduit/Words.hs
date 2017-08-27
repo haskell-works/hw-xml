@@ -1,7 +1,7 @@
 module HaskellWorks.Data.Xml.Conduit.Words where
 
-import           Data.Word
-import           Data.Word8
+import Data.Word
+import Data.Word8
 
 isLeadingDigit :: Word8 -> Bool
 isLeadingDigit w = w == _hyphen || (w >= _0 && w <= _9)
@@ -34,4 +34,3 @@ isTextStart w = not (isSpace w) && w /= _less && w /= _greater
 isIn :: Word8 -> (Word8, Word8) -> Bool
 isIn w (s, e) = w >= s && w <= e
 {-# INLINE isIn #-}
-

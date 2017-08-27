@@ -1,7 +1,7 @@
 module HaskellWorks.Data.Xml.CharLike where
 
-import           Data.Word
-import           Data.Word8 as W
+import Data.Word
+import Data.Word8 as W
 
 class XmlCharLike c where
   isElementStart :: c -> Bool

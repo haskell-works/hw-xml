@@ -8,15 +8,16 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
   , getXmlBalancedParens
   ) where
 
-import           Control.Applicative
-import qualified Data.ByteString                                    as BS
-import           Data.Conduit
-import qualified Data.Vector.Storable                               as DVS
-import           Data.Word
-import           HaskellWorks.Data.BalancedParens                   as BP
-import           HaskellWorks.Data.Conduit.List
-import           HaskellWorks.Data.Xml.Conduit
-import           HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+import Control.Applicative
+import Data.Conduit
+import Data.Word
+import HaskellWorks.Data.BalancedParens                 as BP
+import HaskellWorks.Data.Conduit.List
+import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+
+import qualified Data.ByteString      as BS
+import qualified Data.Vector.Storable as DVS
 
 newtype XmlBalancedParens a = XmlBalancedParens a
 

@@ -36,21 +36,12 @@ xmlToInterestBits3 = blankXml =$= blankedXmlToInterestBits
 runCon :: Conduit i [] BS.ByteString -> i -> BS.ByteString
 runCon con bs = BS.concat $ runListConduit con [bs]
 
-benchRankXml8mbConduits :: [Benchmark]
-benchRankXml8mbConduits =
-  [ env (setupEnvXml "corpus/8mb.xml") $ \bs -> bgroup "Xml4mb"
-    [ bench "Run blankXml                    "  (whnf (runCon blankXml                  ) bs)
-    , bench "Run xmlToInterestBits3          "  (whnf (runCon xmlToInterestBits3        ) bs)
-    , bench "loadXml" (whnf loadXml bs)
-    ]
-  ]
-
-benchRankXmlBigConduits :: [Benchmark]
-benchRankXmlBigConduits =
-  [ env (setupEnvXml "corpus/105mb.xml") $ \bs -> bgroup "XmlBig"
-    [ bench "Run blankXml                    "  (whnf (runCon blankXml                  ) bs)
-    , bench "Run xmlToInterestBits3          "  (whnf (runCon xmlToInterestBits3        ) bs)
-    , bench "loadXml" (whnf loadXml bs)
+benchRankXmlCatalogConduits :: [Benchmark]
+benchRankXmlCatalogConduits =
+  [ env (setupEnvXml "data/catalog.xml") $ \bs -> bgroup "catalog.xml"
+    [ bench "Run blankXml"            (whnf (runCon blankXml          ) bs)
+    , bench "Run xmlToInterestBits3"  (whnf (runCon xmlToInterestBits3) bs)
+    , bench "loadXml"                 (whnf loadXml                     bs)
     ]
   ]
 
@@ -69,6 +60,5 @@ benchIsInterestingWord8 =
 main :: IO ()
 main = defaultMain $ concat
   [ benchIsInterestingWord8
-  , benchRankXmlBigConduits
-  , benchRankXml8mbConduits
+  , benchRankXmlCatalogConduits
   ]

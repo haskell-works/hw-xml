@@ -25,26 +25,8 @@ readXml path = do
 main :: IO ()
 main = do
   performGC
-  !c0 <- readXml "сorpus/105mb.xml"
-  !c1 <- readXml "сorpus/105mb.xml"
-  !c2 <- readXml "сorpus/105mb.xml"
-  !c3 <- readXml "сorpus/105mb.xml"
-  !c4 <- readXml "сorpus/105mb.xml"
-  !c5 <- readXml "сorpus/105mb.xml"
-  !c6 <- readXml "сorpus/105mb.xml"
-  !c7 <- readXml "сorpus/105mb.xml"
-  !c8 <- readXml "сorpus/105mb.xml"
-  !c9 <- readXml "сorpus/105mb.xml"
+  !c0 <- readXml "data/catalog.xml"
   print "Returned from readXml"
   performGC
   threadDelay 100000000
   print c0
-  print c1
-  print c2
-  print c3
-  print c4
-  print c5
-  print c6
-  print c7
-  print c8
-  print c9

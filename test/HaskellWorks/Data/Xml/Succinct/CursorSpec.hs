@@ -117,7 +117,7 @@ genSpec t _ = do
       xit "depth at first child of object at second child of array" $ do
         (fc >=> ns >=> fc >=> ns >=> cd) cursor `shouldBe` Just 3
 
-    describe "For sample Json" $ do
+    describe "For sample XML" $ do
       let cursor =  "<widget debug=\"on\"> \
                     \  <window name=\"main_window\"> \
                     \    <dimension>500</dimension> \

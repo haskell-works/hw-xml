@@ -40,7 +40,7 @@ fc = TC.firstChild
 ns = TC.nextSibling
 
 spec :: Spec
-spec = describe "HaskellWorks.Data.Json.Succinct.CursorSpec" $ do
+spec = describe "HaskellWorks.Data.Xml.TypeSpec" $ do
   describe "Cursor for [Bool]" $ do
     it "initialises to beginning of empty object" $ do
       let cursor = "<elem />" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
@@ -91,7 +91,7 @@ genSpec :: forall t u.
   )
   => String -> (XmlCursor BS.ByteString t u) -> SpecWith ()
 genSpec t _ = do
-  describe ("Json cursor of type " ++ t) $ do
+  describe ("XML cursor of type " ++ t) $ do
     let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " ++ show cursor) (f cursor)
     forXml "<elem/>" $ \cursor -> do
       it "should have correct type"       $         xmlTypeAt  cursor `shouldBe` Just XmlTypeElement

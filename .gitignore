@@ -19,8 +19,8 @@ cabal.sandbox.config
 /.stack-work/
 /result
 /deps
-/*.json
-/*.json.ib
-/*.json.bp
+/*.xml
+/*.xml.ib
+/*.xml.bp
 /snapshot.yaml
 /stack-ci.yaml

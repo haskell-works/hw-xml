@@ -18,7 +18,7 @@ import qualified Data.ByteString as BS
 
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do
-  it (show original <> " when blanked json should be " <> show expected) $ do
+  it (show original <> " when blanked xml should be " <> show expected) $ do
     BS.concat (runListConduit blankXml [original]) `shouldBe` expected
 
 repeatBS :: Int -> BS.ByteString -> BS.ByteString

@@ -12,7 +12,7 @@ category:               Data, XML
 build-type:             Simple
 extra-source-files:     README.md
 cabal-version:          >= 1.22
-data-files:             test/data/sample.xml
+data-files:             data/catalog.xml
 
 executable hw-xml-example
   hs-source-dirs:       app

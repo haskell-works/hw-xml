@@ -4,6 +4,16 @@ packages:
 - '.'
 
 extra-deps:
+  - hw-balancedparens-0.2.0.1
+  - hw-bits-0.7.0.1
+  - hw-conduit-0.2.0.2
+  - hw-excess-0.2.0.0
+  - hw-int-0.0.0.3
+  - hw-parser-0.0.0.3
+  - hw-prim-0.5.0.0
+  - hw-rankselect-0.10.0.3
+  - hw-rankselect-base-0.2.0.2
+  - hw-string-parse-0.0.0.4
   - hedgehog-0.5
 
 flags: {}

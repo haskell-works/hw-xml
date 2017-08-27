@@ -3,21 +3,20 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TupleSections         #-}
 
 module HaskellWorks.Data.Xml.RawValue
-( RawValue(..)
-, RawValueAt(..)
-)
-where
+  ( RawValue(..)
+  , RawValueAt(..)
+  ) where
 
-import qualified Data.Attoparsec.ByteString.Char8     as ABC
-import qualified Data.ByteString                      as BS
-import           Data.Monoid
-import           Data.List
-import           HaskellWorks.Data.Xml.Grammar
-import           HaskellWorks.Data.Xml.Succinct.Index
-import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import Data.List
+import Data.Monoid
+import HaskellWorks.Data.Xml.Grammar
+import HaskellWorks.Data.Xml.Succinct.Index
+import Text.PrettyPrint.ANSI.Leijen         hiding ((<$>), (<>))
+
+import qualified Data.Attoparsec.ByteString.Char8 as ABC
+import qualified Data.ByteString                  as BS
 
 data RawValue
   = RawDocument [RawValue]
@@ -48,7 +47,7 @@ instance Pretty RawValue where
       formatAttr at = case at of
         RawAttrName a  -> text " " <> pretty (RawAttrName a)
         RawAttrValue a -> text "=" <> pretty (RawAttrValue a)
-        RawAttrList _ -> red $ text "ATTRS"
+        RawAttrList _  -> red $ text "ATTRS"
         _              -> red $ text "booo"
       formatAttrs ats = hcat (formatAttr <$> ats)
       formatElem s xs =
@@ -70,16 +69,16 @@ class RawValueAt a where
 
 instance RawValueAt XmlIndex where
   rawValueAt i = case i of
-    XmlIndexCData s        -> parseTextUntil "]]>" s `as` RawCData
-    XmlIndexComment s      -> parseTextUntil "-->" s `as` RawComment
-    XmlIndexMeta s cs      -> RawMeta s       (rawValueAt <$> cs)
-    XmlIndexElement s cs   -> RawElement s    (rawValueAt <$> cs)
-    XmlIndexDocument cs    -> RawDocument     (rawValueAt <$> cs)
-    XmlIndexAttrName cs    -> parseAttrName cs       `as` RawAttrName
-    XmlIndexAttrValue cs   -> parseString cs         `as` RawAttrValue
-    XmlIndexAttrList cs    -> RawAttrList     (rawValueAt <$> cs)
-    XmlIndexValue s        -> parseTextUntil "<" s   `as` RawText
-    XmlIndexError s        -> RawError s
+    XmlIndexCData s      -> parseTextUntil "]]>" s `as` RawCData
+    XmlIndexComment s    -> parseTextUntil "-->" s `as` RawComment
+    XmlIndexMeta s cs    -> RawMeta s       (rawValueAt <$> cs)
+    XmlIndexElement s cs -> RawElement s    (rawValueAt <$> cs)
+    XmlIndexDocument cs  -> RawDocument     (rawValueAt <$> cs)
+    XmlIndexAttrName cs  -> parseAttrName cs       `as` RawAttrName
+    XmlIndexAttrValue cs -> parseString cs         `as` RawAttrValue
+    XmlIndexAttrList cs  -> RawAttrList     (rawValueAt <$> cs)
+    XmlIndexValue s      -> parseTextUntil "<" s   `as` RawText
+    XmlIndexError s      -> RawError s
     --unknown                -> XmlError ("Not yet supported: " <> show unknown)
     where
       parseUntil s = ABC.manyTill ABC.anyChar (ABC.string s)

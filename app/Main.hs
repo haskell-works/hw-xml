@@ -3,30 +3,45 @@
 
 module Main where
 
+import Data.Semigroup                                ((<>))
 import Data.Word
-import GHC.Conc
+import HaskellWorks.Data.BalancedParens.RangeMinMax2
+import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
-import HaskellWorks.Data.BalancedParens.Simple
+import HaskellWorks.Data.RankSelect.CsPoppy
+import HaskellWorks.Data.TreeCursor
+import HaskellWorks.Data.Xml.RawValue
 import HaskellWorks.Data.Xml.Succinct.Cursor
-import System.Mem
+import HaskellWorks.Data.Xml.Succinct.Index
 
 import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS
 
-readXml :: String -> IO (XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
-readXml path = do
-  bs <- BS.readFile path
-  print "Read file"
-  let !cursor = fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-  print "Created cursor"
+type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
+type CsCursor = XmlCursor BS.ByteString CsPoppy (RangeMinMax2 CsPoppy)
+
+readRawCursor :: String -> IO RawCursor
+readRawCursor path = do
+  !bs <- BS.readFile path
+  let !cursor = fromByteString bs :: RawCursor
   return cursor
+
+readCsCursor :: String -> IO CsCursor
+readCsCursor filename = do
+  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- readRawCursor filename
+  let !bpCsPoppy = makeCsPoppy bp
+  let !rangeMinMax = mkRangeMinMax2 bpCsPoppy
+  let !ibCsPoppy = makeCsPoppy ib
+  return $ XmlCursor text ibCsPoppy rangeMinMax 1
 
 main :: IO ()
 main = do
-  performGC
-  !c0 <- readXml "data/catalog.xml"
-  print "Returned from readXml"
-  performGC
-  threadDelay 100000000
-  print c0
+  !cursor <- readCsCursor "data/catalog.xml"
+  case nextSibling cursor of
+    Just rootCursor -> do
+      let rootValue = rawValueAt (xmlIndexAt rootCursor)
+      putStrLn $ "Raw value: " <> take 100 (show rootValue)
+    Nothing -> do
+      putStrLn "Could not read XML"
+      return ()

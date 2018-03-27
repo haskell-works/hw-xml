@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveAnyClass        #-}
+{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DerivingStrategies    #-}
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
@@ -9,10 +12,12 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.Internal
   , xmlCursorPos
   ) where
 
+import Control.DeepSeq                                    (NFData)
 import Data.ByteString.Internal                           as BSI
 import Data.String
 import Data.Word
 import Foreign.ForeignPtr
+import GHC.Generics
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.FromForeignRegion
@@ -37,7 +42,8 @@ data XmlCursor t v w = XmlCursor
   , balancedParens :: !w
   , cursorRank     :: !Count
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+  deriving anyclass NFData
 
 instance  (FromBlankedXml (XmlInterestBits a), FromBlankedXml (CBP.XmlBalancedParens b))
           => FromByteString (XmlCursor BS.ByteString a b) where

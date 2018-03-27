@@ -1,9 +1,9 @@
 version: 2.0
 jobs:
   build:
-    working_directory: ~/hw-xml
+    working_directory: ~/project
     docker:
-      - image: quay.io/haskell_works/stack-build-cabal
+      - image: quay.io/haskell_works/stack-build-cabal:2018-01-29
 
     steps:
       - checkout
@@ -84,7 +84,7 @@ jobs:
 
       - save_cache:
           key: dot-stack-work-{{ checksum "stack.yaml" }}
-          paths: ~/hw-xml/.stack-work
+          paths: ~/project/.stack-work
 
       ##### Running tests
       - run:

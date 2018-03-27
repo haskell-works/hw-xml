@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/hw-xml
     docker:
-      - image: fpco/stack-build:latest
+      - image: quay.io/haskell_works/stack-build-cabal
 
     steps:
       - checkout
@@ -49,7 +49,7 @@ jobs:
       ##### Building library
       - restore_cache:
           keys:
-            - dot-stack-{{ checksum "stack.yaml" }}-{{ checksum "hw-xml.cabal" }}
+            - dot-stack-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
             - dot-stack-{{ checksum "stack.yaml" }}-build
             - dot-stack-{{ checksum "stack.yaml" }}-setup
 
@@ -74,7 +74,7 @@ jobs:
           command: stack --stack-yaml stack-ci.yaml build --test --no-run-tests
 
       - save_cache:
-          key: dot-stack-{{ checksum "stack.yaml" }}-{{ checksum "hw-xml.cabal" }}
+          key: dot-stack-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
           paths:
             - ~/.stack
       - save_cache:

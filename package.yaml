@@ -1,5 +1,5 @@
 name: hw-xml
-version: '0.1.0.2'
+version: '0.1.0.3'
 synopsis: Conduits for tokenizing streams.
 description: Please see README.md
 category: Data, XML

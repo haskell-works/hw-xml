@@ -38,6 +38,10 @@ instance Foldable DecodeResult where
   foldr f z (DecodeOk     a) = f a z
   foldr _ z (DecodeFailed _) = z
 
+instance Traversable DecodeResult where
+  traverse _ (DecodeFailed e) = pure (DecodeFailed e)
+  traverse f (DecodeOk x)     = DecodeOk <$> f x
+
 toEither :: DecodeResult a -> Either DecodeError a
 toEither (DecodeOk     a) = Right a
 toEither (DecodeFailed e) = Left  e

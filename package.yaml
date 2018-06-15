@@ -1,7 +1,7 @@
 name: hw-xml
 version: '0.1.0.3'
 synopsis: Conduits for tokenizing streams.
-description: Please see README.md
+description: Conduits for tokenizing streams. Please see README.md
 category: Data, XML
 author:
 - John Ky
@@ -111,6 +111,8 @@ tests:
     - hw-rankselect >=0.7.0.0
     - hw-rankselect-base >=0.2.0.0
     - QuickCheck
+    verbatim:
+      build-tool-depends: hspec-discover:hspec-discover
 benchmarks:
   bench:
     main: Main.hs

@@ -111,6 +111,8 @@ tests:
     - hw-rankselect >=0.7.0.0
     - hw-rankselect-base >=0.2.0.0
     - QuickCheck
+    verbatim:
+      build-tool-depends: hspec-discover:hspec-discover
 benchmarks:
   bench:
     main: Main.hs

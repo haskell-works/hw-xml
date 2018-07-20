@@ -2,7 +2,7 @@ name: hw-xml
 version: '0.1.0.3'
 synopsis: Conduits for tokenizing streams.
 description: Conduits for tokenizing streams. Please see README.md
-category: Data, XML
+category: Data, XML, Succinct Data Structures, Data Structures
 author:
 - John Ky
 - Alexey Raga
@@ -15,10 +15,12 @@ github: haskell-works/hw-xml
 homepage: http://github.com/haskell-works/hw-xml#readme
 extra-source-files:
 - README.md
+
 dependencies:
 - base >=4 && <5
 - bytestring
 - vector
+
 library:
   source-dirs: src
   ghc-options:
@@ -74,6 +76,7 @@ library:
   - resourcet
   - transformers
   - word8
+
 executables:
   hw-xml-example:
     main: Main.hs
@@ -91,6 +94,7 @@ executables:
     - hw-prim >=0.5.0.0
     - hw-rankselect >=0.10.0.3
     - hw-xml
+
 tests:
   hw-xml-test:
     main: Spec.hs
@@ -113,6 +117,7 @@ tests:
     - QuickCheck
     verbatim:
       build-tool-depends: hspec-discover:hspec-discover
+
 benchmarks:
   bench:
     main: Main.hs
@@ -131,5 +136,6 @@ benchmarks:
     - hw-prim >=0.4.0.0
     - mmap
     - resourcet
+
 data-files:
 - data/catalog.xml

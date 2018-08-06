@@ -17,7 +17,7 @@ extra-source-files:
 - README.md
 
 dependencies:
-- base >=4 && <5
+- base            >= 4         && < 5
 - bytestring
 - vector
 
@@ -64,13 +64,13 @@ library:
   - containers
   - deepseq
   - ghc-prim
-  - hw-balancedparens >=0.1.0.0
-  - hw-bits >=0.4.0.0
-  - hw-conduit >=0.2.0.2
+  - hw-balancedparens     >= 0.1.0.0
+  - hw-bits               >= 0.4.0.0
+  - hw-conduit            >= 0.2.0.2
   - hw-parser
-  - hw-prim >=0.4.0.0
-  - hw-rankselect >=0.7.0.0
-  - hw-rankselect-base >=0.2.0.0
+  - hw-prim               >= 0.4.0.0
+  - hw-rankselect         >= 0.7.0.0
+  - hw-rankselect-base    >= 0.2.0.0
   - lens
   - mtl
   - resourcet
@@ -89,10 +89,10 @@ executables:
     - -Wall
     - -msse4.2
     dependencies:
-    - hw-balancedparens >=0.2.0.1
-    - hw-bits >=0.7.0.2
-    - hw-prim >=0.5.0.0
-    - hw-rankselect >=0.10.0.3
+    - hw-balancedparens   >= 0.2.0.1
+    - hw-bits             >= 0.7.0.2
+    - hw-prim             >= 0.5.0.0
+    - hw-rankselect       >= 0.10.0.3
     - hw-xml
 
 tests:
@@ -107,13 +107,13 @@ tests:
     - attoparsec
     - conduit
     - hspec
-    - hw-balancedparens >=0.1.0.0
-    - hw-bits >=0.4.0.0
-    - hw-conduit >=0.2.0.2
+    - hw-balancedparens   >= 0.1.0.0
+    - hw-bits             >= 0.4.0.0
+    - hw-conduit          >= 0.2.0.2
     - hw-xml
-    - hw-prim >=0.4.0.0
-    - hw-rankselect >=0.7.0.0
-    - hw-rankselect-base >=0.2.0.0
+    - hw-prim             >= 0.4.0.0
+    - hw-rankselect       >= 0.7.0.0
+    - hw-rankselect-base  >= 0.2.0.0
     - QuickCheck
     verbatim:
       build-tool-depends: hspec-discover:hspec-discover
@@ -129,11 +129,11 @@ benchmarks:
     dependencies:
     - conduit
     - criterion
-    - hw-balancedparens >=0.1.0.0
-    - hw-bits >=0.4.0.0
-    - hw-conduit >=0.2.0.2
+    - hw-balancedparens   >= 0.1.0.0
+    - hw-bits             >= 0.4.0.0
+    - hw-conduit          >= 0.2.0.2
     - hw-xml
-    - hw-prim >=0.4.0.0
+    - hw-prim             >= 0.4.0.0
     - mmap
     - resourcet
 

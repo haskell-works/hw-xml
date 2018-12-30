@@ -33,20 +33,20 @@ instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens [Bool])) where
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word8))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 =$= compressWordAsBit) (getBlankedXml bj))
+    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 .| compressWordAsBit) (getBlankedXml bj))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word16))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 =$= compressWordAsBit) (getBlankedXml bj))
+    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 .| compressWordAsBit) (getBlankedXml bj))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word32))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 =$= compressWordAsBit) (getBlankedXml bj))
+    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 .| compressWordAsBit) (getBlankedXml bj))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word64))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 =$= compressWordAsBit) (getBlankedXml bj))
+    where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 .| compressWordAsBit) (getBlankedXml bj))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8

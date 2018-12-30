@@ -1,0 +1,20 @@
+version: 2.1
+
+orbs:
+  haskell: haskell-works/haskell-build@1.2.0
+workflows:
+  multiple-ghc-build:
+    jobs:
+      - haskell/build:
+          name: Build with GHC 8.4.4
+          cabal-file: hw-xml.cabal
+          executor: haskell/ghc-8_4_4
+          write-result-workspace: false
+          cache-version: ${CACHE_VERSION}
+
+      - haskell/build:
+          name: Build with GHC 8.6.3
+          cabal-file: hw-xml.cabal
+          executor: haskell/ghc-8_6_3
+          write-result-workspace: false
+          cache-version: ${CACHE_VERSION}

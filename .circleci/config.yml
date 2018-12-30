@@ -2,6 +2,8 @@ version: 2.1
 
 orbs:
   haskell: haskell-works/haskell-build@1.2.0
+  github: haskell-works/github-release@1.0.1
+
 workflows:
   multiple-ghc-build:
     jobs:
@@ -18,3 +20,13 @@ workflows:
           executor: haskell/ghc-8_6_3
           write-result-workspace: false
           cache-version: ${CACHE_VERSION}
+
+      - github/release-cabal:
+          requires:
+            - Build with GHC 8.4.4
+            - Build with GHC 8.6.3
+          checkout: true
+          cabal-file: hw-xml.cabal
+          filters:
+            branches:
+              only: master

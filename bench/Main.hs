@@ -31,7 +31,7 @@ loadXml :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word64
 loadXml bs = fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
 
 xmlToInterestBits3 :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
-xmlToInterestBits3 = blankXml =$= blankedXmlToInterestBits
+xmlToInterestBits3 = blankXml .| blankedXmlToInterestBits
 
 runCon :: Conduit i [] BS.ByteString -> i -> BS.ByteString
 runCon con bs = BS.concat $ runListConduit con [bs]

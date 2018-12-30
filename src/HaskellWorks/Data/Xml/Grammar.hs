@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -9,6 +10,7 @@ module HaskellWorks.Data.Xml.Grammar where
 import Control.Applicative
 import Data.Char
 import Data.String
+import Data.Word
 import HaskellWorks.Data.Parser as P
 
 import qualified Data.Attoparsec.Types as T
@@ -20,12 +22,12 @@ data XmlElementType
   | XmlElementTypeCData
   | XmlElementTypeMeta String
 
-parseXmlString :: (P.Parser t, IsString t) => T.Parser t String
+parseXmlString :: (P.Parser t Word8, IsString t) => T.Parser t String
 parseXmlString = do
   q <- satisfyChar (=='"') <|> satisfyChar (=='\'')
   many (satisfyChar (/= q))
 
-parseXmlElement :: (P.Parser t, IsString t) => T.Parser t XmlElementType
+parseXmlElement :: (P.Parser t Word8, IsString t) => T.Parser t XmlElementType
 parseXmlElement = comment <|> cdata <|> doc <|> meta <|> element
   where
   comment = const XmlElementTypeComment  <$> string "!--"
@@ -34,10 +36,10 @@ parseXmlElement = comment <|> cdata <|> doc <|> meta <|> element
   doc     = const XmlElementTypeDocument <$> string "?xml"
   element = XmlElementTypeElement        <$> parseXmlToken
 
-parseXmlToken :: (P.Parser t, IsString t) => T.Parser t String
+parseXmlToken :: (P.Parser t Word8, IsString t) => T.Parser t String
 parseXmlToken = many $ satisfyChar isNameChar <?> "invalid string character"
 
-parseXmlAttributeName :: (P.Parser t, IsString t) => T.Parser t String
+parseXmlAttributeName :: (P.Parser t Word8, IsString t) => T.Parser t String
 parseXmlAttributeName = parseXmlToken
 
 isNameStartChar :: Char -> Bool

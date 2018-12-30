@@ -39,10 +39,10 @@ isInterestingWord8 :: Word8 -> Word8
 isInterestingWord8 b = interestingWord8s ! b
 {-# INLINABLE isInterestingWord8 #-}
 
-blankedXmlToInterestBits :: Monad m => Conduit BS.ByteString m BS.ByteString
+blankedXmlToInterestBits :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
 
-blankedXmlToInterestBits' :: Monad m => BS.ByteString -> Conduit BS.ByteString m BS.ByteString
+blankedXmlToInterestBits' :: Monad m => BS.ByteString -> ConduitT BS.ByteString BS.ByteString m ()
 blankedXmlToInterestBits' rs = do
   mbs <- await
   case mbs of
@@ -65,27 +65,27 @@ blankedXmlToInterestBits' rs = do
                     , BS.drop 8 as
                     )
 
-blankedXmlToBalancedParens :: Monad m => Conduit BS.ByteString m Bool
+blankedXmlToBalancedParens :: Monad m => ConduitT BS.ByteString Bool m ()
 blankedXmlToBalancedParens = do
   mbs <- await
   case mbs of
     Just bs -> blankedXmlToBalancedParens' bs
     Nothing -> return ()
 
-blankedXmlToBalancedParens' :: Monad m => BS.ByteString -> Conduit BS.ByteString m Bool
+blankedXmlToBalancedParens' :: Monad m => BS.ByteString -> ConduitT BS.ByteString Bool m ()
 blankedXmlToBalancedParens' bs = case BS.uncons bs of
   Just (c, cs) -> do
     case c of
-      d | d == _less          -> yield True
-      d | d == _greater       -> yield False
-      d | d == _bracketleft   -> yield True
-      d | d == _bracketright  -> yield False
-      d | d == _parenleft     -> yield True
-      d | d == _parenright    -> yield False
-      d | d == _a             -> yield True >> yield False
-      d | d == _v             -> yield True >> yield False
-      d | d == _t             -> yield True >> yield False
-      _                       -> return ()
+      d | d == _less         -> yield True
+      d | d == _greater      -> yield False
+      d | d == _bracketleft  -> yield True
+      d | d == _bracketright -> yield False
+      d | d == _parenleft    -> yield True
+      d | d == _parenright   -> yield False
+      d | d == _a            -> yield True >> yield False
+      d | d == _v            -> yield True >> yield False
+      d | d == _t            -> yield True >> yield False
+      _                      -> return ()
     blankedXmlToBalancedParens' cs
   Nothing -> return ()
 
@@ -95,10 +95,10 @@ repartitionMod8 aBS bBS = (BS.take cLen abBS, BS.drop cLen abBS)
         abLen = BS.length abBS
         cLen = (abLen `div` 8) * 8
 
-compressWordAsBit :: Monad m => Conduit BS.ByteString m BS.ByteString
+compressWordAsBit :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
 compressWordAsBit = compressWordAsBit' BS.empty
 
-compressWordAsBit' :: Monad m => BS.ByteString -> Conduit BS.ByteString m BS.ByteString
+compressWordAsBit' :: Monad m => BS.ByteString -> ConduitT BS.ByteString BS.ByteString m ()
 compressWordAsBit' aBS = do
   mbBS <- await
   case mbBS of
@@ -117,7 +117,7 @@ compressWordAsBit' aBS = do
                     , BS.drop 8 xs
                     )
 
-blankedXmlToBalancedParens2 :: Monad m => Conduit BS.ByteString m BS.ByteString
+blankedXmlToBalancedParens2 :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
 blankedXmlToBalancedParens2 = do
   mbs <- await
   case mbs of
@@ -141,18 +141,18 @@ data MiniBP = MiniN | MiniT | MiniF | MiniTF
 
 balancedParensOf :: Word8 -> MiniBP
 balancedParensOf c = case c of
-    d | d == _less          -> MiniT
-    d | d == _greater       -> MiniF
-    d | d == _bracketleft   -> MiniT
-    d | d == _bracketright  -> MiniF
-    d | d == _parenleft     -> MiniT
-    d | d == _parenright    -> MiniF
-    d | d == _t             -> MiniTF
-    d | d == _a             -> MiniTF
-    d | d == _v             -> MiniTF
-    _                       -> MiniN
+    d | d == _less         -> MiniT
+    d | d == _greater      -> MiniF
+    d | d == _bracketleft  -> MiniT
+    d | d == _bracketright -> MiniF
+    d | d == _parenleft    -> MiniT
+    d | d == _parenright   -> MiniF
+    d | d == _t            -> MiniTF
+    d | d == _a            -> MiniTF
+    d | d == _v            -> MiniTF
+    _                      -> MiniN
 
-yieldBitsOfWord8 :: Monad m => Word8 -> Conduit BS.ByteString m Bool
+yieldBitsOfWord8 :: Monad m => Word8 -> ConduitT BS.ByteString Bool m ()
 yieldBitsOfWord8 w = do
   yield ((w .&. BITS.bit 0) /= 0)
   yield ((w .&. BITS.bit 1) /= 0)
@@ -163,10 +163,10 @@ yieldBitsOfWord8 w = do
   yield ((w .&. BITS.bit 6) /= 0)
   yield ((w .&. BITS.bit 7) /= 0)
 
-yieldBitsofWord8s :: Monad m => [Word8] -> Conduit BS.ByteString m Bool
+yieldBitsofWord8s :: Monad m => [Word8] -> ConduitT BS.ByteString Bool m ()
 yieldBitsofWord8s = P.foldr ((>>) . yieldBitsOfWord8) (return ())
 
-byteStringToBits :: Monad m => Conduit BS.ByteString m Bool
+byteStringToBits :: Monad m => ConduitT BS.ByteString Bool m ()
 byteStringToBits = do
   mbs <- await
   case mbs of

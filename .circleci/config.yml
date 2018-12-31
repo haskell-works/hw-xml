@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   haskell: haskell-works/haskell-build@1.2.0
   github: haskell-works/github-release@1.0.1
+  hackage: haskell-works/hackage@1.0.0
 
 workflows:
   multiple-ghc-build:
@@ -22,6 +23,7 @@ workflows:
           cache-version: ${CACHE_VERSION}
 
       - github/release-cabal:
+          name: GitHub Release
           requires:
             - Build with GHC 8.4.4
             - Build with GHC 8.6.3
@@ -30,3 +32,10 @@ workflows:
           filters:
             branches:
               only: master
+
+      - hackage/upload:
+          publish: true
+          requires:
+            - GitHub Release
+          username: ${HACKAGE_USER}
+          password: ${HACKAGE_PASS}

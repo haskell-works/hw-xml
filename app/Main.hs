@@ -7,9 +7,9 @@ module Main where
 
 import Data.Foldable
 import Data.Maybe
-import Data.Semigroup                                ((<>))
+import Data.Semigroup                             ((<>))
 import Data.Word
-import HaskellWorks.Data.BalancedParens.RangeMinMax2
+import HaskellWorks.Data.BalancedParens.RangeMin2
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
@@ -27,7 +27,7 @@ import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS
 
 type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-type FastCursor = XmlCursor BS.ByteString CsPoppy (RangeMinMax2 CsPoppy)
+type FastCursor = XmlCursor BS.ByteString CsPoppy (RangeMin2 CsPoppy)
 
 -- | Read an XML file into memory and return a raw cursor initialised to the
 -- start of the XML document.
@@ -47,7 +47,7 @@ readFastCursor filename = do
   -- re-parsing the file.
   XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- readRawCursor filename
   let !bpCsPoppy = makeCsPoppy bp
-  let !rangeMinMax = mkRangeMinMax2 bpCsPoppy
+  let !rangeMinMax = mkRangeMin2 bpCsPoppy
   let !ibCsPoppy = makeCsPoppy ib
   return $ XmlCursor text ibCsPoppy rangeMinMax 1
 

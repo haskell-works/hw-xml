@@ -25,33 +25,34 @@ source-repository head
 
 common base                       { build-depends: base                       >= 4.7        && < 5      }
 
-common QuickCheck                 { build-depends: QuickCheck                                           }
-common ansi-wl-pprint             { build-depends: ansi-wl-pprint                                       }
-common array                      { build-depends: array                                                }
-common attoparsec                 { build-depends: attoparsec                                           }
-common bytestring                 { build-depends: bytestring                                           }
-common cereal                     { build-depends: cereal                                               }
-common conduit                    { build-depends: conduit                                              }
-common containers                 { build-depends: containers                                           }
-common criterion                  { build-depends: criterion                                            }
-common deepseq                    { build-depends: deepseq                                              }
-common ghc-prim                   { build-depends: ghc-prim                                             }
-common hspec                      { build-depends: hspec                                                }
-common hw-balancedparens          { build-depends: hw-balancedparens          >= 0.2.0.1                }
-common hw-bits                    { build-depends: hw-bits                    >= 0.7.0.2                }
-common hw-conduit                 { build-depends: hw-conduit                 >= 0.2.0.2                }
-common hw-parser                  { build-depends: hw-parser                                            }
-common hw-prim                    { build-depends: hw-prim                    >= 0.4.0.0                }
-common hw-rankselect              { build-depends: hw-rankselect              >= 0.10.0.3               }
-common hw-rankselect-base         { build-depends: hw-rankselect-base         >= 0.2.0.0                }
-common hw-xml                     { build-depends: hw-xml                                               }
-common lens                       { build-depends: lens                                                 }
-common mmap                       { build-depends: mmap                                                 }
-common mtl                        { build-depends: mtl                                                  }
-common resourcet                  { build-depends: resourcet                                            }
-common transformers               { build-depends: transformers                                         }
-common vector                     { build-depends: vector                                               }
-common word8                      { build-depends: word8                                                }
+common QuickCheck                 { build-depends: QuickCheck                 >= 2.13.1     && < 3      }
+common ansi-wl-pprint             { build-depends: ansi-wl-pprint             >= 0.6.9      && < 0.7    }
+common array                      { build-depends: array                      >= 0.5.2.0    && < 0.6    }
+common attoparsec                 { build-depends: attoparsec                 >= 0.13.2.2   && < 0.14   }
+common bytestring                 { build-depends: bytestring                 >= 0.10.8.2   && < 0.11   }
+common cereal                     { build-depends: cereal                     >= 0.5.8.1    && < 0.6    }
+common conduit                    { build-depends: conduit                    >= 1.3.1.1    && < 1.4    }
+common containers                 { build-depends: containers                 >= 0.6.2.1    && < 0.7    }
+common criterion                  { build-depends: criterion                  >= 1.5.5.0    && < 1.6    }
+common deepseq                    { build-depends: deepseq                    >= 1.4.3.0    && < 1.5    }
+common ghc-prim                   { build-depends: ghc-prim                   >= 0.5        && < 0.6    }
+common hedgehog                   { build-depends: hedgehog                   >= 1.0        && < 1.1    }
+common hspec                      { build-depends: hspec                      >= 2.5        && < 3.0    }
+common hw-balancedparens          { build-depends: hw-balancedparens          >= 0.3.0.0    && < 0.4    }
+common hw-bits                    { build-depends: hw-bits                    >= 0.7.0.6    && < 0.8    }
+common hw-conduit                 { build-depends: hw-conduit                 >= 0.2.0.5    && < 0.3    }
+common hw-hspec-hedgehog          { build-depends: hw-hspec-hedgehog          >= 0.1        && < 0.2    }
+common hw-parser                  { build-depends: hw-parser                  >= 0.1.0.1    && < 0.2    }
+common hw-prim                    { build-depends: hw-prim                    >= 0.6.2.28   && < 0.7    }
+common hw-rankselect              { build-depends: hw-rankselect              >= 0.13.1.0   && < 0.14   }
+common hw-rankselect-base         { build-depends: hw-rankselect-base         >= 0.3.2.1    && < 0.4    }
+common lens                       { build-depends: lens                       >= 4.17.1     && < 5.0    }
+common mmap                       { build-depends: mmap                       >= 0.5.9      && < 0.6    }
+common mtl                        { build-depends: mtl                        >= 2.2.2      && < 3      }
+common resourcet                  { build-depends: resourcet                  >= 1.2.2      && < 1.3    }
+common transformers               { build-depends: transformers               >= 0.5.5.0    && < 0.6    }
+common vector                     { build-depends: vector                     >= 0.12.0.3   && < 0.13   }
+common word8                      { build-depends: word8                      >= 0.1.3      && < 0.2    }
 
 common config
   default-language: Haskell2010
@@ -121,11 +122,11 @@ executable hw-xml-example
           , hw-bits
           , hw-prim
           , hw-rankselect
-          , hw-xml
           , vector
   main-is:            Main.hs
   other-modules:      Paths_hw_xml
   autogen-modules:    Paths_hw_xml
+  build-depends:      hw-xml
   hs-source-dirs:     app
   ghc-options:        -threaded -rtsopts -with-rtsopts=-N -O2 -Wall -msse4.2
 
@@ -143,11 +144,11 @@ test-suite hw-xml-test
           , hw-prim
           , hw-rankselect
           , hw-rankselect-base
-          , hw-xml
           , vector
   type:               exitcode-stdio-1.0
   main-is:            Spec.hs
   hs-source-dirs:     test
+  build-depends:      hw-xml
   ghc-options:        -threaded -rtsopts -with-rtsopts=-N
   default-language:   Haskell2010
   build-tool-depends: hspec-discover:hspec-discover
@@ -171,13 +172,13 @@ benchmark bench
           , hw-bits
           , hw-conduit
           , hw-prim
-          , hw-xml
           , mmap
           , resourcet
           , vector
   type:             exitcode-stdio-1.0
   main-is:          Main.hs
   other-modules:    Paths_hw_xml
+  build-depends:    hw-xml
   autogen-modules:  Paths_hw_xml
   hs-source-dirs:   bench
   ghc-options:      -O2 -Wall -msse4.2

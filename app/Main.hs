@@ -13,7 +13,7 @@ import HaskellWorks.Data.BalancedParens.RangeMin2
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
-import HaskellWorks.Data.RankSelect.CsPoppy
+import HaskellWorks.Data.RankSelect.CsPoppy1
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.Decode
 import HaskellWorks.Data.Xml.DecodeResult
@@ -27,7 +27,7 @@ import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS
 
 type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-type FastCursor = XmlCursor BS.ByteString CsPoppy (RangeMin2 CsPoppy)
+type FastCursor = XmlCursor BS.ByteString CsPoppy1 (RangeMin2 CsPoppy1)
 
 -- | Read an XML file into memory and return a raw cursor initialised to the
 -- start of the XML document.

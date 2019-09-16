@@ -4,17 +4,14 @@
 module HaskellWorks.Data.Xml.Conduit
   ( blankedXmlToInterestBits
   , byteStringToBits
-  , blankedXmlToBalancedParens
   , blankedXmlToBalancedParens2
   , compressWordAsBit
   , interestingWord8s
   , isInterestingWord8
   ) where
 
-import Control.Monad
 import Data.Array.Unboxed             as A
 import Data.ByteString                as BS
-import Data.Conduit
 import Data.Word
 import Data.Word8
 import HaskellWorks.Data.Bits.BitWise
@@ -39,25 +36,22 @@ isInterestingWord8 :: Word8 -> Word8
 isInterestingWord8 b = interestingWord8s ! b
 {-# INLINABLE isInterestingWord8 #-}
 
-blankedXmlToInterestBits :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
+blankedXmlToInterestBits :: [BS.ByteString] -> [BS.ByteString]
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
 
-blankedXmlToInterestBits' :: Monad m => BS.ByteString -> ConduitT BS.ByteString BS.ByteString m ()
-blankedXmlToInterestBits' rs = do
-  mbs <- await
-  case mbs of
-    Just bs -> do
-      let cs = if BS.length rs /= 0 then BS.concat [rs, bs] else bs
-      let lencs = BS.length cs
-      let q = lencs `quot` 8
-      let (ds, es) = BS.splitAt (q * 8) cs
-      let (fs, _) = BS.unfoldrN q gen ds
-      yield fs
-      blankedXmlToInterestBits' es
-    Nothing -> do
-      let lenrs = BS.length rs
-      let q = lenrs + 7 `quot` 8
-      yield (fst (BS.unfoldrN q gen rs))
+blankedXmlToInterestBits' :: BS.ByteString -> [BS.ByteString] -> [BS.ByteString]
+blankedXmlToInterestBits' rs is = case is of
+  (bs:bss) -> do
+    let cs = if BS.length rs /= 0 then BS.concat [rs, bs] else bs
+    let lencs = BS.length cs
+    let q = lencs `quot` 8
+    let (ds, es) = BS.splitAt (q * 8) cs
+    let (fs, _) = BS.unfoldrN q gen ds
+    fs:blankedXmlToInterestBits' es bss
+  [] -> do
+    let lenrs = BS.length rs
+    let q = lenrs + 7 `quot` 8
+    [fst (BS.unfoldrN q gen rs)]
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
@@ -65,51 +59,24 @@ blankedXmlToInterestBits' rs = do
                     , BS.drop 8 as
                     )
 
-blankedXmlToBalancedParens :: Monad m => ConduitT BS.ByteString Bool m ()
-blankedXmlToBalancedParens = do
-  mbs <- await
-  case mbs of
-    Just bs -> blankedXmlToBalancedParens' bs
-    Nothing -> return ()
-
-blankedXmlToBalancedParens' :: Monad m => BS.ByteString -> ConduitT BS.ByteString Bool m ()
-blankedXmlToBalancedParens' bs = case BS.uncons bs of
-  Just (c, cs) -> do
-    case c of
-      d | d == _less         -> yield True
-      d | d == _greater      -> yield False
-      d | d == _bracketleft  -> yield True
-      d | d == _bracketright -> yield False
-      d | d == _parenleft    -> yield True
-      d | d == _parenright   -> yield False
-      d | d == _a            -> yield True >> yield False
-      d | d == _v            -> yield True >> yield False
-      d | d == _t            -> yield True >> yield False
-      _                      -> return ()
-    blankedXmlToBalancedParens' cs
-  Nothing -> return ()
-
 repartitionMod8 :: BS.ByteString -> BS.ByteString -> (BS.ByteString, BS.ByteString)
 repartitionMod8 aBS bBS = (BS.take cLen abBS, BS.drop cLen abBS)
   where abBS = BS.concat [aBS, bBS]
         abLen = BS.length abBS
         cLen = (abLen `div` 8) * 8
 
-compressWordAsBit :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
+compressWordAsBit :: [BS.ByteString] -> [BS.ByteString]
 compressWordAsBit = compressWordAsBit' BS.empty
 
-compressWordAsBit' :: Monad m => BS.ByteString -> ConduitT BS.ByteString BS.ByteString m ()
-compressWordAsBit' aBS = do
-  mbBS <- await
-  case mbBS of
-    Just bBS -> do
-      let (cBS, dBS) = repartitionMod8 aBS bBS
-      let (cs, _) = BS.unfoldrN (BS.length cBS + 7 `div` 8) gen cBS
-      yield cs
-      compressWordAsBit' dBS
-    Nothing -> do
-      let (cs, _) = BS.unfoldrN (BS.length aBS + 7 `div` 8) gen aBS
-      yield cs
+compressWordAsBit' :: BS.ByteString -> [BS.ByteString] -> [BS.ByteString]
+compressWordAsBit' aBS iBS = case iBS of
+  (bBS:bBSs) -> do
+    let (cBS, dBS) = repartitionMod8 aBS bBS
+    let (cs, _) = BS.unfoldrN (BS.length cBS + 7 `div` 8) gen cBS
+    cs:compressWordAsBit' dBS bBSs
+  [] -> do
+    let (cs, _) = BS.unfoldrN (BS.length aBS + 7 `div` 8) gen aBS
+    [cs]
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen xs = if BS.length xs == 0
           then Nothing
@@ -117,15 +84,12 @@ compressWordAsBit' aBS = do
                     , BS.drop 8 xs
                     )
 
-blankedXmlToBalancedParens2 :: Monad m => ConduitT BS.ByteString BS.ByteString m ()
-blankedXmlToBalancedParens2 = do
-  mbs <- await
-  case mbs of
-    Just bs -> do
-      let (cs, _) = BS.unfoldrN (BS.length bs * 2) gen (Nothing, bs)
-      yield cs
-      blankedXmlToBalancedParens2
-    Nothing -> return ()
+blankedXmlToBalancedParens2 :: [BS.ByteString] -> [BS.ByteString]
+blankedXmlToBalancedParens2 is = case is of
+  (bs:bss) -> do
+    let (cs, _) = BS.unfoldrN (BS.length bs * 2) gen (Nothing, bs)
+    cs:blankedXmlToBalancedParens2 bss
+  [] -> []
   where gen :: (Maybe Bool, ByteString) -> Maybe (Word8, (Maybe Bool, ByteString))
         gen (Just True  , bs) = Just (0xFF, (Nothing, bs))
         gen (Just False , bs) = Just (0x00, (Nothing, bs))
@@ -152,23 +116,22 @@ balancedParensOf c = case c of
     d | d == _v            -> MiniTF
     _                      -> MiniN
 
-yieldBitsOfWord8 :: Monad m => Word8 -> ConduitT BS.ByteString Bool m ()
-yieldBitsOfWord8 w = do
-  yield ((w .&. BITS.bit 0) /= 0)
-  yield ((w .&. BITS.bit 1) /= 0)
-  yield ((w .&. BITS.bit 2) /= 0)
-  yield ((w .&. BITS.bit 3) /= 0)
-  yield ((w .&. BITS.bit 4) /= 0)
-  yield ((w .&. BITS.bit 5) /= 0)
-  yield ((w .&. BITS.bit 6) /= 0)
-  yield ((w .&. BITS.bit 7) /= 0)
+yieldBitsOfWord8 :: Word8 -> [Bool]
+yieldBitsOfWord8 w =
+  [ (w .&. BITS.bit 0) /= 0
+  , (w .&. BITS.bit 1) /= 0
+  , (w .&. BITS.bit 2) /= 0
+  , (w .&. BITS.bit 3) /= 0
+  , (w .&. BITS.bit 4) /= 0
+  , (w .&. BITS.bit 5) /= 0
+  , (w .&. BITS.bit 6) /= 0
+  , (w .&. BITS.bit 7) /= 0
+  ]
 
-yieldBitsofWord8s :: Monad m => [Word8] -> ConduitT BS.ByteString Bool m ()
-yieldBitsofWord8s = P.foldr ((>>) . yieldBitsOfWord8) (return ())
+yieldBitsofWord8s :: [Word8] -> [Bool]
+yieldBitsofWord8s = P.foldr ((++) . yieldBitsOfWord8) []
 
-byteStringToBits :: Monad m => ConduitT BS.ByteString Bool m ()
-byteStringToBits = do
-  mbs <- await
-  case mbs of
-    Just bs -> yieldBitsofWord8s (BS.unpack bs) >> byteStringToBits
-    Nothing -> return ()
+byteStringToBits :: [BS.ByteString] -> [Bool]
+byteStringToBits is = case is of
+  (bs:bss) -> yieldBitsofWord8s (BS.unpack bs) ++ byteStringToBits bss
+  []       -> []

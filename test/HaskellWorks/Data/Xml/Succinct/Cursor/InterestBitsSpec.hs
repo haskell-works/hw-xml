@@ -7,7 +7,6 @@ import Data.Monoid                                        ((<>))
 import Data.String
 import Data.Word
 import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.Conduit.List
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
@@ -47,7 +46,7 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec" $ do
     let ib :: XmlInterestBits (BitShown (DVS.Vector Word8))
         ib = XmlInterestBits (getXmlInterestBits (fromBlankedXml (BlankedXml blanked)))
     let moo :: [BS.ByteString]
-        moo = runListConduit blankedXmlToInterestBits blanked -- :: XmlInterestBits (BitShown (DVS.Vector Word8))
+        moo = blankedXmlToInterestBits blanked -- :: XmlInterestBits (BitShown (DVS.Vector Word8))
     putStrLn $ "Moo:       " <> show (BitShown . BS.unpack <$> moo)
     let actual = getXmlInterestBits ib :: BitShown (DVS.Vector Word8)
     let expected = fromString "10000110 00000010 00001000 00000100 00000001 00100000 00000000"

@@ -10,7 +10,7 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.Internal
   , xmlCursorPos
   ) where
 
-import Control.DeepSeq                                    (NFData(..))
+import Control.DeepSeq                                    (NFData (..))
 import Data.ByteString.Internal                           as BSI
 import Data.String
 import Data.Word
@@ -55,17 +55,6 @@ instance  (FromBlankedXml (XmlInterestBits a), FromBlankedXml (CBP.XmlBalancedPa
     }
     where blankedXml :: BlankedXml
           blankedXml = fromByteString bs
-
-instance IsString (XmlCursor String (BitShown [Bool]) (BP.SimpleBalancedParens [Bool])) where
-  fromString :: String -> XmlCursor String (BitShown [Bool]) (BP.SimpleBalancedParens [Bool])
-  fromString s = XmlCursor
-    { cursorText      = s
-    , cursorRank      = 1
-    , interests       = getXmlInterestBits (fromBlankedXml blankedXml)
-    , balancedParens  = CBP.getXmlBalancedParens (fromBlankedXml blankedXml)
-    }
-    where blankedXml :: BlankedXml
-          blankedXml = fromByteString (BSC.pack s)
 
 instance IsString (XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (BP.SimpleBalancedParens (DVS.Vector Word8))) where
   fromString = fromByteString . BSC.pack

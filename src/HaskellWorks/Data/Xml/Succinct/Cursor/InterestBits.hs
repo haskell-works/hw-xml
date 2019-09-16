@@ -14,7 +14,6 @@ import Control.Applicative
 import Data.ByteString.Internal
 import Data.Word
 import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.Conduit.List
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.RankSelect.Poppy512
 import HaskellWorks.Data.Xml.Conduit
@@ -29,7 +28,7 @@ getXmlInterestBits :: XmlInterestBits a -> a
 getXmlInterestBits (XmlInterestBits a) = a
 
 blankedXmlBssToInterestBitsBs :: [ByteString] -> ByteString
-blankedXmlBssToInterestBitsBs bss = BS.concat $ runListConduit blankedXmlToInterestBits bss
+blankedXmlBssToInterestBitsBs bss = BS.concat $ blankedXmlToInterestBits bss
 
 genInterest :: ByteString -> Maybe (Word8, ByteString)
 genInterest = BS.uncons
@@ -38,7 +37,7 @@ genInterestForever :: ByteString -> Maybe (Word8, ByteString)
 genInterestForever bs = BS.uncons bs <|> Just (0, bs)
 
 instance FromBlankedXml (XmlInterestBits (BitShown [Bool])) where
-  fromBlankedXml = XmlInterestBits . fromByteString . BS.concat . runListConduit blankedXmlToInterestBits . getBlankedXml
+  fromBlankedXml = XmlInterestBits . fromByteString . BS.concat . blankedXmlToInterestBits . getBlankedXml
 
 instance FromBlankedXml (XmlInterestBits (BitShown BS.ByteString)) where
   fromBlankedXml = XmlInterestBits . BitShown . BS.unfoldr genInterest . blankedXmlBssToInterestBitsBs . getBlankedXml

@@ -6,7 +6,6 @@ module HaskellWorks.Data.Xml.Conduit.BlankSpec (spec) where
 import Data.Char
 import Data.Monoid
 import HaskellWorks.Data.ByteString
-import HaskellWorks.Data.Conduit.List
 import HaskellWorks.Data.Xml.Conduit.Blank
 import Test.Hspec
 import Test.QuickCheck
@@ -19,7 +18,7 @@ import qualified Data.ByteString as BS
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do
   it (show original <> " when blanked xml should be " <> show expected) $ do
-    BS.concat (runListConduit blankXml [original]) `shouldBe` expected
+    BS.concat (blankXml [original]) `shouldBe` expected
 
 repeatBS :: Int -> BS.ByteString -> BS.ByteString
 repeatBS n bs | n > 0   = bs <> repeatBS (n - 1) bs
@@ -73,12 +72,12 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     let inputOriginalSuffix = "\n  </attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n</statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
     let inputOriginalChunked = chunkedBy 16 inputOriginal
-    let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
+    let inputOriginalBlanked = blankXml inputOriginalChunked
 
     forAll (choose (0, 16)) $ \(n :: Int) -> do
       let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
       let inputShiftedChunked = chunkedBy 16 inputShifted
-      let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
+      let inputShiftedBlanked = blankXml inputShiftedChunked
 
       noSpaces (BS.concat inputShiftedBlanked) `shouldBe` noSpaces (BS.concat inputOriginalBlanked)
   it "Can blank across chunk boundaries with auto-close tags" $ do
@@ -86,12 +85,12 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
     let inputOriginalChunked = chunkedBy 16 inputOriginal
-    let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
+    let inputOriginalBlanked = blankXml inputOriginalChunked
 
     forAll (choose (0, 16)) $ \(n :: Int) -> do
       let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
       let inputShiftedChunked = chunkedBy 16 inputShifted
-      let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
+      let inputShiftedBlanked = blankXml inputShiftedChunked
 
       -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
       let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
@@ -103,12 +102,12 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
     let inputOriginalChunked = chunkedBy 16 inputOriginal
-    let inputOriginalBlanked = runListConduit blankXml inputOriginalChunked
+    let inputOriginalBlanked = blankXml inputOriginalChunked
 
     let n = 15
     let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
     let inputShiftedChunked = chunkedBy 16 inputShifted
-    let inputShiftedBlanked = runListConduit blankXml inputShiftedChunked
+    let inputShiftedBlanked = blankXml inputShiftedChunked
 
     -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
     let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)

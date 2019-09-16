@@ -7,10 +7,7 @@ module HaskellWorks.Data.Xml.Conduit.Blank
   , BlankData(..)
   ) where
 
-import Control.Monad
-import Control.Monad.Trans.Resource        (MonadThrow)
 import Data.ByteString                     as BS
-import Data.Conduit
 import Data.Monoid                         ((<>))
 import Data.Word
 import Data.Word8
@@ -41,39 +38,36 @@ data BlankData = BlankData
   , blankC     :: !ByteString
   }
 
-blankXml :: MonadThrow m => ConduitT BS.ByteString BS.ByteString m ()
+blankXml :: [BS.ByteString] -> [BS.ByteString]
 blankXml = blankXmlPlan1 BS.empty InXml
 
-blankXmlPlan1 :: MonadThrow m => BS.ByteString -> BlankState -> ConduitT BS.ByteString BS.ByteString m ()
-blankXmlPlan1 as lastState = do
-  mbs <- await
-  case mbs of
-    Just bs -> do
-      let cs = as <> bs
-      case BS.uncons cs of
-        Just (d, ds) -> case BS.uncons ds of
-          Just (e, es) -> blankXmlRun False d e es lastState
-          Nothing      -> blankXmlPlan1 cs lastState
-        Nothing -> blankXmlPlan1 cs lastState
-    Nothing -> yield $ BS.map (const _space) as
+blankXmlPlan1 :: BS.ByteString -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlPlan1 as lastState is = case is of
+  (bs:bss) -> do
+    let cs = as <> bs
+    case BS.uncons cs of
+      Just (d, ds) -> case BS.uncons ds of
+        Just (e, es) -> blankXmlRun False d e es lastState bss
+        Nothing      -> blankXmlPlan1 cs lastState bss
+      Nothing -> blankXmlPlan1 cs lastState bss
+  [] -> [BS.map (const _space) as]
 
-blankXmlPlan2 :: MonadThrow m => Word8 -> Word8 -> BlankState -> ConduitT BS.ByteString BS.ByteString m ()
-blankXmlPlan2 a b lastState = do
-  mcs <- await
-  case mcs of
-    Just cs -> blankXmlRun False a b cs lastState
-    Nothing -> blankXmlRun True a b (BS.pack [_space, _space]) lastState
+blankXmlPlan2 :: Word8 -> Word8 -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlPlan2 a b lastState is = case is of
+  (cs:css) -> blankXmlRun False a b cs lastState css
+  []       -> blankXmlRun True a b (BS.pack [_space, _space]) lastState []
 
-blankXmlRun :: MonadThrow m => Bool -> Word8 -> Word8 -> BS.ByteString -> BlankState -> ConduitT BS.ByteString BS.ByteString m ()
-blankXmlRun done a b cs lastState = do
+blankXmlRun :: Bool -> Word8 -> Word8 -> BS.ByteString -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlRun done a b cs lastState is = do
   let (!ds, Just (BlankData !nextState _ _ _)) = unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
-  yield ds
   let (yy, zz) = case BS.unsnoc cs of
         Just (ys, z) -> case BS.unsnoc ys of
           Just (_, y) -> (y, z)
           Nothing     -> (b, z)
         Nothing -> (a, b)
-  unless done (blankXmlPlan2 yy zz nextState)
+  if done
+    then [ds]
+    else ds:blankXmlPlan2 yy zz nextState is
 
 mkNext :: Word8 -> BlankState -> Word8 -> BS.ByteString -> Maybe (Word8, BlankData)
 mkNext w s a bs = case BS.uncons bs of

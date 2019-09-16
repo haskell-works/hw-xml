@@ -3,14 +3,11 @@
 
 module Main where
 
-import Control.Monad.Trans.Resource            (MonadThrow)
 import Criterion.Main
-import Data.Conduit
 import Data.Word
 import Foreign
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.Conduit.List
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.Xml.Conduit
 import HaskellWorks.Data.Xml.Conduit.Blank
@@ -30,11 +27,11 @@ setupEnvXml filepath = do
 loadXml :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
 loadXml bs = fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
 
-xmlToInterestBits3 :: MonadThrow m => Conduit BS.ByteString m BS.ByteString
-xmlToInterestBits3 = blankXml .| blankedXmlToInterestBits
+xmlToInterestBits3 :: [BS.ByteString] -> [BS.ByteString]
+xmlToInterestBits3 = blankedXmlToInterestBits . blankXml
 
-runCon :: Conduit i [] BS.ByteString -> i -> BS.ByteString
-runCon con bs = BS.concat $ runListConduit con [bs]
+runCon :: ([i] -> [BS.ByteString]) -> i -> BS.ByteString
+runCon con bs = BS.concat $ con [bs]
 
 benchRankXmlCatalogConduits :: [Benchmark]
 benchRankXmlCatalogConduits =

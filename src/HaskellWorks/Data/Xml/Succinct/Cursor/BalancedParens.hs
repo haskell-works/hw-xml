@@ -28,9 +28,6 @@ genBitWordsForever :: BS.ByteString -> Maybe (Word8, BS.ByteString)
 genBitWordsForever bs = BS.uncons bs <|> Just (0, bs)
 {-# INLINABLE genBitWordsForever #-}
 
-instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens [Bool])) where
-  fromBlankedXml (BlankedXml bj) = XmlBalancedParens (SimpleBalancedParens (runListConduit blankedXmlToBalancedParens bj))
-
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word8))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
     where interestBS    = BS.concat (runListConduit (blankedXmlToBalancedParens2 .| compressWordAsBit) (getBlankedXml bj))

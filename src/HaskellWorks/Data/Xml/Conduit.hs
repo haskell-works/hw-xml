@@ -4,7 +4,6 @@
 module HaskellWorks.Data.Xml.Conduit
   ( blankedXmlToInterestBits
   , byteStringToBits
-  , blankedXmlToBalancedParens
   , blankedXmlToBalancedParens2
   , compressWordAsBit
   , interestingWord8s
@@ -64,30 +63,6 @@ blankedXmlToInterestBits' rs = do
           else Just ( BS.foldr' (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (BS.take 8 as)
                     , BS.drop 8 as
                     )
-
-blankedXmlToBalancedParens :: Monad m => ConduitT BS.ByteString Bool m ()
-blankedXmlToBalancedParens = do
-  mbs <- await
-  case mbs of
-    Just bs -> blankedXmlToBalancedParens' bs
-    Nothing -> return ()
-
-blankedXmlToBalancedParens' :: Monad m => BS.ByteString -> ConduitT BS.ByteString Bool m ()
-blankedXmlToBalancedParens' bs = case BS.uncons bs of
-  Just (c, cs) -> do
-    case c of
-      d | d == _less         -> yield True
-      d | d == _greater      -> yield False
-      d | d == _bracketleft  -> yield True
-      d | d == _bracketright -> yield False
-      d | d == _parenleft    -> yield True
-      d | d == _parenright   -> yield False
-      d | d == _a            -> yield True >> yield False
-      d | d == _v            -> yield True >> yield False
-      d | d == _t            -> yield True >> yield False
-      _                      -> return ()
-    blankedXmlToBalancedParens' cs
-  Nothing -> return ()
 
 repartitionMod8 :: BS.ByteString -> BS.ByteString -> (BS.ByteString, BS.ByteString)
 repartitionMod8 aBS bBS = (BS.take cLen abBS, BS.drop cLen abBS)

@@ -41,35 +41,7 @@ ns = TC.nextSibling
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.TypeSpec" $ do
-  describe "Cursor for [Bool]" $ do
-    it "initialises to beginning of empty object" $ do
-      let cursor = "<elem />" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlTypeAt cursor `shouldBe` Just XmlTypeElement
-    it "initialises to beginning of empty object preceded by spaces" $ do
-      let cursor = " <elem />" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      xmlTypeAt cursor `shouldBe` Just XmlTypeElement
-    it "cursor can navigate to attr list" $ do
-      let cursor = "<a foo='bar' boo='buzz'/>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList
-    it "cursor can navigate through attrs" $ do
-      let cursor = "<a foo='bar' boo='buzz'/>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      (fc >=> fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --foo
-      (fc >=> fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --bar
-      (fc >=> fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --boo
-      (fc >=> fc >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeToken --buzz
-      (fc >=> fc >=> ns >=> ns >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing --back off!
-    it "cursor can navigate to children" $ do
-      let cursor = "<a><b /><c /></a>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement --b
-      (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement --c
-      (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing --back off!
-    it "cursor recognises child element as an element child next to attr list" $ do
-      let cursor = "<a foo='bar'><inner /></a>" :: XmlCursor String (BitShown [Bool]) (SimpleBalancedParens [Bool])
-      (fc >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeAttrList
-      (fc >=> ns >=> xmlTypeAt) cursor `shouldBe` Just XmlTypeElement
-      (fc >=> ns >=> ns >=> xmlTypeAt) cursor `shouldBe` Nothing -- no more!
-
-  genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
+  genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8 )) (SimpleBalancedParens (DVS.Vector Word8 )))
   genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
   genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
   genSpec "DVS.Vector Word64" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))

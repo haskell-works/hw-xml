@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts          #-}
 {-# LANGUAGE FlexibleInstances         #-}
 {-# LANGUAGE InstanceSigs              #-}
+{-# LANGUAGE MonoLocalBinds            #-}
 {-# LANGUAGE MultiParamTypeClasses     #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings         #-}
@@ -12,21 +13,22 @@
 module HaskellWorks.Data.Xml.RawValueSpec (spec) where
 
 import Control.Monad
-import Data.Monoid
+import Data.Semigroup                                  ((<>))
 import Data.String
 import Data.Word
 import HaskellWorks.Data.BalancedParens.BalancedParens
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.Bits.BitWise
-import HaskellWorks.Data.FromForeignRegion
 import HaskellWorks.Data.RankSelect.Base.Rank0
 import HaskellWorks.Data.RankSelect.Base.Rank1
 import HaskellWorks.Data.RankSelect.Base.Select1
 import HaskellWorks.Data.RankSelect.Poppy512
+import HaskellWorks.Data.Xml.RawValue
 import HaskellWorks.Data.Xml.Succinct.Cursor           as C
 import HaskellWorks.Data.Xml.Succinct.Index
-import HaskellWorks.Data.Xml.RawValue
+import HaskellWorks.Hspec.Hedgehog
+import Hedgehog
 import Test.Hspec
 
 import qualified Data.ByteString              as BS
@@ -35,11 +37,9 @@ import qualified HaskellWorks.Data.TreeCursor as TC
 
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
---{-# ANN module ("HLint: ignore Redundant bracket"   :: String) #-}
 
 fc = TC.firstChild
 ns = TC.nextSibling
--- cd = TC.depth
 
 attrs :: [(String, String)] -> RawValue
 attrs as = RawAttrList $ as >>= (\(k, v) -> [RawAttrName k, RawAttrValue v])
@@ -59,18 +59,14 @@ rawValueVia mk = case mk of
   Nothing -> RawError "No such element"
 
 genSpec :: forall t u.
-  ( Eq                t
-  , Show              t
+  ( Show              t
   , Select1           t
-  , Eq                u
   , Show              u
   , Rank0             u
   , Rank1             u
   , BalancedParens    u
   , TestBit           u
-  , FromForeignRegion (XmlCursor BS.ByteString t u)
   , IsString          (XmlCursor BS.ByteString t u)
-  , XmlIndexAt        (XmlCursor BS.ByteString t u)
   )
   => String -> XmlCursor BS.ByteString t u -> SpecWith ()
 genSpec t _ = do
@@ -78,47 +74,47 @@ genSpec t _ = do
     let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " <> show cursor) (f cursor)
 
     forXml "<a/>" $ \cursor -> do
-      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe` RawElement "a" []
+      it "should have correct value" $ requireTest $ rawValueVia (Just cursor) === RawElement "a" []
 
     forXml "<a attr='value'/>" $ \cursor -> do
-      it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
+      it "should have correct value"    $ requireTest $ rawValueVia (Just cursor) ===
         RawElement "a" [attrs [("attr", "value")]]
 
     forXml "<a attr='value'><b attr='value' /></a>" $ \cursor -> do
-      it "should have correct value"    $ rawValueVia (Just cursor) `shouldBe`
+      it "should have correct value"  $ requireTest $ rawValueVia (Just cursor) ===
         RawElement "a" [attrs [("attr", "value")],
           RawElement "b" [attrs [("attr", "value")]]]
 
     forXml "<a>value text</a>" $ \cursor -> do
-      it "should have correct value"      $ rawValueVia (Just cursor) `shouldBe`
+      it "should have correct value"  $ requireTest $ rawValueVia (Just cursor) ===
         RawElement "a" [RawText "value text"]
 
     forXml "<!-- some comment -->" $ \cursor -> do
-      it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
+      it "should parse space separared comment" $ requireTest $ rawValueVia (Just cursor) ===
         RawComment " some comment "
 
     forXml "<!--some comment ->-->" $ \cursor -> do
-      it "should parse space separared comment" $ rawValueVia (Just cursor) `shouldBe`
+      it "should parse space separared comment" $ requireTest $ rawValueVia (Just cursor) ===
         RawComment "some comment ->"
 
     forXml "<![CDATA[a <br/> tag]]>" $ \cursor -> do
-      it "should parse cdata data" $ rawValueVia (Just cursor) `shouldBe`
+      it "should parse cdata data" $ requireTest $ rawValueVia (Just cursor) ===
         RawCData "a <br/> tag"
 
     forXml "<!DOCTYPE greeting [<!ELEMENT greeting (#PCDATA)>]>" $ \cursor -> do
-      it "should parse metas" $ rawValueVia (Just cursor) `shouldBe`
+      it "should parse metas" $ requireTest $ rawValueVia (Just cursor) ===
         RawMeta "DOCTYPE" [RawMeta "ELEMENT" []]
 
     forXml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a text='value'>free</a>" $ \cursor -> do
-      it "should parse xml header" $ rawValueVia (Just cursor) `shouldBe`
+      it "should parse xml header" $ requireTest $ rawValueVia (Just cursor) ===
         RawDocument [
           attrs [("version", "1.0"), ("encoding", "UTF-8")],
           RawElement "a" [attrs [("text", "value")],
           RawText "free"]]
 
-      it "navigate around" $ do
-        rawValueVia (ns cursor) `shouldBe` RawElement "a" [attrs [("text", "value")], RawText "free"]
-        rawValueVia ((ns >=> fc) cursor) `shouldBe` attrs [("text", "value")]
-        rawValueVia ((ns >=> fc >=> fc) cursor) `shouldBe` RawAttrName "text"
-        rawValueVia ((ns >=> fc >=> fc >=> ns) cursor) `shouldBe` RawAttrValue "value"
-        rawValueVia ((ns >=> fc >=> ns) cursor) `shouldBe` RawText "free"
+      it "navigate around" $ requireTest $ do
+        rawValueVia (ns cursor) === RawElement "a" [attrs [("text", "value")], RawText "free"]
+        rawValueVia ((ns >=> fc) cursor) === attrs [("text", "value")]
+        rawValueVia ((ns >=> fc >=> fc) cursor) === RawAttrName "text"
+        rawValueVia ((ns >=> fc >=> fc >=> ns) cursor) === RawAttrValue "value"
+        rawValueVia ((ns >=> fc >=> ns) cursor) === RawText "free"

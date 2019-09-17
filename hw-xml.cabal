@@ -25,7 +25,6 @@ source-repository head
 
 common base                       { build-depends: base                       >= 4.7        && < 5      }
 
-common QuickCheck                 { build-depends: QuickCheck                 >= 2.13.1     && < 3      }
 common ansi-wl-pprint             { build-depends: ansi-wl-pprint             >= 0.6.9      && < 0.7    }
 common array                      { build-depends: array                      >= 0.5.2.0    && < 0.6    }
 common attoparsec                 { build-depends: attoparsec                 >= 0.13.2.2   && < 0.14   }
@@ -128,13 +127,14 @@ executable hw-xml-example
 
 test-suite hw-xml-test
   import:   base, config
-          , QuickCheck
           , attoparsec
           , base
           , bytestring
+          , hedgehog
           , hspec
           , hw-balancedparens
           , hw-bits
+          , hw-hspec-hedgehog
           , hw-prim
           , hw-rankselect
           , hw-rankselect-base

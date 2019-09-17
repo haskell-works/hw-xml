@@ -4,21 +4,24 @@
 module HaskellWorks.Data.Xml.Conduit.BlankSpec (spec) where
 
 import Data.Char
-import Data.Monoid
+import Data.Semigroup                      ((<>))
 import HaskellWorks.Data.ByteString
 import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Hspec.Hedgehog
+import Hedgehog
 import Test.Hspec
-import Test.QuickCheck
 
 import qualified Data.ByteString as BS
+import qualified Hedgehog.Gen    as G
+import qualified Hedgehog.Range  as R
 
 {-# ANN module ("HLint: ignore Redundant do" :: String) #-}
 {-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
 
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do
-  it (show original <> " when blanked xml should be " <> show expected) $ do
-    BS.concat (blankXml [original]) `shouldBe` expected
+  it (show original <> " when blanked xml should be " <> show expected) $ requireTest $ do
+    BS.concat (blankXml [original]) === expected
 
 repeatBS :: Int -> BS.ByteString -> BS.ByteString
 repeatBS n bs | n > 0   = bs <> repeatBS (n - 1) bs
@@ -67,37 +70,39 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     "<a><c>00</c><s/></a>"                    `whenBlankedXmlShouldBe` "<  <  t    ><  >   >"
     "<a><c>0</c><s/></a>"                     `whenBlankedXmlShouldBe` "<  <  t   ><  >   >"
 
-  it "Can blank across chunk boundaries with basic tags" $ do
+  it "Can blank across chunk boundaries with basic tags" $ requireTest $ do
     let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<statistics>\n  <attack>"
     let inputOriginalSuffix = "\n  </attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n  <attack></attack>\n</statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
     let inputOriginalChunked = chunkedBy 16 inputOriginal
     let inputOriginalBlanked = blankXml inputOriginalChunked
 
-    forAll (choose (0, 16)) $ \(n :: Int) -> do
-      let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
-      let inputShiftedChunked = chunkedBy 16 inputShifted
-      let inputShiftedBlanked = blankXml inputShiftedChunked
+    n <- forAll $ G.int (R.linear 0 16)
 
-      noSpaces (BS.concat inputShiftedBlanked) `shouldBe` noSpaces (BS.concat inputOriginalBlanked)
-  it "Can blank across chunk boundaries with auto-close tags" $ do
+    let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
+    let inputShiftedChunked = chunkedBy 16 inputShifted
+    let inputShiftedBlanked = blankXml inputShiftedChunked
+
+    noSpaces (BS.concat inputShiftedBlanked) === noSpaces (BS.concat inputOriginalBlanked)
+  it "Can blank across chunk boundaries with auto-close tags" $ requireTest $ do
     let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><statistics><attack>"
     let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
     let inputOriginalChunked = chunkedBy 16 inputOriginal
     let inputOriginalBlanked = blankXml inputOriginalChunked
 
-    forAll (choose (0, 16)) $ \(n :: Int) -> do
-      let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
-      let inputShiftedChunked = chunkedBy 16 inputShifted
-      let inputShiftedBlanked = blankXml inputShiftedChunked
+    n <- forAll $ G.int (R.linear 0 16)
 
-      -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
-      let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
-      let expected  = Annotated (noSpaces (BS.concat inputOriginalBlanked)) (inputOriginalBlanked, n)
+    let inputShifted = inputOriginalPrefix <> repeatBS n " " <> inputOriginalSuffix
+    let inputShiftedChunked = chunkedBy 16 inputShifted
+    let inputShiftedBlanked = blankXml inputShiftedChunked
 
-      actual `shouldBe` expected
-  it "Can blank across chunk boundaries with auto-close tags" $ do
+    -- putStrLn $ show (BS.concat inputShiftedBlanked) <> " vs " <> show (BS.concat inputOriginalBlanked)
+    let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
+    let expected  = Annotated (noSpaces (BS.concat inputOriginalBlanked)) (inputOriginalBlanked, n)
+
+    actual === expected
+  it "Can blank across chunk boundaries with auto-close tags" $ requireTest $ do
     let inputOriginalPrefix = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><statistics><attack>"
     let inputOriginalSuffix = "<inner/></attack><attack></attack></statistics>\n"
     let inputOriginal = inputOriginalPrefix <> inputOriginalSuffix
@@ -113,4 +118,4 @@ spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
     let actual    = Annotated (noSpaces (BS.concat inputShiftedBlanked )) (inputShiftedBlanked, n)
     let expected  = Annotated (noSpaces (BS.concat inputOriginalBlanked)) (inputOriginalBlanked, n)
 
-    actual `shouldBe` expected
+    actual === expected

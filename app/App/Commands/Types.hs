@@ -10,4 +10,6 @@ import GHC.Generics
 
 data DemoOptions = DemoOptions deriving (Eq, Show, Generic)
 
-data QueryOptions = QueryOptions deriving (Eq, Show, Generic)
+newtype QueryOptions = QueryOptions
+  { input :: FilePath
+  } deriving (Eq, Show, Generic)

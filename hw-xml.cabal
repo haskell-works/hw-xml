@@ -131,6 +131,7 @@ executable hw-xml
   other-modules:        Paths_hw_xml
                         App.Commands
                         App.Commands.Demo
+                        App.Commands.Query
                         App.Commands.Types
                         App.Show
   autogen-modules:      Paths_hw_xml

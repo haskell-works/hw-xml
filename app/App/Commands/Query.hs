@@ -12,36 +12,51 @@ module App.Commands.Query
 
 import Data.Foldable
 import Data.Maybe
-import Data.Semigroup                             ((<>))
+import Data.Semigroup                                   ((<>))
 import Data.Word
+import Foreign.ForeignPtr
 import HaskellWorks.Data.BalancedParens.RangeMin2
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.RankSelect.CsPoppy1
 import HaskellWorks.Data.TreeCursor
+import HaskellWorks.Data.Vector.Storable
 import HaskellWorks.Data.Xml.Decode
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
 import HaskellWorks.Data.Xml.Succinct.Cursor
+import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Data.Xml.Succinct.Index
 import HaskellWorks.Data.Xml.Value
-import Options.Applicative                        hiding (columns)
+import Options.Applicative                              hiding (columns)
 
-import qualified App.Commands.Types   as Z
-import qualified Data.ByteString      as BS
-import qualified Data.Vector.Storable as DVS
+import qualified App.Commands.Types                      as Z
+import qualified Data.ByteString                         as BS
+import qualified Data.ByteString.Internal                as BSI
+import qualified Data.Vector.Storable                    as DVS
+import qualified HaskellWorks.Data.Xml.Internal.ToIbBp64 as I
+import qualified System.IO.MMap                          as IO
 
 type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
 type FastCursor = XmlCursor BS.ByteString CsPoppy1 (RangeMin2 CsPoppy1)
 
 -- | Read an XML file into memory and return a raw cursor initialised to the
 -- start of the XML document.
-readRawCursor :: String -> IO RawCursor
-readRawCursor path = do
-  !bs <- BS.readFile path
-  let !cursor = fromByteString bs :: RawCursor
+mmapRawCursor :: String -> IO RawCursor
+mmapRawCursor filePath = do
+  (fptr :: ForeignPtr Word8, offset, size) <- IO.mmapFileForeignPtr filePath IO.ReadOnly Nothing
+  let !bs = BSI.fromForeignPtr (castForeignPtr fptr) offset size
+  let blankedXml :: BlankedXml = fromByteString bs
+  let (ib, bp) = construct64UnzipN (fromIntegral size) (I.toIbBp64 blankedXml)
+  let !cursor = XmlCursor
+        { cursorText      = bs
+        , interests       = BitShown ib
+        , balancedParens  = SimpleBalancedParens bp
+        , cursorRank      = 1
+        }
+
   return cursor
 
 -- | Read an XML file into memory and return a query-optimised cursor initialised
@@ -52,7 +67,7 @@ readFastCursor filename = do
   -- The raw XML data is `text`, and `ib` and `bp` are the indexes.
   -- `ib` and `bp` can be persisted to an index file for later use to avoid
   -- re-parsing the file.
-  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- readRawCursor filename
+  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- mmapRawCursor filename
   let !bpCsPoppy = makeCsPoppy bp
   let !rangeMinMax = mkRangeMin2 bpCsPoppy
   let !ibCsPoppy = makeCsPoppy ib

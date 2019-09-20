@@ -20,7 +20,6 @@ import Foreign.ForeignPtr
 import HaskellWorks.Data.BalancedParens.RangeMin2
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.RankSelect.CsPoppy1
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Vector.Storable
@@ -50,7 +49,7 @@ mmapRawCursor :: String -> IO RawCursor
 mmapRawCursor filePath = do
   (fptr :: ForeignPtr Word8, offset, size) <- IO.mmapFileForeignPtr filePath IO.ReadOnly Nothing
   let !bs = BSI.fromForeignPtr (castForeignPtr fptr) offset size
-  let blankedXml :: BlankedXml = fromByteString bs
+  let blankedXml = bsToBlankedXml bs
   let (ib, bp) = construct64UnzipN (fromIntegral size) (I.toIbBp64 blankedXml)
   let !cursor = XmlCursor
         { cursorText      = bs

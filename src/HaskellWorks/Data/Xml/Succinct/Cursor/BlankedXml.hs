@@ -3,10 +3,10 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   ( BlankedXml(..)
   , FromBlankedXml(..)
   , getBlankedXml
+  , bsToBlankedXml
   ) where
 
 import HaskellWorks.Data.ByteString
-import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.Xml.Conduit.Blank
 
 import qualified Data.ByteString as BS
@@ -19,5 +19,5 @@ getBlankedXml (BlankedXml bs) = bs
 class FromBlankedXml a where
   fromBlankedXml :: BlankedXml -> a
 
-instance FromByteString BlankedXml where
-  fromByteString bs = BlankedXml (blankXml (chunkedBy 4064 bs))
+bsToBlankedXml :: BS.ByteString -> BlankedXml
+bsToBlankedXml bs = BlankedXml (blankXml (chunkedBy 4064 bs))

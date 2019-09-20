@@ -113,7 +113,7 @@ library
   hs-source-dirs:     src
   ghc-options:        -Wall -O2 -msse4.2
 
-executable hw-xml-example
+executable hw-xml
   import:   base, config
           , bytestring
           , generic-lens

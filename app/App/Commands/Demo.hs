@@ -122,4 +122,4 @@ optsDemo :: Parser Z.DemoOptions
 optsDemo = pure Z.DemoOptions
 
 cmdDemo :: Mod CommandFields (IO ())
-cmdDemo = command "put-file"  $ flip info idm $ runDemo <$> optsDemo
+cmdDemo = command "demo"  $ flip info idm $ runDemo <$> optsDemo

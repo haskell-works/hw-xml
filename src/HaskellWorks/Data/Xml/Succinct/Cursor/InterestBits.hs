@@ -8,6 +8,7 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
   , getXmlInterestBits
   , blankedXmlToInterestBits
   , blankedXmlBssToInterestBitsBs
+  , genInterestForever
   ) where
 
 import Control.Applicative

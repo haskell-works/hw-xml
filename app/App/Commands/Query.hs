@@ -10,7 +10,9 @@ module App.Commands.Query
   ( cmdQuery
   ) where
 
+import Control.Lens
 import Data.Foldable
+import Data.Generics.Product.Any
 import Data.Maybe
 import Data.Semigroup                                   ((<>))
 import Data.Word
@@ -115,9 +117,12 @@ decodeCatalog xml = do
   return $ Catalog aPlants
 
 runQuery :: Z.QueryOptions -> IO ()
-runQuery _ = do
+runQuery opt = do
+  let input = opt ^. the @"input"
+
   -- Read XML into memory as a query-optimised cursor
-  !cursor <- readFastCursor "data/catalog.xml"
+  !cursor <- readFastCursor input
+
   -- Skip the XML declaration to get to the root element cursor
   case nextSibling cursor of
     Just rootCursor -> do
@@ -134,7 +139,12 @@ runQuery _ = do
       return ()
 
 optsQuery :: Parser Z.QueryOptions
-optsQuery = pure Z.QueryOptions
+optsQuery = Z.QueryOptions
+  <$> strOption
+      (   long "input"
+      <>  help "Input file"
+      <>  metavar "FILE"
+      )
 
 cmdQuery :: Mod CommandFields (IO ())
 cmdQuery = command "query"  $ flip info idm $ runQuery <$> optsQuery

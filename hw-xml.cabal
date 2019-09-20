@@ -123,6 +123,7 @@ executable hw-xml
           , hw-prim
           , hw-rankselect
           , lens
+          , mmap
           , mtl
           , optparse-applicative
           , resourcet

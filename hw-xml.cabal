@@ -75,6 +75,7 @@ library
           , hw-rankselect
           , hw-rankselect-base
           , lens
+          , mmap
           , mtl
           , resourcet
           , transformers
@@ -100,6 +101,7 @@ library
     HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
     HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
     HaskellWorks.Data.Xml.Succinct.Cursor.Internal
+    HaskellWorks.Data.Xml.Succinct.Cursor.MMap
     HaskellWorks.Data.Xml.Succinct.Cursor.Token
     HaskellWorks.Data.Xml.Succinct.Index
     HaskellWorks.Data.Xml.RawDecode
@@ -135,7 +137,6 @@ executable hw-xml
                         App.Commands
                         App.Commands.Count
                         App.Commands.Demo
-                        App.Commands.Query
                         App.Commands.Types
                         App.Options
                         App.XPath.Parser

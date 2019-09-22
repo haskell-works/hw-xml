@@ -15,68 +15,21 @@ import App.Options
 import Control.Lens
 import Control.Monad
 import Data.Generics.Product.Any
-import Data.Semigroup                                   ((<>))
-import Data.Text                                        (Text)
-import Data.Word
-import Foreign.ForeignPtr
-import HaskellWorks.Data.BalancedParens.RangeMin2
-import HaskellWorks.Data.BalancedParens.Simple
-import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.RankSelect.CsPoppy1
+import Data.Semigroup                             ((<>))
+import Data.Text                                  (Text)
 import HaskellWorks.Data.TreeCursor
-import HaskellWorks.Data.Vector.Storable
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
-import HaskellWorks.Data.Xml.Succinct.Cursor
-import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+import HaskellWorks.Data.Xml.Succinct.Cursor.MMap
 import HaskellWorks.Data.Xml.Succinct.Index
 import HaskellWorks.Data.Xml.Value
-import Options.Applicative                              hiding (columns)
+import Options.Applicative                        hiding (columns)
 
-import qualified App.Commands.Types                      as Z
-import qualified App.XPath.Parser                        as XPP
-import qualified Data.ByteString                         as BS
-import qualified Data.ByteString.Internal                as BSI
-import qualified Data.Text                               as T
-import qualified Data.Vector.Storable                    as DVS
-import qualified HaskellWorks.Data.Xml.Internal.ToIbBp64 as I
-import qualified System.IO                               as IO
-import qualified System.IO.MMap                          as IO
-
-type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-type FastCursor = XmlCursor BS.ByteString CsPoppy1 (RangeMin2 CsPoppy1)
-
--- | Read an XML file into memory and return a raw cursor initialised to the
--- start of the XML document.
-mmapRawCursor :: String -> IO RawCursor
-mmapRawCursor filePath = do
-  (fptr :: ForeignPtr Word8, offset, size) <- IO.mmapFileForeignPtr filePath IO.ReadOnly Nothing
-  let !bs = BSI.fromForeignPtr (castForeignPtr fptr) offset size
-  let blankedXml = bsToBlankedXml bs
-  let (ib, bp) = construct64UnzipN (fromIntegral size) (I.toIbBp64 blankedXml)
-  let !cursor = XmlCursor
-        { cursorText      = bs
-        , interests       = BitShown ib
-        , balancedParens  = SimpleBalancedParens bp
-        , cursorRank      = 1
-        }
-
-  return cursor
-
--- | Read an XML file into memory and return a Count-optimised cursor initialised
--- to the start of the XML document.
-readFastCursor :: String -> IO FastCursor
-readFastCursor filename = do
-  -- Load the XML file into memory as a raw cursor.
-  -- The raw XML data is `text`, and `ib` and `bp` are the indexes.
-  -- `ib` and `bp` can be persisted to an index file for later use to avoid
-  -- re-parsing the file.
-  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- mmapRawCursor filename
-  let !bpCsPoppy = makeCsPoppy bp
-  let !rangeMinMax = mkRangeMin2 bpCsPoppy
-  let !ibCsPoppy = makeCsPoppy ib
-  return $ XmlCursor text ibCsPoppy rangeMinMax 1
+import qualified App.Commands.Types as Z
+import qualified App.XPath.Parser   as XPP
+import qualified Data.Text          as T
+import qualified System.IO          as IO
 
 -- | Document model.  This does not need to be able to completely represent all
 -- the data in the XML document.  In fact, having a smaller model may improve
@@ -115,7 +68,7 @@ runCount opt = do
   IO.putStrLn $ "XPath: " <> show xpath
 
   -- Read XML into memory as a Count-optimised cursor
-  !cursor <- readFastCursor input
+  !cursor <- mmapFastCursor input
 
   -- Skip the XML declaration to get to the root element cursor
   case nextSibling cursor of

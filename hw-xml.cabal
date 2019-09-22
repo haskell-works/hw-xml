@@ -116,6 +116,7 @@ library
 
 executable hw-xml
   import:   base, config
+          , attoparsec
           , bytestring
           , generic-lens
           , hw-balancedparens
@@ -132,9 +133,13 @@ executable hw-xml
   main-is:              Main.hs
   other-modules:        Paths_hw_xml
                         App.Commands
+                        App.Commands.Count
                         App.Commands.Demo
                         App.Commands.Query
                         App.Commands.Types
+                        App.Options
+                        App.XPath.Parser
+                        App.XPath.Types
                         App.Show
   autogen-modules:      Paths_hw_xml
   build-depends:        hw-xml

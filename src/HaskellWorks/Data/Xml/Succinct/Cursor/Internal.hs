@@ -54,7 +54,7 @@ instance  (FromBlankedXml (XmlInterestBits a), FromBlankedXml (CBP.XmlBalancedPa
     , cursorRank      = 1
     }
     where blankedXml :: BlankedXml
-          blankedXml = fromByteString bs
+          blankedXml = bsToBlankedXml bs
 
 instance IsString (XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (BP.SimpleBalancedParens (DVS.Vector Word8))) where
   fromString = fromByteString . BSC.pack

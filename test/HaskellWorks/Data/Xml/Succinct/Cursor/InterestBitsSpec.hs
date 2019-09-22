@@ -20,7 +20,7 @@ import qualified Data.Vector.Storable as DVS
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
 
 interestBitsOf :: FromBlankedXml (XmlInterestBits a) => BS.ByteString -> a
-interestBitsOf = getXmlInterestBits . fromBlankedXml . fromByteString
+interestBitsOf = getXmlInterestBits . fromBlankedXml . bsToBlankedXml
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec" $ do

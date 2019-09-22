@@ -1,5 +1,6 @@
 module App.Commands where
 
+import App.Commands.Count
 import App.Commands.Demo
 import App.Commands.Query
 import Data.Semigroup      ((<>))
@@ -11,5 +12,6 @@ commands = commandsGeneral
 commandsGeneral :: Parser (IO ())
 commandsGeneral = subparser $ mempty
   <>  commandGroup "Commands:"
+  <>  cmdCount
   <>  cmdDemo
   <>  cmdQuery

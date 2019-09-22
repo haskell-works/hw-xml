@@ -10,53 +10,20 @@ module App.Commands.Demo
   ( cmdDemo
   ) where
 
+import App.Slow
 import Data.Foldable
 import Data.Maybe
-import Data.Semigroup                             ((<>))
-import Data.Word
-import HaskellWorks.Data.BalancedParens.RangeMin2
-import HaskellWorks.Data.BalancedParens.Simple
-import HaskellWorks.Data.Bits.BitShown
-import HaskellWorks.Data.FromByteString
-import HaskellWorks.Data.RankSelect.CsPoppy1
+import Data.Semigroup                       ((<>))
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.Decode
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
-import HaskellWorks.Data.Xml.Succinct.Cursor
 import HaskellWorks.Data.Xml.Succinct.Index
 import HaskellWorks.Data.Xml.Value
-import Options.Applicative                        hiding (columns)
+import Options.Applicative                  hiding (columns)
 
-import qualified App.Commands.Types   as Z
-import qualified Data.ByteString      as BS
-import qualified Data.Vector.Storable as DVS
-
-type RawCursor = XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-type FastCursor = XmlCursor BS.ByteString CsPoppy1 (RangeMin2 CsPoppy1)
-
--- | Read an XML file into memory and return a raw cursor initialised to the
--- start of the XML document.
-readRawCursor :: String -> IO RawCursor
-readRawCursor path = do
-  !bs <- BS.readFile path
-  let !cursor = fromByteString bs :: RawCursor
-  return cursor
-
--- | Read an XML file into memory and return a query-optimised cursor initialised
--- to the start of the XML document.
-readFastCursor :: String -> IO FastCursor
-readFastCursor filename = do
-  -- Load the XML file into memory as a raw cursor.
-  -- The raw XML data is `text`, and `ib` and `bp` are the indexes.
-  -- `ib` and `bp` can be persisted to an index file for later use to avoid
-  -- re-parsing the file.
-  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- readRawCursor filename
-  let !bpCsPoppy = makeCsPoppy bp
-  let !rangeMinMax = mkRangeMin2 bpCsPoppy
-  let !ibCsPoppy = makeCsPoppy ib
-  return $ XmlCursor text ibCsPoppy rangeMinMax 1
+import qualified App.Commands.Types as Z
 
 -- | Parse the text of an XML node.
 class ParseText a where

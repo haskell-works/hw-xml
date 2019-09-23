@@ -8,9 +8,11 @@
 module HaskellWorks.Data.Xml.Succinct.Cursor.Internal
   ( XmlCursor(..)
   , xmlCursorPos
+  , makeXmlCursor
   ) where
 
 import Control.DeepSeq                                    (NFData (..))
+import Data.ByteString                                    (ByteString)
 import Data.String
 import Data.Word
 import Foreign.ForeignPtr
@@ -24,6 +26,8 @@ import HaskellWorks.Data.RankSelect.Base.Rank1
 import HaskellWorks.Data.RankSelect.Base.Select1
 import HaskellWorks.Data.RankSelect.Poppy512
 import HaskellWorks.Data.TreeCursor
+import HaskellWorks.Data.Xml.Internal.BalancedParens
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
 
@@ -32,6 +36,7 @@ import qualified Data.ByteString.Char8                                as BSC
 import qualified Data.ByteString.Internal                             as BSI
 import qualified Data.Vector.Storable                                 as DVS
 import qualified HaskellWorks.Data.BalancedParens                     as BP
+import qualified HaskellWorks.Data.Vector.Storable                    as DVS
 import qualified HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens as CBP
 
 data XmlCursor t v w = XmlCursor
@@ -44,6 +49,18 @@ data XmlCursor t v w = XmlCursor
 
 instance (NFData t, NFData v, NFData w) => NFData (XmlCursor t v w) where
   rnf (XmlCursor a b c d) = rnf (a, b, c, d)
+
+interestAndParens :: [ByteString] -> (DVS.Vector Word64, DVS.Vector Word64)
+interestAndParens bs = DVS.construct64UnzipN (sum (map BS.length bs)) $ zip (blankedXmlToInterestBits bs) (compressWordAsBit . blankedXmlToBalancedParens $ bs)
+
+makeXmlCursor :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (BP.SimpleBalancedParens (DVS.Vector Word64))
+makeXmlCursor bs = XmlCursor
+    { cursorText      = bs
+    , interests       = BitShown interestBits
+    , balancedParens  = BP.SimpleBalancedParens bps
+    , cursorRank      = 1
+    }
+    where (interestBits, bps) = interestAndParens . getBlankedXml $ bsToBlankedXml bs
 
 instance  (FromBlankedXml (XmlInterestBits a), FromBlankedXml (CBP.XmlBalancedParens b))
           => FromByteString (XmlCursor BS.ByteString a b) where

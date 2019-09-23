@@ -12,11 +12,9 @@ import Data.Word
 import HaskellWorks.Data.Bits.BitWise
 import HaskellWorks.Data.Xml.Internal.ByteString
 import HaskellWorks.Data.Xml.Internal.Tables
-import Prelude
 
 import qualified Data.Bits       as BITS
 import qualified Data.ByteString as BS
-import qualified Prelude         as P
 
 blankedXmlToInterestBits :: [ByteString] -> [ByteString]
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
@@ -24,11 +22,8 @@ blankedXmlToInterestBits = blankedXmlToInterestBits' ""
 blankedXmlToInterestBits' :: ByteString -> [ByteString] -> [ByteString]
 blankedXmlToInterestBits' rs is = case is of
   (bs:bss) -> do
-    let cs = if BS.length rs /= 0 then BS.concat [rs, bs] else bs
-    let lencs = BS.length cs
-    let q = lencs `quot` 8
-    let (ds, es) = BS.splitAt (q * 8) cs
-    let (fs, _) = BS.unfoldrN q gen ds
+    let (ds, es) = repartitionMod8 rs bs
+    let (fs, _) = BS.unfoldrN (BS.length ds + 7 `div` 8) gen ds
     fs:blankedXmlToInterestBits' es bss
   [] -> do
     let lenrs = BS.length rs
@@ -37,9 +32,8 @@ blankedXmlToInterestBits' rs is = case is of
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
-          else Just ( BS.foldr' (\b m -> isInterestingWord8 b .|. (m .<. 1)) 0 (BS.take 8 as)
-                    , BS.drop 8 as
-                    )
+          else Just (BS.foldr' (\b m -> isInterestingWord8 b .|. (m .<. 1)) 0 (BS.take 8 as),
+                     BS.drop 8 as)
 
 compressWordAsBit :: [ByteString] -> [ByteString]
 compressWordAsBit = compressWordAsBit' BS.empty
@@ -73,7 +67,7 @@ yieldBitsOfWord8 w =
   ]
 
 yieldBitsofWord8s :: [Word8] -> [Bool]
-yieldBitsofWord8s = P.foldr ((++) . yieldBitsOfWord8) []
+yieldBitsofWord8s = foldr ((++) . yieldBitsOfWord8) []
 
 byteStringToBits :: [ByteString] -> [Bool]
 byteStringToBits is = case is of

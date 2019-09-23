@@ -27,8 +27,10 @@ import HaskellWorks.Data.Xml.Value
 import Options.Applicative                        hiding (columns)
 
 import qualified App.Commands.Types as Z
+import qualified App.Slow           as SLOW
 import qualified App.XPath.Parser   as XPP
 import qualified Data.Text          as T
+import qualified System.Exit        as IO
 import qualified System.IO          as IO
 
 -- | Document model.  This does not need to be able to completely represent all
@@ -62,28 +64,36 @@ countAtPath (t:ts) xml = do
 
 runCount :: Z.CountOptions -> IO ()
 runCount opt = do
-  let input = opt ^. the @"input"
-  let xpath = opt ^. the @"xpath"
+  let input   = opt ^. the @"input"
+  let xpath   = opt ^. the @"xpath"
+  let method  = opt ^. the @"method"
 
   IO.putStrLn $ "XPath: " <> show xpath
 
-  -- Read XML into memory as a Count-optimised cursor
-  !cursor <- mmapFastCursor input
+  cursorResult <- case method of
+    "mmap"  -> Right <$> mmapFastCursor input
+    "slow"  -> Right <$> SLOW.readFastCursor input
+    unknown -> return (Left ("Unknown method " <> show unknown))
 
-  -- Skip the XML declaration to get to the root element cursor
-  case nextSibling cursor of
-    Just rootCursor -> do
-      -- Get the root raw XML value at the root element cursor
-      let rootValue = rawValueAt (xmlIndexAt rootCursor)
-      -- Show what we have at this cursor
-      putStrLn $ "Raw value: " <> take 100 (show rootValue)
-      -- Decode the raw XML value
-      case countAtPath (xpath ^. the @"path") (rawDecode rootValue) of
-        DecodeOk count   -> putStrLn $ "Count: " <> show count
-        DecodeFailed msg -> putStrLn $ "Error: " <> show msg
-    Nothing -> do
-      putStrLn "Could not read XML"
-      return ()
+  case cursorResult of
+    Right !cursor -> do
+      -- Skip the XML declaration to get to the root element cursor
+      case nextSibling cursor of
+        Just rootCursor -> do
+          -- Get the root raw XML value at the root element cursor
+          let rootValue = rawValueAt (xmlIndexAt rootCursor)
+          -- Show what we have at this cursor
+          putStrLn $ "Raw value: " <> take 100 (show rootValue)
+          -- Decode the raw XML value
+          case countAtPath (xpath ^. the @"path") (rawDecode rootValue) of
+            DecodeOk count   -> putStrLn $ "Count: " <> show count
+            DecodeFailed msg -> putStrLn $ "Error: " <> show msg
+        Nothing -> do
+          putStrLn "Could not read XML"
+          return ()
+    Left msg -> do
+      IO.putStrLn $ "Error: " <> msg
+      IO.exitFailure
 
 optsCount :: Parser Z.CountOptions
 optsCount = Z.CountOptions
@@ -96,6 +106,11 @@ optsCount = Z.CountOptions
       (   long "xpath"
       <>  help "XPath expression"
       <>  metavar "XPATH"
+      )
+  <*> textOption
+      (   long "method"
+      <>  help "Read method"
+      <>  metavar "METHOD"
       )
 
 cmdCount :: Mod CommandFields (IO ())

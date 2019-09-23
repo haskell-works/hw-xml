@@ -21,6 +21,7 @@ import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
+import HaskellWorks.Data.Xml.Succinct.Cursor.Load
 import HaskellWorks.Data.Xml.Succinct.Cursor.MMap
 import HaskellWorks.Data.Xml.Succinct.Index
 import HaskellWorks.Data.Xml.Value
@@ -71,9 +72,10 @@ runCount opt = do
   IO.putStrLn $ "XPath: " <> show xpath
 
   cursorResult <- case method of
-    "mmap"  -> Right <$> mmapFastCursor input
-    "naive" -> Right <$> NAIVE.loadFastCursor input
-    unknown -> return (Left ("Unknown method " <> show unknown))
+    "mmap"   -> Right <$> mmapFastCursor input
+    "memory" -> Right <$> loadFastCursor input
+    "naive"  -> Right <$> NAIVE.loadFastCursor input
+    unknown  -> return (Left ("Unknown method " <> show unknown))
 
   case cursorResult of
     Right !cursor -> do

@@ -142,6 +142,7 @@ executable hw-xml
                         App.XPath.Parser
                         App.XPath.Types
                         App.Show
+                        App.Slow
   autogen-modules:      Paths_hw_xml
   build-depends:        hw-xml
   hs-source-dirs:       app

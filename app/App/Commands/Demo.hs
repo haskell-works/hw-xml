@@ -10,18 +10,18 @@ module App.Commands.Demo
   ( cmdDemo
   ) where
 
-import App.Slow
 import Data.Foldable
 import Data.Maybe
-import Data.Semigroup                       ((<>))
+import Data.Semigroup                             ((<>))
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.Decode
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
+import HaskellWorks.Data.Xml.Succinct.Cursor.Load
 import HaskellWorks.Data.Xml.Succinct.Index
 import HaskellWorks.Data.Xml.Value
-import Options.Applicative                  hiding (columns)
+import Options.Applicative                        hiding (columns)
 
 import qualified App.Commands.Types as Z
 
@@ -69,7 +69,7 @@ decodeCatalog xml = do
 runDemo :: Z.DemoOptions -> IO ()
 runDemo _ = do
   -- Read XML into memory as a query-optimised cursor
-  !cursor <- readFastCursor "data/catalog.xml"
+  !cursor <- loadFastCursor "data/catalog.xml"
   -- Skip the XML declaration to get to the root element cursor
   case nextSibling cursor of
     Just rootCursor -> do

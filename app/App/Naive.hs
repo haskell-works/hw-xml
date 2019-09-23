@@ -6,9 +6,9 @@
 {-# LANGUAGE TypeApplications     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module App.Slow
-  ( readRawCursor
-  , readFastCursor
+module App.Naive
+  ( loadSlowCursor
+  , loadFastCursor
   ) where
 
 import HaskellWorks.Data.BalancedParens.RangeMin2
@@ -21,23 +21,23 @@ import HaskellWorks.Data.Xml.Succinct.Cursor.MMap
 
 import qualified Data.ByteString as BS
 
--- | Read an XML file into memory and return a raw cursor initialised to the
+-- | Load an XML file into memory and return a raw cursor initialised to the
 -- start of the XML document.
-readRawCursor :: String -> IO RawCursor
-readRawCursor path = do
+loadSlowCursor :: String -> IO SlowCursor
+loadSlowCursor path = do
   !bs <- BS.readFile path
-  let !cursor = fromByteString bs :: RawCursor
+  let !cursor = fromByteString bs :: SlowCursor
   return cursor
 
--- | Read an XML file into memory and return a query-optimised cursor initialised
+-- | Load an XML file into memory and return a query-optimised cursor initialised
 -- to the start of the XML document.
-readFastCursor :: String -> IO FastCursor
-readFastCursor filename = do
+loadFastCursor :: String -> IO FastCursor
+loadFastCursor filename = do
   -- Load the XML file into memory as a raw cursor.
   -- The raw XML data is `text`, and `ib` and `bp` are the indexes.
   -- `ib` and `bp` can be persisted to an index file for later use to avoid
   -- re-parsing the file.
-  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- readRawCursor filename
+  XmlCursor !text (BitShown !ib) (SimpleBalancedParens !bp) _ <- loadSlowCursor filename
   let !bpCsPoppy = makeCsPoppy bp
   let !rangeMinMax = mkRangeMin2 bpCsPoppy
   let !ibCsPoppy = makeCsPoppy ib

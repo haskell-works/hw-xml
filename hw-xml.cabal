@@ -99,8 +99,11 @@ library
     HaskellWorks.Data.Xml.Succinct.Cursor
     HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
     HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
+    HaskellWorks.Data.Xml.Succinct.Cursor.Create
     HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
     HaskellWorks.Data.Xml.Succinct.Cursor.Internal
+    HaskellWorks.Data.Xml.Succinct.Cursor.Load
+    HaskellWorks.Data.Xml.Succinct.Cursor.Types
     HaskellWorks.Data.Xml.Succinct.Cursor.MMap
     HaskellWorks.Data.Xml.Succinct.Cursor.Token
     HaskellWorks.Data.Xml.Succinct.Index
@@ -142,7 +145,7 @@ executable hw-xml
                         App.XPath.Parser
                         App.XPath.Types
                         App.Show
-                        App.Slow
+                        App.Naive
   autogen-modules:      Paths_hw_xml
   build-depends:        hw-xml
   hs-source-dirs:       app

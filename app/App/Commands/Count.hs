@@ -27,7 +27,7 @@ import HaskellWorks.Data.Xml.Value
 import Options.Applicative                        hiding (columns)
 
 import qualified App.Commands.Types as Z
-import qualified App.Slow           as SLOW
+import qualified App.Naive          as NAIVE
 import qualified App.XPath.Parser   as XPP
 import qualified Data.Text          as T
 import qualified System.Exit        as IO
@@ -72,7 +72,7 @@ runCount opt = do
 
   cursorResult <- case method of
     "mmap"  -> Right <$> mmapFastCursor input
-    "slow"  -> Right <$> SLOW.readFastCursor input
+    "naive" -> Right <$> NAIVE.loadFastCursor input
     unknown -> return (Left ("Unknown method " <> show unknown))
 
   case cursorResult of

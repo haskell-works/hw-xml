@@ -11,7 +11,6 @@ module App.Commands.CreateIndex
   ) where
 
 import Control.Lens
-import Control.Monad
 import Data.Generics.Product.Any
 import Data.Semigroup                             ((<>))
 import HaskellWorks.Data.Xml.Succinct.Cursor.MMap
@@ -23,14 +22,14 @@ import qualified HaskellWorks.Data.ByteString.Lazy as LBS
 
 runCreateIndex :: Z.CreateIndexOptions -> IO ()
 runCreateIndex opt = do
-  let input         = opt ^. the @"input"
-  let maybeIbOutput = opt ^. the @"ibOutput"
-  let maybeBpOutput = opt ^. the @"bpOutput"
+  let input     = opt ^. the @"input"
+  let ibOutput  = opt ^. the @"ibOutput"
+  let bpOutput  = opt ^. the @"bpOutput"
 
   cursor <- mmapSlowCursor input
 
-  forM_ maybeIbOutput $ flip LBS.writeFile (LBS.toLazyByteString (cursor ^. the @"interests"      . the @1))
-  forM_ maybeBpOutput $ flip LBS.writeFile (LBS.toLazyByteString (cursor ^. the @"balancedParens" . the @1))
+  LBS.writeFile ibOutput (LBS.toLazyByteString (cursor ^. the @"interests"      . the @1))
+  LBS.writeFile bpOutput (LBS.toLazyByteString (cursor ^. the @"balancedParens" . the @1))
 
   return ()
 
@@ -41,19 +40,15 @@ optsCreateIndex = Z.CreateIndexOptions
       <>  help "Input file"
       <>  metavar "FILE"
       )
-  <*> optional
-      ( strOption
-        (   long "ib-output"
-        <>  help "Interest Bits output"
-        <>  metavar "FILE"
-        )
+  <*> strOption
+      (   long "ib-output"
+      <>  help "Interest Bits output"
+      <>  metavar "FILE"
       )
-  <*> optional
-      ( strOption
-        (   long "bp-output"
-        <>  help "Balanced Parens output"
-        <>  metavar "FILE"
-        )
+  <*> strOption
+      (   long "bp-output"
+      <>  help "Balanced Parens output"
+      <>  metavar "FILE"
       )
 
 cmdCreateIndex :: Mod CommandFields (IO ())

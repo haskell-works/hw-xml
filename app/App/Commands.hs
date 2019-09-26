@@ -1,9 +1,10 @@
 module App.Commands where
 
 import App.Commands.Count
+import App.Commands.CreateIbIndex
 import App.Commands.CreateIndex
 import App.Commands.Demo
-import Data.Semigroup           ((<>))
+import Data.Semigroup             ((<>))
 import Options.Applicative
 
 commands :: Parser (IO ())
@@ -14,4 +15,5 @@ commandsGeneral = subparser $ mempty
   <>  commandGroup "Commands:"
   <>  cmdCount
   <>  cmdCreateIndex
+  <>  cmdCreateIbIndex
   <>  cmdDemo

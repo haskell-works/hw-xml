@@ -3,6 +3,7 @@
 
 module App.Commands.Types
   ( CountOptions(..)
+  , CreateIndexOptions(..)
   , DemoOptions(..)
   ) where
 
@@ -16,4 +17,10 @@ data CountOptions = CountOptions
   { input  :: FilePath
   , xpath  :: XPath
   , method :: Text
+  } deriving (Eq, Show, Generic)
+
+data CreateIndexOptions = CreateIndexOptions
+  { input    :: FilePath
+  , ibOutput :: Maybe FilePath
+  , bpOutput :: Maybe FilePath
   } deriving (Eq, Show, Generic)

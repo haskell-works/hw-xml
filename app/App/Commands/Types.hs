@@ -5,6 +5,7 @@ module App.Commands.Types
   ( CountOptions(..)
   , CreateIndexOptions(..)
   , CreateIbIndexOptions(..)
+  , CreateBpIndexOptions(..)
   , DemoOptions(..)
   ) where
 
@@ -27,6 +28,11 @@ data CreateIndexOptions = CreateIndexOptions
   } deriving (Eq, Show, Generic)
 
 data CreateIbIndexOptions = CreateIbIndexOptions
-  { input    :: FilePath
-  , ibOutput :: FilePath
+  { input  :: FilePath
+  , output :: FilePath
+  } deriving (Eq, Show, Generic)
+
+data CreateBpIndexOptions = CreateBpIndexOptions
+  { input  :: FilePath
+  , output :: FilePath
   } deriving (Eq, Show, Generic)

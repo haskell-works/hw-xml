@@ -22,15 +22,13 @@ import qualified Data.ByteString.Lazy as LBS
 
 runCreateIbIndex :: Z.CreateIbIndexOptions -> IO ()
 runCreateIbIndex opt = do
-  let input     = opt ^. the @"input"
+  let input   = opt ^. the @"input"
   let output  = opt ^. the @"output"
 
   lbs <- LBS.readFile input
-  let blankedXml = lbsToBlankedXml lbs
-  let ib = toInterestBits64' blankedXml
+  let blankedXml  = lbsToBlankedXml lbs
+  let ib          = toInterestBits64 blankedXml
   LBS.writeFile output (LBS.fromChunks ib)
-
-  return ()
 
 optsCreateIbIndex :: Parser Z.CreateIbIndexOptions
 optsCreateIbIndex = Z.CreateIbIndexOptions

@@ -1,7 +1,7 @@
 cabal-version:      2.2
 
 name:               hw-xml
-version:            0.4.0.0
+version:            0.4.0.1
 synopsis:           Conduits for tokenizing streams.
 description:        Conduits for tokenizing streams. Please see README.md
 category:           Data, XML, Succinct Data Structures, Data Structures

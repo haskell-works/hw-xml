@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 
 module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   ( BlankedXml(..)
@@ -7,13 +8,16 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   , lbsToBlankedXml
   ) where
 
+import GHC.Generics
 import HaskellWorks.Data.Xml.Conduit.Blank
 
 import qualified Data.ByteString              as BS
 import qualified Data.ByteString.Lazy         as LBS
 import qualified HaskellWorks.Data.ByteString as BS
 
-newtype BlankedXml = BlankedXml [BS.ByteString] deriving (Eq, Show)
+newtype BlankedXml = BlankedXml
+  { unblankedXml :: [BS.ByteString]
+  } deriving (Eq, Show, Generic)
 
 getBlankedXml :: BlankedXml -> [BS.ByteString]
 getBlankedXml (BlankedXml bs) = bs

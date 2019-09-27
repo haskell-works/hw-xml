@@ -5,40 +5,17 @@ module HaskellWorks.Data.Xml.Conduit
   ( blankedXmlToInterestBits
   , byteStringToBits
   , compressWordAsBit
-  , interestingWord8s
-  , isInterestingWord8
   ) where
 
-import Data.ByteString                as BS
+import Data.ByteString                       (ByteString)
 import Data.Word
-import Data.Word8
-import HaskellWorks.Data.AtIndex      ((!!!))
 import HaskellWorks.Data.Bits.BitWise
-import Prelude                        as P
+import HaskellWorks.Data.Xml.Internal.Tables
+import Prelude
 
-import qualified Data.Bits            as BITS
-import qualified Data.Vector.Storable as DVS
-
-interestingWord8s :: DVS.Vector Word8
-interestingWord8s = DVS.constructN 256 go
-  where go :: DVS.Vector Word8 -> Word8
-        go v = if     w == _bracketleft
-                  ||  w == _braceleft
-                  ||  w == _parenleft
-                  ||  w == _bracketleft
-                  ||  w == _less
-                  ||  w == _a
-                  ||  w == _v
-                  ||  w == _t
-              then 1
-              else 0
-          where w :: Word8
-                w = fromIntegral (DVS.length v)
-{-# NOINLINE interestingWord8s #-}
-
-isInterestingWord8 :: Word8 -> Word8
-isInterestingWord8 b = fromIntegral (interestingWord8s !!! fromIntegral b)
-{-# INLINABLE isInterestingWord8 #-}
+import qualified Data.Bits       as BITS
+import qualified Data.ByteString as BS
+import qualified Prelude         as P
 
 blankedXmlToInterestBits :: [BS.ByteString] -> [BS.ByteString]
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""

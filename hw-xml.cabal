@@ -139,9 +139,10 @@ executable hw-xml
   other-modules:        Paths_hw_xml
                         App.Commands
                         App.Commands.Count
+                        App.Commands.CreateBlankedXml
+                        App.Commands.CreateBpIndex
                         App.Commands.CreateIbIndex
                         App.Commands.CreateIndex
-                        App.Commands.CreateBpIndex
                         App.Commands.Demo
                         App.Commands.Types
                         App.Options

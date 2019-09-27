@@ -1,6 +1,7 @@
 module App.Commands where
 
 import App.Commands.Count
+import App.Commands.CreateBpIndex
 import App.Commands.CreateIbIndex
 import App.Commands.CreateIndex
 import App.Commands.Demo
@@ -16,4 +17,5 @@ commandsGeneral = subparser $ mempty
   <>  cmdCount
   <>  cmdCreateIndex
   <>  cmdCreateIbIndex
+  <>  cmdCreateBpIndex
   <>  cmdDemo

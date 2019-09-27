@@ -6,8 +6,8 @@
 {-# LANGUAGE TypeApplications     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module App.Commands.CreateIbIndex
-  ( cmdCreateIbIndex
+module App.Commands.CreateBpIndex
+  ( cmdCreateBpIndex
   ) where
 
 import Control.Lens
@@ -20,20 +20,20 @@ import Options.Applicative                              hiding (columns)
 import qualified App.Commands.Types   as Z
 import qualified Data.ByteString.Lazy as LBS
 
-runCreateIbIndex :: Z.CreateIbIndexOptions -> IO ()
-runCreateIbIndex opt = do
+runCreateBpIndex :: Z.CreateBpIndexOptions -> IO ()
+runCreateBpIndex opt = do
   let input     = opt ^. the @"input"
   let output  = opt ^. the @"output"
 
   lbs <- LBS.readFile input
   let blankedXml = lbsToBlankedXml lbs
-  let ib = toInterestBits64' blankedXml
+  let ib = toBalancedParens64' blankedXml
   LBS.writeFile output (LBS.fromChunks ib)
 
   return ()
 
-optsCreateIbIndex :: Parser Z.CreateIbIndexOptions
-optsCreateIbIndex = Z.CreateIbIndexOptions
+optsCreateBpIndex :: Parser Z.CreateBpIndexOptions
+optsCreateBpIndex = Z.CreateBpIndexOptions
   <$> strOption
       (   long "input"
       <>  help "Input file"
@@ -41,9 +41,9 @@ optsCreateIbIndex = Z.CreateIbIndexOptions
       )
   <*> strOption
       (   long "output"
-      <>  help "Interest Bits output"
+      <>  help "Balanced parens output"
       <>  metavar "FILE"
       )
 
-cmdCreateIbIndex :: Mod CommandFields (IO ())
-cmdCreateIbIndex = command "create-ib-index"  $ flip info idm $ runCreateIbIndex <$> optsCreateIbIndex
+cmdCreateBpIndex :: Mod CommandFields (IO ())
+cmdCreateBpIndex = command "create-bp-index"  $ flip info idm $ runCreateBpIndex <$> optsCreateBpIndex

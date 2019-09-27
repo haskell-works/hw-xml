@@ -141,6 +141,7 @@ executable hw-xml
                         App.Commands.Count
                         App.Commands.CreateIbIndex
                         App.Commands.CreateIndex
+                        App.Commands.CreateBpIndex
                         App.Commands.Demo
                         App.Commands.Types
                         App.Options

@@ -10,30 +10,35 @@ module HaskellWorks.Data.Xml.Conduit
   , isInterestingWord8
   ) where
 
-import Data.Array.Unboxed             as A
 import Data.ByteString                as BS
+import Data.Vector.Storable           ((!))
 import Data.Word
 import Data.Word8
 import HaskellWorks.Data.Bits.BitWise
 import Prelude                        as P
 
-import qualified Data.Bits as BITS
+import qualified Data.Bits            as BITS
+import qualified Data.Vector.Storable as DVS
 
-interestingWord8s :: A.UArray Word8 Word8
-interestingWord8s = A.array (0, 255) [
-  (w, if w == _bracketleft
-         || w == _braceleft
-         || w == _parenleft
-         || w == _bracketleft
-         || w == _less
-         || w == _a || w == _v || w == _t
-    then 1
-    else 0)
-  | w <- [0 .. 255]]
+interestingWord8s :: DVS.Vector Word8
+interestingWord8s = DVS.constructN 256 go
+  where go :: DVS.Vector Word8 -> Word8
+        go v = if     w == _bracketleft
+                  ||  w == _braceleft
+                  ||  w == _parenleft
+                  ||  w == _bracketleft
+                  ||  w == _less
+                  ||  w == _a
+                  ||  w == _v
+                  ||  w == _t
+              then 1
+              else 0
+          where w :: Word8
+                w = fromIntegral (DVS.length v)
 {-# NOINLINE interestingWord8s #-}
 
 isInterestingWord8 :: Word8 -> Word8
-isInterestingWord8 b = interestingWord8s ! b
+isInterestingWord8 b = fromIntegral (interestingWord8s ! fromIntegral b)
 {-# INLINABLE isInterestingWord8 #-}
 
 blankedXmlToInterestBits :: [BS.ByteString] -> [BS.ByteString]
@@ -55,7 +60,7 @@ blankedXmlToInterestBits' rs is = case is of
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
-          else Just ( BS.foldr' (\b m -> (interestingWord8s ! b) .|. (m .<. 1)) 0 (BS.take 8 as)
+          else Just ( BS.foldr' (\b m -> (interestingWord8s ! fromIntegral b) .|. (m .<. 1)) 0 (BS.take 8 as)
                     , BS.drop 8 as
                     )
 

@@ -9,9 +9,9 @@ import Data.Monoid                                      ((<>))
 import Data.String
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.ByteString
-import HaskellWorks.Data.Xml.Conduit
-import HaskellWorks.Data.Xml.Conduit.Blank
 import HaskellWorks.Data.Xml.Internal.BalancedParens
+import HaskellWorks.Data.Xml.Internal.Blank
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Hspec.Hedgehog
 import Hedgehog

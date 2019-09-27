@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module HaskellWorks.Data.Xml.Conduit.BlankSpec (spec) where
+module HaskellWorks.Data.Xml.Internal.BlankSpec (spec) where
 
 import Data.Char
-import Data.Semigroup                      ((<>))
+import Data.Semigroup                       ((<>))
 import HaskellWorks.Data.ByteString
-import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.Xml.Internal.Blank
 import HaskellWorks.Hspec.Hedgehog
 import Hedgehog
 import Test.Hspec
@@ -36,7 +36,7 @@ instance Eq a => Eq (Annotated a b) where
   (Annotated a _) == (Annotated b _) = a == b
 
 spec :: Spec
-spec = describe "HaskellWorks.Data.Xml.Conduit.BlankSpec" $ do
+spec = describe "HaskellWorks.Data.Xml.Internal.BlankSpec" $ do
   describe "Can blank XML" $ do
     "<b/>"                                    `whenBlankedXmlShouldBe` "<  >"
     "<b></b>"                                 `whenBlankedXmlShouldBe` "<     >"

@@ -13,8 +13,8 @@ module HaskellWorks.Data.Xml.Internal.ToIbBp64
 
 import Control.Applicative
 import Data.Word
-import HaskellWorks.Data.Xml.Conduit
 import HaskellWorks.Data.Xml.Internal.BalancedParens
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml   (BlankedXml (..))
 import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits (blankedXmlToInterestBits, genInterestForever)
 

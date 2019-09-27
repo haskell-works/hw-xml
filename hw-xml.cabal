@@ -85,9 +85,6 @@ library
     HaskellWorks.Data.Xml
     HaskellWorks.Data.Xml.Blank
     HaskellWorks.Data.Xml.CharLike
-    HaskellWorks.Data.Xml.Conduit
-    HaskellWorks.Data.Xml.Conduit.Blank
-    HaskellWorks.Data.Xml.Conduit.Words
     HaskellWorks.Data.Xml.Decode
     HaskellWorks.Data.Xml.DecodeError
     HaskellWorks.Data.Xml.DecodeResult
@@ -95,8 +92,11 @@ library
     HaskellWorks.Data.Xml.Index
     HaskellWorks.Data.Xml.Internal.BalancedParens
     HaskellWorks.Data.Xml.Internal.ByteString
+    HaskellWorks.Data.Xml.Internal.Blank
+    HaskellWorks.Data.Xml.Internal.List
     HaskellWorks.Data.Xml.Internal.Tables
     HaskellWorks.Data.Xml.Internal.ToIbBp64
+    HaskellWorks.Data.Xml.Internal.Words
     HaskellWorks.Data.Xml.Lens
     HaskellWorks.Data.Xml.Succinct
     HaskellWorks.Data.Xml.Succinct.Cursor
@@ -181,7 +181,7 @@ test-suite hw-xml-test
   build-tool-depends: hspec-discover:hspec-discover
   autogen-modules:    Paths_hw_xml
   other-modules:
-    HaskellWorks.Data.Xml.Conduit.BlankSpec
+    HaskellWorks.Data.Xml.Internal.BlankSpec
     HaskellWorks.Data.Xml.RawValueSpec
     HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
     HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec

@@ -1,5 +1,6 @@
 module HaskellWorks.Data.Xml.Internal.Tables
-  ( isInterestingWord8
+  ( interestingWord8s
+  , isInterestingWord8
   ) where
 
 import Data.Word

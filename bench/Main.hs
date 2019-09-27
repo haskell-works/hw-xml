@@ -11,6 +11,7 @@ import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.Xml.Conduit
 import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.Xml.Internal.Tables
 import HaskellWorks.Data.Xml.Succinct.Cursor
 import System.IO.MMap
 

@@ -94,6 +94,7 @@ library
     HaskellWorks.Data.Xml.Grammar
     HaskellWorks.Data.Xml.Index
     HaskellWorks.Data.Xml.Internal.BalancedParens
+    HaskellWorks.Data.Xml.Internal.ByteString
     HaskellWorks.Data.Xml.Internal.Tables
     HaskellWorks.Data.Xml.Internal.ToIbBp64
     HaskellWorks.Data.Xml.Lens

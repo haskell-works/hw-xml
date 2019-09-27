@@ -12,6 +12,7 @@ import Control.Applicative
 import Data.Word
 import HaskellWorks.Data.BalancedParens                 as BP
 import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Internal.BalancedParens
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 
 import qualified Data.ByteString      as BS
@@ -28,20 +29,20 @@ genBitWordsForever bs = BS.uncons bs <|> Just (0, bs)
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word8))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens2 (getBlankedXml bj)))
+    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens (getBlankedXml bj)))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word16))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens2 (getBlankedXml bj)))
+    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens (getBlankedXml bj)))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word32))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens2 (getBlankedXml bj)))
+    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens (getBlankedXml bj)))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 instance FromBlankedXml (XmlBalancedParens (SimpleBalancedParens (DVS.Vector Word64))) where
   fromBlankedXml bj    = XmlBalancedParens (SimpleBalancedParens (DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)))
-    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens2 (getBlankedXml bj)))
+    where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens (getBlankedXml bj)))
           newLen        = (BS.length interestBS + 7) `div` 8 * 8

@@ -22,7 +22,7 @@ data XmlElementType
   | XmlElementTypeCData
   | XmlElementTypeMeta String
 
-parseXmlString :: (P.Parser t Word8, IsString t) => T.Parser t String
+parseXmlString :: (P.Parser t Word8) => T.Parser t String
 parseXmlString = do
   q <- satisfyChar (=='"') <|> satisfyChar (=='\'')
   many (satisfyChar (/= q))
@@ -36,10 +36,10 @@ parseXmlElement = comment <|> cdata <|> doc <|> meta <|> element
   doc     = const XmlElementTypeDocument <$> string "?xml"
   element = XmlElementTypeElement        <$> parseXmlToken
 
-parseXmlToken :: (P.Parser t Word8, IsString t) => T.Parser t String
+parseXmlToken :: (P.Parser t Word8) => T.Parser t String
 parseXmlToken = many $ satisfyChar isNameChar <?> "invalid string character"
 
-parseXmlAttributeName :: (P.Parser t Word8, IsString t) => T.Parser t String
+parseXmlAttributeName :: (P.Parser t Word8) => T.Parser t String
 parseXmlAttributeName = parseXmlToken
 
 isNameStartChar :: Char -> Bool

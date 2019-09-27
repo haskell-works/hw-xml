@@ -3,7 +3,6 @@
 
 module HaskellWorks.Data.Xml.Internal.List
   ( blankedXmlToInterestBits
-  , byteStringToBits
   , compressWordAsBit
   ) where
 
@@ -14,9 +13,7 @@ import HaskellWorks.Data.Xml.Internal.ByteString
 import HaskellWorks.Data.Xml.Internal.Tables
 import Prelude
 
-import qualified Data.Bits       as BITS
 import qualified Data.ByteString as BS
-import qualified Prelude         as P
 
 blankedXmlToInterestBits :: [ByteString] -> [ByteString]
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
@@ -59,23 +56,3 @@ compressWordAsBit' aBS iBS = case iBS of
           else Just ( BS.foldr' (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (BS.take 8 xs)
                     , BS.drop 8 xs
                     )
-
-yieldBitsOfWord8 :: Word8 -> [Bool]
-yieldBitsOfWord8 w =
-  [ (w .&. BITS.bit 0) /= 0
-  , (w .&. BITS.bit 1) /= 0
-  , (w .&. BITS.bit 2) /= 0
-  , (w .&. BITS.bit 3) /= 0
-  , (w .&. BITS.bit 4) /= 0
-  , (w .&. BITS.bit 5) /= 0
-  , (w .&. BITS.bit 6) /= 0
-  , (w .&. BITS.bit 7) /= 0
-  ]
-
-yieldBitsofWord8s :: [Word8] -> [Bool]
-yieldBitsofWord8s = P.foldr ((++) . yieldBitsOfWord8) []
-
-byteStringToBits :: [ByteString] -> [Bool]
-byteStringToBits is = case is of
-  (bs:bss) -> yieldBitsofWord8s (BS.unpack bs) ++ byteStringToBits bss
-  []       -> []

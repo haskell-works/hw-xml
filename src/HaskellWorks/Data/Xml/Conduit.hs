@@ -11,9 +11,9 @@ module HaskellWorks.Data.Xml.Conduit
   ) where
 
 import Data.ByteString                as BS
-import Data.Vector.Storable           ((!))
 import Data.Word
 import Data.Word8
+import HaskellWorks.Data.AtIndex      ((!!!))
 import HaskellWorks.Data.Bits.BitWise
 import Prelude                        as P
 
@@ -38,7 +38,7 @@ interestingWord8s = DVS.constructN 256 go
 {-# NOINLINE interestingWord8s #-}
 
 isInterestingWord8 :: Word8 -> Word8
-isInterestingWord8 b = fromIntegral (interestingWord8s ! fromIntegral b)
+isInterestingWord8 b = fromIntegral (interestingWord8s !!! fromIntegral b)
 {-# INLINABLE isInterestingWord8 #-}
 
 blankedXmlToInterestBits :: [BS.ByteString] -> [BS.ByteString]
@@ -60,7 +60,7 @@ blankedXmlToInterestBits' rs is = case is of
   where gen :: ByteString -> Maybe (Word8, ByteString)
         gen as = if BS.length as == 0
           then Nothing
-          else Just ( BS.foldr' (\b m -> (interestingWord8s ! fromIntegral b) .|. (m .<. 1)) 0 (BS.take 8 as)
+          else Just ( BS.foldr' (\b m -> isInterestingWord8 b .|. (m .<. 1)) 0 (BS.take 8 as)
                     , BS.drop 8 as
                     )
 

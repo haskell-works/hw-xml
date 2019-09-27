@@ -5,45 +5,23 @@ module HaskellWorks.Data.Xml.Conduit
   ( blankedXmlToInterestBits
   , byteStringToBits
   , compressWordAsBit
-  , interestingWord8s
-  , isInterestingWord8
   ) where
 
-import Data.ByteString                as BS
+import Data.ByteString                           (ByteString)
 import Data.Word
-import Data.Word8
-import HaskellWorks.Data.AtIndex      ((!!!))
 import HaskellWorks.Data.Bits.BitWise
-import Prelude                        as P
+import HaskellWorks.Data.Xml.Internal.ByteString
+import HaskellWorks.Data.Xml.Internal.Tables
+import Prelude
 
-import qualified Data.Bits            as BITS
-import qualified Data.Vector.Storable as DVS
+import qualified Data.Bits       as BITS
+import qualified Data.ByteString as BS
+import qualified Prelude         as P
 
-interestingWord8s :: DVS.Vector Word8
-interestingWord8s = DVS.constructN 256 go
-  where go :: DVS.Vector Word8 -> Word8
-        go v = if     w == _bracketleft
-                  ||  w == _braceleft
-                  ||  w == _parenleft
-                  ||  w == _bracketleft
-                  ||  w == _less
-                  ||  w == _a
-                  ||  w == _v
-                  ||  w == _t
-              then 1
-              else 0
-          where w :: Word8
-                w = fromIntegral (DVS.length v)
-{-# NOINLINE interestingWord8s #-}
-
-isInterestingWord8 :: Word8 -> Word8
-isInterestingWord8 b = fromIntegral (interestingWord8s !!! fromIntegral b)
-{-# INLINABLE isInterestingWord8 #-}
-
-blankedXmlToInterestBits :: [BS.ByteString] -> [BS.ByteString]
+blankedXmlToInterestBits :: [ByteString] -> [ByteString]
 blankedXmlToInterestBits = blankedXmlToInterestBits' ""
 
-blankedXmlToInterestBits' :: BS.ByteString -> [BS.ByteString] -> [BS.ByteString]
+blankedXmlToInterestBits' :: ByteString -> [ByteString] -> [ByteString]
 blankedXmlToInterestBits' rs is = case is of
   (bs:bss) -> do
     let cs = if BS.length rs /= 0 then BS.concat [rs, bs] else bs
@@ -63,16 +41,10 @@ blankedXmlToInterestBits' rs is = case is of
                     , BS.drop 8 as
                     )
 
-repartitionMod8 :: BS.ByteString -> BS.ByteString -> (BS.ByteString, BS.ByteString)
-repartitionMod8 aBS bBS = (BS.take cLen abBS, BS.drop cLen abBS)
-  where abBS = BS.concat [aBS, bBS]
-        abLen = BS.length abBS
-        cLen = (abLen `div` 8) * 8
-
-compressWordAsBit :: [BS.ByteString] -> [BS.ByteString]
+compressWordAsBit :: [ByteString] -> [ByteString]
 compressWordAsBit = compressWordAsBit' BS.empty
 
-compressWordAsBit' :: BS.ByteString -> [BS.ByteString] -> [BS.ByteString]
+compressWordAsBit' :: ByteString -> [ByteString] -> [ByteString]
 compressWordAsBit' aBS iBS = case iBS of
   (bBS:bBSs) -> do
     let (cBS, dBS) = repartitionMod8 aBS bBS
@@ -103,7 +75,7 @@ yieldBitsOfWord8 w =
 yieldBitsofWord8s :: [Word8] -> [Bool]
 yieldBitsofWord8s = P.foldr ((++) . yieldBitsOfWord8) []
 
-byteStringToBits :: [BS.ByteString] -> [Bool]
+byteStringToBits :: [ByteString] -> [Bool]
 byteStringToBits is = case is of
   (bs:bss) -> yieldBitsofWord8s (BS.unpack bs) ++ byteStringToBits bss
   []       -> []

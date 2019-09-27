@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes        #-}
 
-module HaskellWorks.Data.Xml.Conduit
+module HaskellWorks.Data.Xml.Internal.List
   ( blankedXmlToInterestBits
   , byteStringToBits
   , compressWordAsBit

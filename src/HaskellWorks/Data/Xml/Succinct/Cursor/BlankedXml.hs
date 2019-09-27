@@ -9,7 +9,7 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
   ) where
 
 import GHC.Generics
-import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.Xml.Internal.Blank
 
 import qualified Data.ByteString              as BS
 import qualified Data.ByteString.Lazy         as LBS

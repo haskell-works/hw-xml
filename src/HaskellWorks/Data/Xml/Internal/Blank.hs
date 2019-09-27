@@ -2,17 +2,19 @@
 {-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module HaskellWorks.Data.Xml.Conduit.Blank
+module HaskellWorks.Data.Xml.Internal.Blank
   ( blankXml
   , BlankData(..)
   ) where
 
-import Data.ByteString                     as BS
-import Data.Monoid                         ((<>))
+import Data.ByteString                      (ByteString)
+import Data.Monoid                          ((<>))
 import Data.Word
 import Data.Word8
-import HaskellWorks.Data.Xml.Conduit.Words
-import Prelude                             as P
+import HaskellWorks.Data.Xml.Internal.Words
+import Prelude
+
+import qualified Data.ByteString as BS
 
 type ExpectedChar      = Word8
 
@@ -38,10 +40,10 @@ data BlankData = BlankData
   , blankC     :: !ByteString
   }
 
-blankXml :: [BS.ByteString] -> [BS.ByteString]
+blankXml :: [ByteString] -> [ByteString]
 blankXml = blankXmlPlan1 BS.empty InXml
 
-blankXmlPlan1 :: BS.ByteString -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlPlan1 :: ByteString -> BlankState -> [ByteString] -> [ByteString]
 blankXmlPlan1 as lastState is = case is of
   (bs:bss) -> do
     let cs = as <> bs
@@ -52,14 +54,14 @@ blankXmlPlan1 as lastState is = case is of
       Nothing -> blankXmlPlan1 cs lastState bss
   [] -> [BS.map (const _space) as]
 
-blankXmlPlan2 :: Word8 -> Word8 -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlPlan2 :: Word8 -> Word8 -> BlankState -> [ByteString] -> [ByteString]
 blankXmlPlan2 a b lastState is = case is of
   (cs:css) -> blankXmlRun False a b cs lastState css
   []       -> blankXmlRun True a b (BS.pack [_space, _space]) lastState []
 
-blankXmlRun :: Bool -> Word8 -> Word8 -> BS.ByteString -> BlankState -> [BS.ByteString] -> [BS.ByteString]
+blankXmlRun :: Bool -> Word8 -> Word8 -> ByteString -> BlankState -> [ByteString] -> [ByteString]
 blankXmlRun done a b cs lastState is = do
-  let (!ds, Just (BlankData !nextState _ _ _)) = unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
+  let (!ds, Just (BlankData !nextState _ _ _)) = BS.unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
   let (yy, zz) = case BS.unsnoc cs of
         Just (ys, z) -> case BS.unsnoc ys of
           Just (_, y) -> (y, z)
@@ -69,7 +71,7 @@ blankXmlRun done a b cs lastState is = do
     then [ds]
     else ds:blankXmlPlan2 yy zz nextState is
 
-mkNext :: Word8 -> BlankState -> Word8 -> BS.ByteString -> Maybe (Word8, BlankData)
+mkNext :: Word8 -> BlankState -> Word8 -> ByteString -> Maybe (Word8, BlankData)
 mkNext w s a bs = case BS.uncons bs of
   Just (b, cs) -> Just (w, BlankData s a b cs)
   Nothing      -> error "This should never happen"

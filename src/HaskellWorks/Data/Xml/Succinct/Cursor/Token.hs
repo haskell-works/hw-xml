@@ -3,7 +3,7 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.Token
   ( xmlTokenAt
   ) where
 
-import Data.ByteString.Internal                       as BSI
+import Data.ByteString                                (ByteString)
 import HaskellWorks.Data.Bits.BitWise
 import HaskellWorks.Data.Drop
 import HaskellWorks.Data.Positioning
@@ -14,6 +14,7 @@ import HaskellWorks.Data.Xml.Token.Tokenize
 import Prelude                                        hiding (drop)
 
 import qualified Data.Attoparsec.ByteString.Char8 as ABC
+import qualified Data.ByteString.Internal         as BSI
 
 xmlTokenAt :: (Rank1 w, Select1 v, TestBit w) => XmlCursor ByteString v w -> Maybe (XmlToken String Double)
 xmlTokenAt k = if balancedParens k .?. lastPositionOf (cursorRank k)

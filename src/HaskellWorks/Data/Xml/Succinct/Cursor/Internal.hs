@@ -11,7 +11,6 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.Internal
   ) where
 
 import Control.DeepSeq                                    (NFData (..))
-import Data.ByteString.Internal                           as BSI
 import Data.String
 import Data.Word
 import Foreign.ForeignPtr
@@ -30,6 +29,7 @@ import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
 
 import qualified Data.ByteString                                      as BS
 import qualified Data.ByteString.Char8                                as BSC
+import qualified Data.ByteString.Internal                             as BSI
 import qualified Data.Vector.Storable                                 as DVS
 import qualified HaskellWorks.Data.BalancedParens                     as BP
 import qualified HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens as CBP

@@ -1,4 +1,4 @@
-module HaskellWorks.Data.Xml.Conduit.Words where
+module HaskellWorks.Data.Xml.Internal.Words where
 
 import Data.Word
 import Data.Word8

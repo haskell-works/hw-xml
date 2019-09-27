@@ -11,8 +11,8 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
 import Control.Applicative
 import Data.Word
 import HaskellWorks.Data.BalancedParens                 as BP
-import HaskellWorks.Data.Xml.Conduit
 import HaskellWorks.Data.Xml.Internal.BalancedParens
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 
 import qualified Data.ByteString      as BS

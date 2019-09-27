@@ -4,13 +4,14 @@
 module Main where
 
 import Criterion.Main
+import Data.ByteString                         (ByteString)
 import Data.Word
 import Foreign
 import HaskellWorks.Data.BalancedParens.Simple
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
-import HaskellWorks.Data.Xml.Conduit
-import HaskellWorks.Data.Xml.Conduit.Blank
+import HaskellWorks.Data.Xml.Internal.Blank
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Internal.Tables
 import HaskellWorks.Data.Xml.Succinct.Cursor
 import System.IO.MMap
@@ -19,23 +20,23 @@ import qualified Data.ByteString          as BS
 import qualified Data.ByteString.Internal as BSI
 import qualified Data.Vector.Storable     as DVS
 
-setupEnvXml :: FilePath -> IO BS.ByteString
+setupEnvXml :: FilePath -> IO ByteString
 setupEnvXml filepath = do
   (fptr :: ForeignPtr Word8, offset, size) <- mmapFileForeignPtr filepath ReadOnly Nothing
   let !bs = BSI.fromForeignPtr (castForeignPtr fptr) offset size
   return bs
 
-loadXml :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
-loadXml bs = fromByteString bs :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
+loadXml :: ByteString -> XmlCursor ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
+loadXml bs = fromByteString bs :: XmlCursor ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64))
 
-xmlToInterestBits3 :: [BS.ByteString] -> [BS.ByteString]
+xmlToInterestBits3 :: [ByteString] -> [ByteString]
 xmlToInterestBits3 = blankedXmlToInterestBits . blankXml
 
-runCon :: ([i] -> [BS.ByteString]) -> i -> BS.ByteString
+runCon :: ([i] -> [ByteString]) -> i -> ByteString
 runCon con bs = BS.concat $ con [bs]
 
-benchRankXmlCatalogConduits :: [Benchmark]
-benchRankXmlCatalogConduits =
+benchRankXmlCatalogLists :: [Benchmark]
+benchRankXmlCatalogLists =
   [ env (setupEnvXml "data/catalog.xml") $ \bs -> bgroup "catalog.xml"
     [ bench "Run blankXml"            (whnf (runCon blankXml          ) bs)
     , bench "Run xmlToInterestBits3"  (whnf (runCon xmlToInterestBits3) bs)
@@ -58,5 +59,5 @@ benchIsInterestingWord8 =
 main :: IO ()
 main = defaultMain $ concat
   [ benchIsInterestingWord8
-  , benchRankXmlCatalogConduits
+  , benchRankXmlCatalogLists
   ]

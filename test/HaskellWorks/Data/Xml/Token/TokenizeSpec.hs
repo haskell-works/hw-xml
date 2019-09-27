@@ -2,13 +2,14 @@
 
 module HaskellWorks.Data.Xml.Token.TokenizeSpec (spec) where
 
-import Data.ByteString                      as BS
+import Data.ByteString                      (ByteString)
 import HaskellWorks.Data.Xml.Token.Tokenize
 import HaskellWorks.Hspec.Hedgehog
 import Hedgehog
 import Test.Hspec
 
 import qualified Data.Attoparsec.ByteString.Char8 as BC
+import qualified Data.ByteString                  as BS
 
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
 
@@ -16,7 +17,7 @@ parseXmlToken' :: ByteString -> Either String (XmlToken String Double)
 parseXmlToken' = BC.parseOnly parseXmlToken
 
 spec :: Spec
-spec = describe "Data.Conduit.Succinct.XmlSpec" $ do
+spec = describe "HaskellWorks.Data.Xml.Token.TokenizeSpec" $ do
   describe "When parsing single token at beginning of text" $ do
     it "Empty Xml should produce no bits" $ requireTest $
       parseXmlToken' "" === Left "not enough input"

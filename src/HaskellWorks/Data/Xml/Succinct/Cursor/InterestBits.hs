@@ -17,7 +17,7 @@ import Data.Word
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.RankSelect.Poppy512
-import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 
 import qualified Data.ByteString      as BS

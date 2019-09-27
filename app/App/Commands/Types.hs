@@ -26,6 +26,7 @@ data CreateIndexOptions = CreateIndexOptions
   { input    :: FilePath
   , ibOutput :: FilePath
   , bpOutput :: FilePath
+  , method   :: Text
   } deriving (Eq, Show, Generic)
 
 data CreateBlankedXmlOptions = CreateBlankedXmlOptions

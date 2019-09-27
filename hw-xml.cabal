@@ -93,6 +93,7 @@ library
     HaskellWorks.Data.Xml.DecodeResult
     HaskellWorks.Data.Xml.Grammar
     HaskellWorks.Data.Xml.Index
+    HaskellWorks.Data.Xml.Internal.BalancedParens
     HaskellWorks.Data.Xml.Internal.ToIbBp64
     HaskellWorks.Data.Xml.Lens
     HaskellWorks.Data.Xml.Succinct

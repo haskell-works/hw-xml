@@ -4,7 +4,6 @@
 module HaskellWorks.Data.Xml.Conduit
   ( blankedXmlToInterestBits
   , byteStringToBits
-  , blankedXmlToBalancedParens2
   , compressWordAsBit
   , interestingWord8s
   , isInterestingWord8
@@ -88,38 +87,6 @@ compressWordAsBit' aBS iBS = case iBS of
           else Just ( BS.foldr' (\b m -> ((b .&. 1) .|. (m .<. 1))) 0 (BS.take 8 xs)
                     , BS.drop 8 xs
                     )
-
-blankedXmlToBalancedParens2 :: [BS.ByteString] -> [BS.ByteString]
-blankedXmlToBalancedParens2 is = case is of
-  (bs:bss) -> do
-    let (cs, _) = BS.unfoldrN (BS.length bs * 2) gen (Nothing, bs)
-    cs:blankedXmlToBalancedParens2 bss
-  [] -> []
-  where gen :: (Maybe Bool, ByteString) -> Maybe (Word8, (Maybe Bool, ByteString))
-        gen (Just True  , bs) = Just (0xFF, (Nothing, bs))
-        gen (Just False , bs) = Just (0x00, (Nothing, bs))
-        gen (Nothing    , bs) = case BS.uncons bs of
-          Just (c, cs) -> case balancedParensOf c of
-            MiniN  -> gen         (Nothing    , cs)
-            MiniT  -> Just (0xFF, (Nothing    , cs))
-            MiniF  -> Just (0x00, (Nothing    , cs))
-            MiniTF -> Just (0xFF, (Just False , cs))
-          Nothing   -> Nothing
-
-data MiniBP = MiniN | MiniT | MiniF | MiniTF
-
-balancedParensOf :: Word8 -> MiniBP
-balancedParensOf c = case c of
-    d | d == _less         -> MiniT
-    d | d == _greater      -> MiniF
-    d | d == _bracketleft  -> MiniT
-    d | d == _bracketright -> MiniF
-    d | d == _parenleft    -> MiniT
-    d | d == _parenright   -> MiniF
-    d | d == _t            -> MiniTF
-    d | d == _a            -> MiniTF
-    d | d == _v            -> MiniTF
-    _                      -> MiniN
 
 yieldBitsOfWord8 :: Word8 -> [Bool]
 yieldBitsOfWord8 w =

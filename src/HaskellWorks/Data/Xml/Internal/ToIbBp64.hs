@@ -14,6 +14,7 @@ module HaskellWorks.Data.Xml.Internal.ToIbBp64
 import Control.Applicative
 import Data.Word
 import HaskellWorks.Data.Xml.Conduit
+import HaskellWorks.Data.Xml.Internal.BalancedParens
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml   (BlankedXml (..))
 import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits (blankedXmlToInterestBits, genInterestForever)
 
@@ -26,11 +27,11 @@ genBitWordsForever bs = BS.uncons bs <|> Just (0, bs)
 
 toBalancedParens64 :: BlankedXml -> DVS.Vector Word64
 toBalancedParens64 (BlankedXml bj) = DVS.unsafeCast (DVS.unfoldrN newLen genBitWordsForever interestBS)
-  where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens2 bj))
+  where interestBS    = BS.concat (compressWordAsBit (blankedXmlToBalancedParens bj))
         newLen        = (BS.length interestBS + 7) `div` 8 * 8
 
 toBalancedParens64' :: BlankedXml -> [BS.ByteString]
-toBalancedParens64' (BlankedXml bj) = compressWordAsBit (blankedXmlToBalancedParens2 bj)
+toBalancedParens64' (BlankedXml bj) = compressWordAsBit (blankedXmlToBalancedParens bj)
 
 toInterestBits64 :: BlankedXml -> DVS.Vector Word64
 toInterestBits64 (BlankedXml bj) = DVS.unsafeCast (DVS.unfoldrN newLen genInterestForever interestBS)

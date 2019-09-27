@@ -27,7 +27,7 @@ runCreateBpIndex opt = do
 
   lbs <- LBS.readFile input
   let blankedXml = lbsToBlankedXml lbs
-  let ib = toBalancedParens64' blankedXml
+  let ib = toBalancedParens64 blankedXml
   LBS.writeFile output (LBS.fromChunks ib)
 
   return ()

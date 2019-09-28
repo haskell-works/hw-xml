@@ -181,7 +181,9 @@ test-suite hw-xml-test
   build-tool-depends: hspec-discover:hspec-discover
   autogen-modules:    Paths_hw_xml
   other-modules:
+    HaskellWorks.Data.Xml.Gen
     HaskellWorks.Data.Xml.Internal.BlankSpec
+    HaskellWorks.Data.Xml.Internal.ByteStringSpec
     HaskellWorks.Data.Xml.RawValueSpec
     HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
     HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec

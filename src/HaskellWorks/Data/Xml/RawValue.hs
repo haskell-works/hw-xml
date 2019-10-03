@@ -10,7 +10,6 @@ module HaskellWorks.Data.Xml.RawValue
   ) where
 
 import Data.List
-import Data.Semigroup                       ((<>))
 import HaskellWorks.Data.Xml.Grammar
 import HaskellWorks.Data.Xml.Succinct.Index
 import Text.PrettyPrint.ANSI.Leijen         hiding ((<$>), (<>))

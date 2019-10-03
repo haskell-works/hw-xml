@@ -19,7 +19,6 @@ module HaskellWorks.Data.Xml.Value
   ) where
 
 import Control.Lens
-import Data.Monoid                     ((<>))
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
 
@@ -66,8 +65,8 @@ instance RawDecode Value where
   rawDecode (RawError     msg       ) = XmlError      msg
 
 mkXmlElement :: String -> [RawValue] -> Value
-mkXmlElement n (RawAttrList as:cs)  = XmlElement n (mkAttrs as) (rawDecode <$> cs)
-mkXmlElement n cs                   = XmlElement n []           (rawDecode <$> cs)
+mkXmlElement n (RawAttrList as:cs) = XmlElement n (mkAttrs as) (rawDecode <$> cs)
+mkXmlElement n cs                  = XmlElement n []           (rawDecode <$> cs)
 
 mkAttrs :: [RawValue] -> [(String, String)]
 mkAttrs (RawAttrName n:RawAttrValue v:cs) = (n, v):mkAttrs cs

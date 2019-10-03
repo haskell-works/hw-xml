@@ -9,11 +9,10 @@ module HaskellWorks.Data.Xml.Internal.ToIbBp64
   , toIbBp64
   ) where
 
-import Data.ByteString                                    (ByteString)
+import Data.ByteString                                  (ByteString)
 import HaskellWorks.Data.Xml.Internal.BalancedParens
 import HaskellWorks.Data.Xml.Internal.List
-import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml   (BlankedXml (..))
-import HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits (blankedXmlToInterestBits)
+import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml (BlankedXml (..))
 
 toBalancedParens64 :: BlankedXml -> [ByteString]
 toBalancedParens64 (BlankedXml bj) = compressWordAsBit (blankedXmlToBalancedParens bj)

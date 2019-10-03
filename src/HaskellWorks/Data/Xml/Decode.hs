@@ -4,7 +4,6 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad
 import Data.Foldable
-import Data.Monoid                        ((<>))
 import HaskellWorks.Data.Xml.DecodeError
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.Value

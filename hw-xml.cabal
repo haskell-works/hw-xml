@@ -14,7 +14,7 @@ copyright:            2016-2019 John Ky
                   ,   2016-2019 Alexey Raga
 license:              BSD-3-Clause
 license-file:         LICENSE
-tested-with:          GHC == 8.8.1, GHC == 8.6.5, GHC == 8.4.4
+tested-with:          GHC == 8.8.1, GHC == 8.6.5, GHC == 8.4.4, GHC == 8.2.2
 build-type:           Simple
 extra-source-files:   README.md
 data-files:           data/catalog.xml
@@ -23,7 +23,7 @@ source-repository head
   type: git
   location: https://github.com/haskell-works/hw-xml
 
-common base                       { build-depends: base                       >= 4.11       && < 5      }
+common base                       { build-depends: base                       >= 4.10       && < 5      }
 
 common ansi-wl-pprint             { build-depends: ansi-wl-pprint             >= 0.6.9      && < 0.7    }
 common array                      { build-depends: array                      >= 0.5.2.0    && < 0.6    }

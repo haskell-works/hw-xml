@@ -19,6 +19,7 @@ module HaskellWorks.Data.Xml.Value
   ) where
 
 import Control.Lens
+import Data.Semigroup                  ((<>))
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
 

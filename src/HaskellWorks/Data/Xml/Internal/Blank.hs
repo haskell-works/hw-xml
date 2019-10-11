@@ -8,6 +8,7 @@ module HaskellWorks.Data.Xml.Internal.Blank
   ) where
 
 import Data.ByteString                      (ByteString)
+import Data.Semigroup                       ((<>))
 import Data.Word
 import Data.Word8
 import HaskellWorks.Data.Xml.Internal.Words

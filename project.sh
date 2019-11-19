@@ -26,7 +26,7 @@ case "$cmd" in
     ;;
 
   test)
-    cabal new-test -j8 --enable-tests --disable-documentation \
+    cabal new-test -j8 --enable-tests --disable-documentation --test-show-details=direct \
       $CABAL_FLAGS "$@"
     ;;
 

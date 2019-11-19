@@ -13,7 +13,7 @@
 module HaskellWorks.Data.Xml.Succinct.CursorSpec(spec) where
 
 import Control.Monad
-import Data.String
+import Data.Semigroup                                  ((<>))
 import Data.Word
 import HaskellWorks.Data.BalancedParens.BalancedParens
 import HaskellWorks.Data.BalancedParens.Simple
@@ -31,14 +31,10 @@ import Hedgehog
 import Test.Hspec
 
 import qualified Data.ByteString                              as BS
-import qualified Data.ByteString                              as BS
 import qualified Data.Text                                    as T
 import qualified Data.Text.Encoding                           as T
 import qualified Data.Vector.Storable                         as DVS
-import qualified Data.Vector.Storable                         as DVS
 import qualified HaskellWorks.Data.FromByteString             as BS
-import qualified HaskellWorks.Data.FromByteString             as BS
-import qualified HaskellWorks.Data.TreeCursor                 as TC
 import qualified HaskellWorks.Data.TreeCursor                 as TC
 import qualified HaskellWorks.Data.Xml.Succinct.Cursor.Create as CC
 

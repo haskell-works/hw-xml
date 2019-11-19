@@ -11,9 +11,8 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import GHC.Generics
 import HaskellWorks.Data.Xml.Internal.Blank
 
-import qualified Data.ByteString              as BS
-import qualified Data.ByteString.Lazy         as LBS
-import qualified HaskellWorks.Data.ByteString as BS
+import qualified Data.ByteString      as BS
+import qualified Data.ByteString.Lazy as LBS
 
 newtype BlankedXml = BlankedXml
   { unblankedXml :: [BS.ByteString]
@@ -26,7 +25,7 @@ class FromBlankedXml a where
   fromBlankedXml :: BlankedXml -> a
 
 bsToBlankedXml :: BS.ByteString -> BlankedXml
-bsToBlankedXml bs = BlankedXml (blankXml (BS.chunkedBy 4064 bs))
+bsToBlankedXml bs = BlankedXml (blankXml [bs])
 
 lbsToBlankedXml :: LBS.ByteString -> BlankedXml
-lbsToBlankedXml lbs = BlankedXml (blankXml (BS.resegmentPadded 4096 (LBS.toChunks lbs)))
+lbsToBlankedXml lbs = BlankedXml (blankXml (LBS.toChunks lbs))

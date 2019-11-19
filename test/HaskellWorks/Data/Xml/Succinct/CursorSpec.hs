@@ -6,6 +6,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings         #-}
 {-# LANGUAGE ScopedTypeVariables       #-}
+{-# LANGUAGE TypeApplications          #-}
 
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
@@ -29,9 +30,10 @@ import HaskellWorks.Hspec.Hedgehog
 import Hedgehog
 import Test.Hspec
 
-import qualified Data.ByteString              as BS
-import qualified Data.Vector.Storable         as DVS
-import qualified HaskellWorks.Data.TreeCursor as TC
+import qualified Data.ByteString                  as BS
+import qualified Data.Vector.Storable             as DVS
+import qualified HaskellWorks.Data.FromByteString as BS
+import qualified HaskellWorks.Data.TreeCursor     as TC
 
 {-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
@@ -45,11 +47,11 @@ ss = TC.subtreeSize
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Succinct.CursorSpec" $ do
-  genSpec "DVS.Vector Word8"  (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8)))
-  genSpec "DVS.Vector Word16" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
-  genSpec "DVS.Vector Word32" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
-  genSpec "DVS.Vector Word64" (undefined :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
-  genSpec "Poppy512"          (undefined :: XmlCursor BS.ByteString Poppy512 (SimpleBalancedParens (DVS.Vector Word64)))
+  genSpec "DVS.Vector Word8"  (BS.fromByteString :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word8 )) (SimpleBalancedParens (DVS.Vector Word8 )))
+  genSpec "DVS.Vector Word16" (BS.fromByteString :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16)))
+  genSpec "DVS.Vector Word32" (BS.fromByteString :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word32)) (SimpleBalancedParens (DVS.Vector Word32)))
+  genSpec "DVS.Vector Word64" (BS.fromByteString :: BS.ByteString -> XmlCursor BS.ByteString (BitShown (DVS.Vector Word64)) (SimpleBalancedParens (DVS.Vector Word64)))
+  genSpec "Poppy512"          (BS.fromByteString :: BS.ByteString -> XmlCursor BS.ByteString  Poppy512                      (SimpleBalancedParens (DVS.Vector Word64)))
   it "Loads same Xml consistentally from different backing vectors" $ requireTest $ do
     let cursor8   = "{\n    \"widget\": {\n        \"debug\": \"on\"  } }" :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word8)) (SimpleBalancedParens (DVS.Vector Word8))
     let cursor16  = "{\n    \"widget\": {\n        \"debug\": \"on\"  } }" :: XmlCursor BS.ByteString (BitShown (DVS.Vector Word16)) (SimpleBalancedParens (DVS.Vector Word16))
@@ -79,12 +81,11 @@ genSpec :: forall t u.
   , Rank1             u
   , BalancedParens    u
   , TestBit           u
-  , IsString          (XmlCursor BS.ByteString t u)
   )
-  => String -> XmlCursor BS.ByteString t u -> SpecWith ()
-genSpec t _ = do
+  => String -> (BS.ByteString -> XmlCursor BS.ByteString t u) -> SpecWith ()
+genSpec t mkCursor = do
   describe ("Cursor for (" ++ t ++ ")") $ do
-    let forXml (cursor :: XmlCursor BS.ByteString t u) f = describe ("of value " ++ show cursor) (f cursor)
+    let forXml bs f = let cursor = mkCursor bs in describe ("of value " ++ show cursor) (f cursor)
     forXml "[null]" $ \cursor -> do
       it "depth at top"                   $ requireTest $ cd          cursor === Just 1
       xit "depth at first child of array" $ requireTest $ (fc >=> cd) cursor === Just 2
@@ -97,7 +98,7 @@ genSpec t _ = do
         (fc >=> ns >=> fc >=> ns >=> cd) cursor === Just 3
 
     describe "For sample XML" $ do
-      let cursor =  "<widget debug=\"on\"> \
+      let cursor = mkCursor "<widget debug=\"on\"> \
                     \  <window name=\"main_window\"> \
                     \    <dimension>500</dimension> \
                     \    <dimension>600.01e-02</dimension> \

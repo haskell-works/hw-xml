@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name:                 hw-xml
-version:              0.4.0.3
+version:              0.4.0.4
 synopsis:             XML parser based on succinct data structures.
 description:          XML parser based on succinct data structures. Please see README.md
 category:             Data, XML, Succinct Data Structures, Data Structures

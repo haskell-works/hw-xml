@@ -23,7 +23,7 @@ import qualified Data.ByteString as BS
 
 -- | Load an XML file into memory and return a raw cursor initialised to the
 -- start of the XML document.
-loadSlowCursor :: String -> IO SlowCursor
+loadSlowCursor :: FilePath -> IO SlowCursor
 loadSlowCursor path = do
   !bs <- BS.readFile path
   let !cursor = fromByteString bs :: SlowCursor
@@ -31,7 +31,7 @@ loadSlowCursor path = do
 
 -- | Load an XML file into memory and return a query-optimised cursor initialised
 -- to the start of the XML document.
-loadFastCursor :: String -> IO FastCursor
+loadFastCursor :: FilePath -> IO FastCursor
 loadFastCursor filename = do
   -- Load the XML file into memory as a raw cursor.
   -- The raw XML data is `text`, and `ib` and `bp` are the indexes.

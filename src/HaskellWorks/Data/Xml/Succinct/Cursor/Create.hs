@@ -23,8 +23,10 @@ byteStringAsSlowCursor bs = XmlCursor
   , balancedParens  = SimpleBalancedParens bp
   , cursorRank      = 1
   }
-  where blankedXml = bsToBlankedXml bs
-        (ib, bp) = construct64UnzipN (BS.length bs) (I.toIbBp64 blankedXml)
+  where blankedXml  = bsToBlankedXml bs
+        bsLen       = BS.length bs
+        idxLen      = (bsLen + 7) `div` 8
+        (ib, bp)    = construct64UnzipN idxLen (I.toIbBp64 blankedXml)
 
 byteStringAsFastCursor :: BS.ByteString -> FastCursor
 byteStringAsFastCursor bs = XmlCursor bs ibCsPoppy rangeMinMax r

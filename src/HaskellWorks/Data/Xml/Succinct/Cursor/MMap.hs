@@ -23,7 +23,7 @@ import qualified Data.ByteString.Internal                as BSI
 import qualified HaskellWorks.Data.Xml.Internal.ToIbBp64 as I
 import qualified System.IO.MMap                          as IO
 
-mmapSlowCursor :: String -> IO SlowCursor
+mmapSlowCursor :: FilePath -> IO SlowCursor
 mmapSlowCursor filePath = do
   (fptr :: ForeignPtr Word8, offset, size) <- IO.mmapFileForeignPtr filePath IO.ReadOnly Nothing
   let !bs = BSI.fromForeignPtr (castForeignPtr fptr) offset size
@@ -38,7 +38,7 @@ mmapSlowCursor filePath = do
 
   return cursor
 
-mmapFastCursor :: String -> IO FastCursor
+mmapFastCursor :: FilePath -> IO FastCursor
 mmapFastCursor filename = do
   -- Load the XML file into memory as a raw cursor.
   -- The raw XML data is `text`, and `ib` and `bp` are the indexes.

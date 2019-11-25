@@ -65,12 +65,12 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlInd
 
 getIndexAt :: (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlIndexState -> XmlCursor BS.ByteString v w -> XmlIndex
 getIndexAt state k = case uncons remainder of
-  Just (!c, cs) | isElementStart c          -> parseElem cs
-  Just (!c, _ ) | isSpace c                 -> XmlIndexAttrList $ mapValuesFrom InAttrList (firstChild k)
-  Just (!c, _ ) | isAttribute && isQuote c  -> XmlIndexAttrValue remainder
-  Just _        | isAttribute               -> XmlIndexAttrName remainder
-  Just _        -> XmlIndexValue remainder
-  Nothing       -> XmlIndexError "End of data"
+  Just (!c, cs) | isElementStart c         -> parseElem cs
+  Just (!c, _ ) | isSpace c                -> XmlIndexAttrList $ mapValuesFrom InAttrList (firstChild k)
+  Just (!c, _ ) | isAttribute && isQuote c -> XmlIndexAttrValue remainder
+  Just _        | isAttribute              -> XmlIndexAttrName remainder
+  Just _                                   -> XmlIndexValue remainder
+  Nothing                                  -> XmlIndexError "End of data"
   where remainder         = remText k
         mapValuesFrom s   = L.unfoldr (fmap (getIndexAt s &&& nextSibling))
         isAttribute = case state of
@@ -78,7 +78,7 @@ getIndexAt state k = case uncons remainder of
           InElement  -> False
           Unknown    -> case remText <$> parent k >>= uncons of
             Just (!c, _) | isSpace c -> True
-            _            -> False
+            _                        -> False
 
         parseElem bs =
           case ABC.parse parseXmlElement bs of

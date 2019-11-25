@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 module HaskellWorks.Data.Xml.Index
@@ -5,8 +7,10 @@ module HaskellWorks.Data.Xml.Index
   , indexVersion
   ) where
 
+import Control.DeepSeq
 import Data.Serialize
 import Data.Word
+import GHC.Generics
 import HaskellWorks.Data.Bits.BitShown
 
 import qualified Data.Vector.Storable as DVS
@@ -18,7 +22,7 @@ data Index = Index
   { xiVersion        :: String
   , xiInterests      :: BitShown (DVS.Vector Word64)
   , xiBalancedParens :: BitShown (DVS.Vector Word64)
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic, NFData)
 
 putBitShownVector :: Putter (BitShown (DVS.Vector Word64))
 putBitShownVector = putVector . bitShown

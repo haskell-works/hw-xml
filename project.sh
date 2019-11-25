@@ -17,7 +17,7 @@ case "$cmd" in
 
   build)
     cabal new-build all -j8 \
-      --enable-tests --enable-benchmarks \
+      --enable-tests --enable-benchmarks --write-ghc-environment-files=always \
       $CABAL_FLAGS "$@"
     ;;
   
@@ -26,7 +26,8 @@ case "$cmd" in
     ;;
 
   test)
-    cabal new-test -j8 --enable-tests --disable-documentation --test-show-details=direct \
+    cabal v2-test -j8 --enable-tests --enable-benchmarks \
+      --write-ghc-environment-files=always --test-show-details=direct \
       $CABAL_FLAGS "$@"
     ;;
 

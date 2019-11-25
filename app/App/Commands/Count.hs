@@ -17,6 +17,7 @@ import Control.Monad
 import Data.Generics.Product.Any
 import Data.Semigroup                             ((<>))
 import Data.Text                                  (Text)
+import GHC.Generics
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.DecodeResult
 import HaskellWorks.Data.Xml.RawDecode
@@ -40,11 +41,11 @@ import qualified System.IO          as IO
 data Plant = Plant
   { common :: String
   , price  :: String
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic)
 
 newtype Catalog = Catalog
   { plants :: [Plant]
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic)
 
 tags :: Value -> String -> [Value]
 tags xml@(XmlElement n _ _) elemName = if n == elemName

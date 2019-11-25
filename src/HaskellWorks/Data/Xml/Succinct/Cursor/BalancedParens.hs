@@ -1,7 +1,9 @@
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs               #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 
 module HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
   ( XmlBalancedParens(..)
@@ -9,8 +11,10 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParens
   ) where
 
 import Control.Applicative
+import Control.DeepSeq
 import Data.Word
-import HaskellWorks.Data.BalancedParens                 as BP
+import GHC.Generics
+import HaskellWorks.Data.BalancedParens
 import HaskellWorks.Data.Xml.Internal.BalancedParens
 import HaskellWorks.Data.Xml.Internal.List
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
@@ -18,7 +22,7 @@ import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS
 
-newtype XmlBalancedParens a = XmlBalancedParens a
+newtype XmlBalancedParens a = XmlBalancedParens a deriving (Eq, Show, Generic, NFData)
 
 getXmlBalancedParens :: XmlBalancedParens a -> a
 getXmlBalancedParens (XmlBalancedParens a) = a

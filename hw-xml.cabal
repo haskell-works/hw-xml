@@ -38,7 +38,7 @@ common ghc-prim                   { build-depends: ghc-prim                   >=
 common hedgehog                   { build-depends: hedgehog                   >= 1.0        && < 1.1    }
 common hspec                      { build-depends: hspec                      >= 2.5        && < 3.0    }
 common hw-balancedparens          { build-depends: hw-balancedparens          >= 0.3.0.1    && < 0.4    }
-common hw-bits                    { build-depends: hw-bits                    >= 0.7.0.7    && < 0.8    }
+common hw-bits                    { build-depends: hw-bits                    >= 0.7.0.9    && < 0.8    }
 common hw-hspec-hedgehog          { build-depends: hw-hspec-hedgehog          >= 0.1        && < 0.2    }
 common hw-parser                  { build-depends: hw-parser                  >= 0.1.0.1    && < 0.2    }
 common hw-prim                    { build-depends: hw-prim                    >= 0.6.2.39   && < 0.7    }
@@ -128,6 +128,7 @@ executable hw-xml
   import:               base, config
                       , attoparsec
                       , bytestring
+                      , deepseq
                       , generic-lens
                       , hw-balancedparens
                       , hw-bits

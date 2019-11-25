@@ -15,6 +15,7 @@ module HaskellWorks.Data.Xml.RawValueSpec (spec) where
 import Control.Monad
 import Data.Semigroup                                  ((<>))
 import Data.String
+import Data.Text                                       (Text)
 import Data.Word
 import HaskellWorks.Data.BalancedParens.BalancedParens
 import HaskellWorks.Data.BalancedParens.Simple
@@ -41,7 +42,7 @@ import qualified HaskellWorks.Data.TreeCursor as TC
 fc = TC.firstChild
 ns = TC.nextSibling
 
-attrs :: [(String, String)] -> RawValue
+attrs :: [(Text, Text)] -> RawValue
 attrs as = RawAttrList $ as >>= (\(k, v) -> [RawAttrName k, RawAttrValue v])
 
 spec :: Spec

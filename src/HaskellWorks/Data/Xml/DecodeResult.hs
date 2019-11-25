@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor     #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module HaskellWorks.Data.Xml.DecodeResult where
 

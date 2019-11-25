@@ -13,6 +13,7 @@ module App.Commands.Demo
 import Data.Foldable
 import Data.Maybe
 import Data.Semigroup                             ((<>))
+import Data.Text                                  (Text)
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.Decode
 import HaskellWorks.Data.Xml.DecodeResult
@@ -29,10 +30,10 @@ import qualified App.Commands.Types as Z
 class ParseText a where
   parseText :: Value -> DecodeResult a
 
-instance ParseText String where
+instance ParseText Text where
   parseText (XmlText text)      = DecodeOk text
   parseText (XmlCData text)     = DecodeOk text
-  parseText (XmlElement _ _ cs) = DecodeOk $ concat $ concat $ toList . parseText <$> cs
+  parseText (XmlElement _ _ cs) = DecodeOk $ mconcat $ mconcat $ toList . parseText <$> cs
   parseText _                   = DecodeOk ""
 
 -- | Convert a decode result to a maybe
@@ -44,8 +45,8 @@ decodeResultToMaybe _            = Nothing
 -- the data in the XML document.  In fact, having a smaller model may improve
 -- query performance.
 data Plant = Plant
-  { common :: String
-  , price  :: String
+  { common :: Text
+  , price  :: Text
   } deriving (Eq, Show)
 
 newtype Catalog = Catalog

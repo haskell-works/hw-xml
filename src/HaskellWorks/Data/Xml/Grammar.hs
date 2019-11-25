@@ -10,36 +10,39 @@ module HaskellWorks.Data.Xml.Grammar where
 import Control.Applicative
 import Data.Char
 import Data.String
+import Data.Text                (Text)
 import Data.Word
-import HaskellWorks.Data.Parser as P
+import HaskellWorks.Data.Parser
 
-import qualified Data.Attoparsec.Types as T
+import qualified Data.Attoparsec.Types    as T
+import qualified Data.Text                as T
+import qualified HaskellWorks.Data.Parser as P
 
 data XmlElementType
   = XmlElementTypeDocument
-  | XmlElementTypeElement String
+  | XmlElementTypeElement Text
   | XmlElementTypeComment
   | XmlElementTypeCData
-  | XmlElementTypeMeta String
+  | XmlElementTypeMeta Text
 
-parseXmlString :: (P.Parser t Word8) => T.Parser t String
+parseXmlString :: (P.Parser t Word8) => T.Parser t Text
 parseXmlString = do
   q <- satisfyChar (=='"') <|> satisfyChar (=='\'')
-  many (satisfyChar (/= q))
+  T.pack <$> many (satisfyChar (/= q))
 
 parseXmlElement :: (P.Parser t Word8, IsString t) => T.Parser t XmlElementType
 parseXmlElement = comment <|> cdata <|> doc <|> meta <|> element
   where
-  comment = const XmlElementTypeComment  <$> string "!--"
-  cdata   = const XmlElementTypeCData    <$> string "![CDATA["
-  meta    = XmlElementTypeMeta           <$> (string "!" >> parseXmlToken)
-  doc     = const XmlElementTypeDocument <$> string "?xml"
-  element = XmlElementTypeElement        <$> parseXmlToken
+  comment = const XmlElementTypeComment   <$> string "!--"
+  cdata   = const XmlElementTypeCData     <$> string "![CDATA["
+  meta    = XmlElementTypeMeta            <$> (string "!" >> parseXmlToken)
+  doc     = const XmlElementTypeDocument  <$> string "?xml"
+  element = XmlElementTypeElement         <$> parseXmlToken
 
-parseXmlToken :: (P.Parser t Word8) => T.Parser t String
-parseXmlToken = many $ satisfyChar isNameChar <?> "invalid string character"
+parseXmlToken :: (P.Parser t Word8) => T.Parser t Text
+parseXmlToken = T.pack <$> many (satisfyChar isNameChar <?> "invalid string character")
 
-parseXmlAttributeName :: (P.Parser t Word8) => T.Parser t String
+parseXmlAttributeName :: (P.Parser t Word8) => T.Parser t Text
 parseXmlAttributeName = parseXmlToken
 
 isNameStartChar :: Char -> Bool

@@ -81,6 +81,7 @@ library
                     , mmap
                     , mtl
                     , resourcet
+                    , text
                     , transformers
                     , vector
                     , word8
@@ -96,6 +97,7 @@ library
                       HaskellWorks.Data.Xml.Internal.ByteString
                       HaskellWorks.Data.Xml.Internal.Blank
                       HaskellWorks.Data.Xml.Internal.List
+                      HaskellWorks.Data.Xml.Internal.Show
                       HaskellWorks.Data.Xml.Internal.Tables
                       HaskellWorks.Data.Xml.Internal.ToIbBp64
                       HaskellWorks.Data.Xml.Internal.Words

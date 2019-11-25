@@ -1,7 +1,9 @@
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs               #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 
 module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
   ( XmlInterestBits(..)
@@ -12,8 +14,10 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBits
   ) where
 
 import Control.Applicative
+import Control.DeepSeq
 import Data.ByteString.Internal
 import Data.Word
+import GHC.Generics
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.FromByteString
 import HaskellWorks.Data.RankSelect.Poppy512
@@ -23,7 +27,7 @@ import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import qualified Data.ByteString      as BS
 import qualified Data.Vector.Storable as DVS
 
-newtype XmlInterestBits a = XmlInterestBits a
+newtype XmlInterestBits a = XmlInterestBits a deriving (Eq, Show, Generic, NFData)
 
 getXmlInterestBits :: XmlInterestBits a -> a
 getXmlInterestBits (XmlInterestBits a) = a

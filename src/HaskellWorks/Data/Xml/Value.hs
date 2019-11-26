@@ -19,7 +19,9 @@ module HaskellWorks.Data.Xml.Value
   ) where
 
 import Control.Lens
-import Data.Semigroup                  ((<>))
+import Data.Semigroup                      ((<>))
+import Data.Text                           (Text)
+import HaskellWorks.Data.Xml.Internal.Show
 import HaskellWorks.Data.Xml.RawDecode
 import HaskellWorks.Data.Xml.RawValue
 
@@ -28,25 +30,25 @@ data Value
     { _childNodes :: [Value]
     }
   | XmlText
-    { _textValue :: String
+    { _textValue :: Text
     }
   | XmlElement
-    { _name       :: String
-    , _attributes :: [(String, String)]
+    { _name       :: Text
+    , _attributes :: [(Text, Text)]
     , _childNodes :: [Value]
     }
   | XmlCData
-    { _cdata :: String
+    { _cdata :: Text
     }
   | XmlComment
-    { _comment :: String
+    { _comment :: Text
     }
   | XmlMeta
-    { _name       :: String
+    { _name       :: Text
     , _childNodes :: [Value]
     }
   | XmlError
-    { _errorMessage :: String
+    { _errorMessage :: Text
     }
   deriving (Eq, Show)
 
@@ -62,14 +64,14 @@ instance RawDecode Value where
   rawDecode (RawMeta      n cs      ) = XmlMeta       n (rawDecode <$> cs)
   rawDecode (RawAttrName  nameValue ) = XmlError      ("Can't decode attribute name: "  <> nameValue)
   rawDecode (RawAttrValue attrValue ) = XmlError      ("Can't decode attribute value: " <> attrValue)
-  rawDecode (RawAttrList  as        ) = XmlError      ("Can't decode attribute list: "  <> show as)
+  rawDecode (RawAttrList  as        ) = XmlError      ("Can't decode attribute list: "  <> tshow as)
   rawDecode (RawError     msg       ) = XmlError      msg
 
-mkXmlElement :: String -> [RawValue] -> Value
+mkXmlElement :: Text -> [RawValue] -> Value
 mkXmlElement n (RawAttrList as:cs) = XmlElement n (mkAttrs as) (rawDecode <$> cs)
 mkXmlElement n cs                  = XmlElement n []           (rawDecode <$> cs)
 
-mkAttrs :: [RawValue] -> [(String, String)]
+mkAttrs :: [RawValue] -> [(Text, Text)]
 mkAttrs (RawAttrName n:RawAttrValue v:cs) = (n, v):mkAttrs cs
 mkAttrs (_:cs)                            = mkAttrs cs
 mkAttrs []                                = []

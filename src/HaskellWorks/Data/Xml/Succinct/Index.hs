@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module HaskellWorks.Data.Xml.Succinct.Index
 ( XmlIndex(..)
@@ -12,6 +13,7 @@ where
 
 import Control.Arrow
 import Data.Monoid
+import Data.Text                                 (Text)
 import HaskellWorks.Data.Bits.BitWise
 import HaskellWorks.Data.Drop
 import HaskellWorks.Data.Positioning
@@ -28,19 +30,20 @@ import Prelude                                   hiding (drop)
 import qualified Data.Attoparsec.ByteString.Char8 as ABC
 import qualified Data.ByteString                  as BS
 import qualified Data.List                        as L
+import qualified Data.Text                        as T
 import qualified HaskellWorks.Data.BalancedParens as BP
 
 data XmlIndex
   = XmlIndexDocument [XmlIndex]
-  | XmlIndexElement String [XmlIndex]
+  | XmlIndexElement Text [XmlIndex]
   | XmlIndexCData BS.ByteString
   | XmlIndexComment BS.ByteString
-  | XmlIndexMeta String [XmlIndex]
+  | XmlIndexMeta Text [XmlIndex]
   | XmlIndexAttrList [XmlIndex]
   | XmlIndexValue BS.ByteString
   | XmlIndexAttrName BS.ByteString
   | XmlIndexAttrValue BS.ByteString
-  | XmlIndexError String
+  | XmlIndexError Text
   deriving (Eq, Show)
 
 data XmlIndexState
@@ -92,5 +95,4 @@ getIndexAt state k = case uncons remainder of
               XmlElementTypeDocument  -> XmlIndexDocument  (mapValuesFrom InElement (firstChild k) <> mapValuesFrom InElement (nextSibling k))
 
 decodeErr :: String -> BS.ByteString -> XmlIndex
-decodeErr reason bs =
-  XmlIndexError $ reason <>": " <> show (BS.take 20 bs) <> "...'"
+decodeErr reason bs = XmlIndexError . T.pack $ reason <>": " <> show (BS.take 20 bs) <> "...'"

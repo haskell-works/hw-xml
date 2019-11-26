@@ -4,6 +4,7 @@
 module HaskellWorks.Data.Xml.DecodeError where
 
 import Control.DeepSeq
+import Data.Text       (Text)
 import GHC.Generics
 
-newtype DecodeError = DecodeError String deriving (Eq, Show, Generic, NFData)
+newtype DecodeError = DecodeError Text deriving (Eq, Show, Generic, NFData)

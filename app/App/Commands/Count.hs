@@ -31,7 +31,6 @@ import Options.Applicative                        hiding (columns)
 import qualified App.Commands.Types as Z
 import qualified App.Naive          as NAIVE
 import qualified App.XPath.Parser   as XPP
-import qualified Data.Text          as T
 import qualified System.Exit        as IO
 import qualified System.IO          as IO
 
@@ -47,7 +46,7 @@ newtype Catalog = Catalog
   { plants :: [Plant]
   } deriving (Eq, Show, Generic)
 
-tags :: Value -> String -> [Value]
+tags :: Value -> Text -> [Value]
 tags xml@(XmlElement n _ _) elemName = if n == elemName
   then [xml]
   else []
@@ -59,9 +58,9 @@ kids _                   = []
 
 countAtPath :: [Text] -> Value -> DecodeResult Int
 countAtPath []  _   = return 0
-countAtPath [t] xml = return (length (tags xml (T.unpack t)))
+countAtPath [t] xml = return (length (tags xml t))
 countAtPath (t:ts) xml = do
-  counts <- forM (tags xml (T.unpack t) >>= kids) $ countAtPath ts
+  counts <- forM (tags xml t >>= kids) $ countAtPath ts
   return (sum counts)
 
 runCount :: Z.CountOptions -> IO ()

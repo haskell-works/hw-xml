@@ -18,7 +18,7 @@ import Prelude                                   hiding (drop)
 import qualified Data.ByteString                  as BS
 import qualified HaskellWorks.Data.BalancedParens as BP
 
-{-# ANN module ("HLint: Ignore Reduce duplication"  :: String) #-}
+{-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
 data XmlType
   = XmlTypeElement

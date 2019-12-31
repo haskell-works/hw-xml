@@ -19,7 +19,7 @@ import Test.Hspec
 
 import qualified Data.ByteString as BS
 
-{-# ANN module ("HLint: Ignore Redundant do"        :: String) #-}
+{-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
 
 spec :: Spec
 spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec" $ do

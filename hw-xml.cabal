@@ -147,8 +147,7 @@ executable hw-xml
                       , text
                       , vector
   main-is:              Main.hs
-  other-modules:        Paths_hw_xml
-                        App.Commands
+  other-modules:        App.Commands
                         App.Commands.Count
                         App.Commands.CreateBlankedXml
                         App.Commands.CreateBpIndex
@@ -161,7 +160,6 @@ executable hw-xml
                         App.XPath.Types
                         App.Show
                         App.Naive
-  autogen-modules:      Paths_hw_xml
   hs-source-dirs:       app
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N -O2 -Wall -msse4.2
 
@@ -187,7 +185,6 @@ test-suite hw-xml-test
   ghc-options:        -threaded -rtsopts -with-rtsopts=-N
   default-language:   Haskell2010
   build-tool-depends: hspec-discover:hspec-discover
-  autogen-modules:    Paths_hw_xml
   other-modules:      HaskellWorks.Data.Xml.Internal.BlankSpec
                       HaskellWorks.Data.Xml.RawValueSpec
                       HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
@@ -196,7 +193,6 @@ test-suite hw-xml-test
                       HaskellWorks.Data.Xml.Succinct.CursorSpec
                       HaskellWorks.Data.Xml.Token.TokenizeSpec
                       HaskellWorks.Data.Xml.TypeSpec
-                      Paths_hw_xml
 
 benchmark bench
   import:             base, config
@@ -210,9 +206,7 @@ benchmark bench
                     , vector
   type:               exitcode-stdio-1.0
   main-is:            Main.hs
-  other-modules:      Paths_hw_xml
   build-depends:      hw-xml
-  autogen-modules:    Paths_hw_xml
   hs-source-dirs:     bench
   ghc-options:        -O2 -Wall -msse4.2
 

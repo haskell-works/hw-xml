@@ -12,7 +12,6 @@ module App.Commands.CreateBpIndex
 
 import Control.Lens
 import Data.Generics.Product.Any
-import Data.Semigroup                                   ((<>))
 import HaskellWorks.Data.Xml.Internal.ToIbBp64
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import Options.Applicative                              hiding (columns)

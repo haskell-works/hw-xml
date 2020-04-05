@@ -14,7 +14,6 @@ import App.Options
 import Control.Lens
 import Control.Monad
 import Data.Generics.Product.Any
-import Data.Semigroup                                   ((<>))
 import HaskellWorks.Data.Xml.Internal.ToIbBp64
 import HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXml
 import HaskellWorks.Data.Xml.Succinct.Cursor.MMap

@@ -6,7 +6,6 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad
 import Data.Foldable
-import Data.Semigroup                      ((<>))
 import Data.Text                           (Text)
 import HaskellWorks.Data.Xml.DecodeError
 import HaskellWorks.Data.Xml.DecodeResult

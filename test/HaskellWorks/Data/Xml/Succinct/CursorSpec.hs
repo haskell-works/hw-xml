@@ -13,7 +13,6 @@
 module HaskellWorks.Data.Xml.Succinct.CursorSpec(spec) where
 
 import Control.Monad
-import Data.Semigroup                                  ((<>))
 import Data.Word
 import HaskellWorks.Data.BalancedParens.BalancedParens
 import HaskellWorks.Data.BalancedParens.Simple

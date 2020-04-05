@@ -12,7 +12,6 @@ module HaskellWorks.Data.Xml.Succinct.Index
 where
 
 import Control.Arrow
-import Data.Monoid
 import Data.Text                                 (Text)
 import HaskellWorks.Data.Bits.BitWise
 import HaskellWorks.Data.Drop

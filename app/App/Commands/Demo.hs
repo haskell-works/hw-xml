@@ -12,7 +12,6 @@ module App.Commands.Demo
 
 import Data.Foldable
 import Data.Maybe
-import Data.Semigroup                             ((<>))
 import Data.Text                                  (Text)
 import HaskellWorks.Data.TreeCursor
 import HaskellWorks.Data.Xml.Decode

@@ -13,7 +13,6 @@
 module HaskellWorks.Data.Xml.RawValueSpec (spec) where
 
 import Control.Monad
-import Data.Semigroup                                  ((<>))
 import Data.String
 import Data.Text                                       (Text)
 import Data.Word

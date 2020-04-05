@@ -3,7 +3,6 @@
 
 module HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec(spec) where
 
-import Data.Monoid                                        ((<>))
 import Data.String
 import Data.Word
 import HaskellWorks.Data.Bits.BitShown

@@ -4,7 +4,6 @@
 module HaskellWorks.Data.Xml.Internal.BlankSpec (spec) where
 
 import Data.Char
-import Data.Semigroup                       ((<>))
 import HaskellWorks.Data.ByteString
 import HaskellWorks.Data.Xml.Internal.Blank
 import HaskellWorks.Hspec.Hedgehog

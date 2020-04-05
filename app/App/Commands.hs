@@ -6,7 +6,6 @@ import App.Commands.CreateBpIndex
 import App.Commands.CreateIbIndex
 import App.Commands.CreateIndex
 import App.Commands.Demo
-import Data.Semigroup                ((<>))
 import Options.Applicative
 
 commands :: Parser (IO ())

@@ -11,7 +11,6 @@ module HaskellWorks.Data.Xml.RawValue
 
 import Data.ByteString                      (ByteString)
 import Data.List
-import Data.Semigroup                       ((<>))
 import Data.Text                            (Text)
 import HaskellWorks.Data.Xml.Grammar
 import HaskellWorks.Data.Xml.Internal.Show

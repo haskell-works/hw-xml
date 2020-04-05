@@ -15,7 +15,6 @@ import App.Options
 import Control.Lens
 import Control.Monad
 import Data.Generics.Product.Any
-import Data.Semigroup                             ((<>))
 import Data.Text                                  (Text)
 import GHC.Generics
 import HaskellWorks.Data.TreeCursor

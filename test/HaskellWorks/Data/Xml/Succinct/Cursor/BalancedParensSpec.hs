@@ -5,7 +5,6 @@ module HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
   ( spec
   ) where
 
-import Data.Monoid                                      ((<>))
 import Data.String
 import HaskellWorks.Data.Bits.BitShown
 import HaskellWorks.Data.ByteString

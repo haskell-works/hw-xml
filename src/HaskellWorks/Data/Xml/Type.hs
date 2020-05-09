@@ -18,7 +18,7 @@ import Prelude                                   hiding (drop)
 import qualified Data.ByteString                  as BS
 import qualified HaskellWorks.Data.BalancedParens as BP
 
-{-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
+{- HLINT ignore "Reduce duplication"  -}
 
 data XmlType
   = XmlTypeElement
@@ -32,9 +32,9 @@ class XmlTypeAt a where
 
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlTypeAt (XmlCursor String v w) where
   xmlTypeAtPosition p k = case drop (toCount p) (cursorText k) of
-    c:_ | fromIntegral (ord c) == _less      -> Just XmlTypeElement
-    c:_ | W8.isSpace $ fromIntegral (ord c)  -> Just XmlTypeAttrList
-    _   -> Just XmlTypeToken
+    c:_ | fromIntegral (ord c) == _less     -> Just XmlTypeElement
+    c:_ | W8.isSpace $ fromIntegral (ord c) -> Just XmlTypeAttrList
+    _                                       -> Just XmlTypeToken
 
   xmlTypeAt k = xmlTypeAtPosition p k
     where p   = lastPositionOf (select1 ik (rank1 bpk (cursorRank k)))
@@ -43,9 +43,9 @@ instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlTyp
 
 instance (BP.BalancedParens w, Rank0 w, Rank1 w, Select1 v, TestBit w) => XmlTypeAt (XmlCursor BS.ByteString v w) where
   xmlTypeAtPosition p k = case BS.uncons (drop (toCount p) (cursorText k)) of
-    Just (c, _) | c == _less     -> Just XmlTypeElement
-    Just (c, _) | W8.isSpace c   -> Just XmlTypeAttrList
-    _           -> Just XmlTypeToken
+    Just (c, _) | c == _less   -> Just XmlTypeElement
+    Just (c, _) | W8.isSpace c -> Just XmlTypeAttrList
+    _                          -> Just XmlTypeToken
 
   xmlTypeAt k = xmlTypeAtPosition p k
     where p   = lastPositionOf (select1 ik (rank1 bpk (cursorRank k)))

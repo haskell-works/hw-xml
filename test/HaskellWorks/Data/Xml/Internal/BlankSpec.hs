@@ -14,8 +14,8 @@ import qualified Data.ByteString as BS
 import qualified Hedgehog.Gen    as G
 import qualified Hedgehog.Range  as R
 
-{-# ANN module ("HLint: ignore Redundant do" :: String) #-}
-{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
+{- HLINT ignore "Redundant do"        -}
+{- HLINT ignore "Reduce duplication"  -}
 
 whenBlankedXmlShouldBe :: BS.ByteString -> BS.ByteString -> Spec
 whenBlankedXmlShouldBe original expected = do

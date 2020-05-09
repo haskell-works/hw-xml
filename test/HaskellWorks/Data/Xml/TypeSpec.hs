@@ -33,9 +33,9 @@ import qualified Data.ByteString              as BS
 import qualified Data.Vector.Storable         as DVS
 import qualified HaskellWorks.Data.TreeCursor as TC
 
-{-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
-{-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
-{-# ANN module ("HLint: ignore Redundant bracket"   :: String) #-}
+{- HLINT ignore "Redundant do"        -}
+{- HLINT ignore "Redundant bracket"   -}
+{- HLINT ignore "Reduce duplication"  -}
 
 fc = TC.firstChild
 ns = TC.nextSibling

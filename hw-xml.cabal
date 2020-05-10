@@ -190,6 +190,7 @@ test-suite hw-xml-test
                       HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec
                       HaskellWorks.Data.Xml.Succinct.Cursor.BlankedXmlSpec
                       HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec
+                      HaskellWorks.Data.Xml.Succinct.CursorSpec.Make
                       HaskellWorks.Data.Xml.Succinct.CursorSpec
                       HaskellWorks.Data.Xml.Token.TokenizeSpec
                       HaskellWorks.Data.Xml.TypeSpec

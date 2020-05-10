@@ -11,7 +11,7 @@ import Test.Hspec
 import qualified Data.Attoparsec.ByteString.Char8 as BC
 import qualified Data.ByteString                  as BS
 
-{-# ANN module ("HLint: ignore Redundant do"        :: String) #-}
+{- HLINT ignore "Redundant do"        -}
 
 parseXmlToken' :: ByteString -> Either String (XmlToken String Double)
 parseXmlToken' = BC.parseOnly parseXmlToken

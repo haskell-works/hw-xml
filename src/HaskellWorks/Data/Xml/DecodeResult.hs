@@ -21,9 +21,6 @@ instance Applicative DecodeResult where
   {-# INLINE (<*>) #-}
 
 instance Monad DecodeResult where
-  return = DecodeOk
-  {-# INLINE return #-}
-
   (>>=) (DecodeOk     a) f = f a
   (>>=) (DecodeFailed e) _ = DecodeFailed e
   {-# INLINE (>>=) #-}

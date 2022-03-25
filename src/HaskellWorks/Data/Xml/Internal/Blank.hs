@@ -60,15 +60,18 @@ blankXmlPlan2 a b lastState is = case is of
 
 blankXmlRun :: Bool -> Word8 -> Word8 -> ByteString -> BlankState -> [ByteString] -> [ByteString]
 blankXmlRun done a b cs lastState is = do
-  let (!ds, Just (BlankData !nextState _ _ _)) = BS.unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
-  let (yy, zz) = case BS.unsnoc cs of
-        Just (ys, z) -> case BS.unsnoc ys of
-          Just (_, y) -> (y, z)
-          Nothing     -> (b, z)
-        Nothing -> (a, b)
-  if done
-    then [ds]
-    else ds:blankXmlPlan2 yy zz nextState is
+  let (!ds, mState) = BS.unfoldrN (BS.length cs) blankByteString (BlankData lastState a b cs)
+  case mState of
+    Just (BlankData !nextState _ _ _) -> do
+      let (yy, zz) = case BS.unsnoc cs of
+            Just (ys, z) -> case BS.unsnoc ys of
+              Just (_, y) -> (y, z)
+              Nothing     -> (b, z)
+            Nothing -> (a, b)
+      if done
+        then [ds]
+        else ds:blankXmlPlan2 yy zz nextState is
+    Nothing -> error "No state: blankXmlRun"
 
 mkNext :: Word8 -> BlankState -> Word8 -> ByteString -> Maybe (Word8, BlankData)
 mkNext w s a bs = case BS.uncons bs of

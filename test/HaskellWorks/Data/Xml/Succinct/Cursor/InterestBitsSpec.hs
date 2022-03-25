@@ -33,7 +33,7 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.InterestBitsSpec" $ do
     (interestBitsOf " <e p='a'/> "   :: BitShown (DVS.Vector Word8)) === fromString "01011010 00000000"
     (interestBitsOf " <!-- u -->"    :: BitShown (DVS.Vector Word8)) === fromString "01000000 00000000"
     (interestBitsOf "<![CDATA[ x"    :: BitShown (DVS.Vector Word8)) === fromString "10000000 00000000"
-  it "Can build interest bits across boundaries" $ requireTest $do
+  it "Can build interest bits across boundaries" $ requireTest $ do
     let blanked =
           [ "<    (a "
           , "      v "

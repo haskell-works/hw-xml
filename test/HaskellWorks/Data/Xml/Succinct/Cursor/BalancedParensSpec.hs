@@ -52,7 +52,7 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec" $ do
     annotate $ "Good: " <> show chunkedBlank
     bp === fromString "11101010 10001101 01010100"
 
-  it "Blanking XML should work 3" $ requireTest $do
+  it "Blanking XML should work 3" $ requireTest $ do
     let bp = BitShown $ BS.concat (compressWordAsBit (blankedXmlToBalancedParens chunkedBadBlank))
     annotate $ "Bad: " <> show chunkedBadBlank
     bp === fromString "11101010 10001101 01010100"
@@ -62,10 +62,10 @@ spec = describe "HaskellWorks.Data.Xml.Succinct.Cursor.BalancedParensSpec" $ do
     let whole = mkBlank 4096 document
     let chunked = mkBlank 15 document
 
-    it "should BP the same with chanks" $ requireTest $do
+    it "should BP the same with chanks" $ requireTest $ do
       BS.concat chunked === BS.concat whole
 
-    it "should produce same bits" $ requireTest $do
+    it "should produce same bits" $ requireTest $ do
       BS.concat (mkBits chunked) === BS.concat (mkBits whole)
 
 

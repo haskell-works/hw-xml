@@ -63,7 +63,7 @@ make t mkCursor = do
       xit "depth at top"                  $ requireTest $ cd          cursor === Just 1
       xit "depth at first child of array" $ requireTest $ (fc >=> cd) cursor === Just 2
     forXml "[null, {\"field\": 1}]" $ \cursor -> do
-      xit "depth at second child of array" $ requireTest $do
+      xit "depth at second child of array" $ requireTest $ do
         (fc >=> ns >=> cd) cursor === Just 2
       xit "depth at first child of object at second child of array" $ requireTest $ do
         (fc >=> ns >=> fc >=> cd) cursor === Just 3

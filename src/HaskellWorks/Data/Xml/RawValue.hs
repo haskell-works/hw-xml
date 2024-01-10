@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE TypeApplications      #-}
 
 module HaskellWorks.Data.Xml.RawValue
   ( RawValue(..)
@@ -15,7 +16,7 @@ import Data.Text                            (Text)
 import HaskellWorks.Data.Xml.Grammar
 import HaskellWorks.Data.Xml.Internal.Show
 import HaskellWorks.Data.Xml.Succinct.Index
-import Text.PrettyPrint.ANSI.Leijen         hiding ((<$>), (<>))
+import Prettyprinter
 
 import qualified Data.Attoparsec.ByteString.Char8 as ABC
 import qualified Data.ByteString                  as BS
@@ -34,35 +35,49 @@ data RawValue
   | RawError Text
   deriving (Eq, Show)
 
+-- TODO use colors and styles
+
+red :: Doc ann -> Doc ann
+red = id
+
+dullwhite :: Doc ann -> Doc ann
+dullwhite = id
+
+bold :: Doc ann -> Doc ann
+bold = id
+
+dullgreen :: Doc ann -> Doc ann
+dullgreen = id
+
 instance Pretty RawValue where
   pretty mjpv = case mjpv of
-    RawText s       -> ctext $ text (T.unpack s)
-    RawAttrName s   -> text (T.unpack s)
-    RawAttrValue s  -> (ctext . dquotes . text) (T.unpack s)
+    RawText s       -> ctext $ pretty (T.unpack s)
+    RawAttrName s   -> pretty (T.unpack s)
+    RawAttrValue s  -> (ctext . dquotes . pretty) (T.unpack s)
     RawAttrList ats -> formatAttrs ats
-    RawComment s    -> text $ "<!-- " <> show s <> "-->"
+    RawComment s    -> pretty $ "<!-- " <> show s <> "-->"
     RawElement s xs -> formatElem (T.unpack s) xs
     RawDocument xs  -> formatMeta "?" "xml" xs
-    RawError s      -> red $ text "[error " <> text (T.unpack s) <> text "]"
-    RawCData s      -> cangle "<!" <> ctag (text "[CDATA[") <> text (T.unpack s) <> cangle (text "]]>")
+    RawError s      -> red $ "[error " <> pretty (T.unpack s) <> "]"
+    RawCData s      -> cangle "<!" <> ctag "[CDATA[" <> pretty (T.unpack s) <> cangle "]]>"
     RawMeta s xs    -> formatMeta "!" (T.unpack s) xs
     where
       formatAttr at = case at of
-        RawAttrName a  -> text " " <> pretty (RawAttrName a)
-        RawAttrValue a -> text "=" <> pretty (RawAttrValue a)
-        RawAttrList _  -> red $ text "ATTRS"
-        _              -> red $ text "booo"
+        RawAttrName a  -> " " <> pretty (RawAttrName a)
+        RawAttrValue a -> "=" <> pretty (RawAttrValue a)
+        RawAttrList _  -> red "ATTRS"
+        _              -> red "booo"
       formatAttrs ats = hcat (formatAttr <$> ats)
       formatElem s xs =
         let (ats, es) = partition isAttrL xs
-        in  cangle langle <> ctag (text s)
+        in  cangle langle <> ctag (pretty s)
               <> hcat (pretty <$> ats)
               <> cangle rangle
               <> hcat (pretty <$> es)
-              <> cangle (text "</") <> ctag (text s) <> cangle rangle
+              <> cangle "</" <> ctag (pretty s) <> cangle rangle
       formatMeta b s xs =
         let (ats, es) = partition isAttr xs
-        in  cangle (langle <> text b) <> ctag (text s)
+        in  cangle (langle <> pretty @String b) <> ctag (pretty @String s)
               <> hcat (pretty <$> ats)
               <> cangle rangle
               <> hcat (pretty <$> es)
@@ -102,13 +117,13 @@ instance RawValueAt XmlIndex where
         ABC.Partial _   -> decodeErr "Unexpected end of attr name, expected" bs
         ABC.Done    _ r -> Right r
 
-cangle :: Doc -> Doc
+cangle :: Doc ann -> Doc ann
 cangle = dullwhite
 
-ctag :: Doc -> Doc
+ctag :: Doc ann -> Doc ann
 ctag = bold
 
-ctext :: Doc -> Doc
+ctext :: Doc ann -> Doc ann
 ctext = dullgreen
 
 isAttrL :: RawValue -> Bool

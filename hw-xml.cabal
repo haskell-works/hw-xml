@@ -10,7 +10,7 @@ bug-reports:          https://github.com/haskell-works/hw-xml/issues
 author:               John Ky,
                       Alexey Raga
 maintainer:           alexey.raga@gmail.com
-copyright:            2016-2021 John Ky
+copyright:            2016-2025 John Ky
                   ,   2016-2019 Alexey Raga
 license:              BSD-3-Clause
 license-file:         LICENSE
